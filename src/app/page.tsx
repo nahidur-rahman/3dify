@@ -1,101 +1,96 @@
-import Image from "next/image";
+import HeroSection from "@/components/HeroSection";
+import CategoryShowcase from "@/components/CategoryShowcase";
+import HowItWorks from "@/components/HowItWorks";
+import ProductGrid from "@/components/ProductGrid";
+import Link from "next/link";
+import { prisma } from "@/lib/db";
 
-export default function Home() {
+export default async function HomePage() {
+  // Fetch featured products
+  let featuredProducts: any[] = [];
+  try {
+    featuredProducts = await prisma.product.findMany({
+      where: { featured: true, inStock: true },
+      take: 4,
+      orderBy: { createdAt: "desc" },
+    });
+  } catch {
+    // DB might not be connected yet — show empty state
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <>
+      {/* Hero */}
+      <HeroSection />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Featured Products */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
+                Featured{" "}
+                <span className="bg-gradient-to-r from-primary-500 to-primary-400 bg-clip-text text-transparent">
+                  Products
+                </span>
+              </h2>
+              <p className="mt-2 text-gray-500 dark:text-gray-400">
+                Our most popular 3D printed items
+              </p>
+            </div>
+            <Link
+              href="/products"
+              className="hidden sm:inline-flex items-center gap-1 text-primary-500 hover:text-primary-400 font-medium transition-colors"
+            >
+              View All →
+            </Link>
+          </div>
+          <ProductGrid products={featuredProducts} />
+          <div className="mt-8 text-center sm:hidden">
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-1 text-primary-500 hover:text-primary-400 font-medium"
+            >
+              View All Products →
+            </Link>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </section>
+
+      {/* Categories */}
+      <CategoryShowcase />
+
+      {/* How It Works */}
+      <HowItWorks />
+
+      {/* CTA */}
+      <section className="py-20 bg-gradient-to-r from-primary-600 to-primary-800">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white">
+            Have a Custom Design in Mind?
+          </h2>
+          <p className="mt-4 text-lg text-primary-100">
+            We can 3D print almost anything! Send us your idea and we&apos;ll make
+            it happen.
+          </p>
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a
+              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP || ""}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto bg-white text-primary-600 px-8 py-3.5 rounded-full font-semibold text-lg hover:bg-gray-50 transition-all hover:shadow-xl"
+            >
+              Contact Us on WhatsApp
+            </a>
+            <Link
+              href="/products"
+              className="w-full sm:w-auto border-2 border-white/30 text-white px-8 py-3.5 rounded-full font-semibold text-lg hover:bg-white/10 transition-all"
+            >
+              Browse Products
+            </Link>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

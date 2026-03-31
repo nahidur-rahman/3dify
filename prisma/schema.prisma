@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Category {
+  FIGURINE
+  PHONE_CASE
+  HOME_DECOR
+  CUSTOM
+}
+
+model Product {
+  id               String   @id @default(cuid())
+  name             String
+  description      String
+  price            Float
+  images           String[]
+  category         Category
+  color            String
+  size             String
+  weight           Float
+  infillPercentage Int      @default(20)
+  customizable     Boolean  @default(false)
+  inStock          Boolean  @default(true)
+  featured         Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("products")
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+
+  @@map("admins")
+}
