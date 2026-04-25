@@ -78,7 +78,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       </div>
 
       {/* Filters */}
-      <Suspense fallback={<div className="h-12 bg-gray-100 dark:bg-dark-100 rounded-xl animate-pulse" />}>
+      <Suspense
+        fallback={
+          <div className="h-12 bg-gray-100 dark:bg-dark-100 rounded-xl animate-pulse" />
+        }
+      >
         <SearchFilter />
       </Suspense>
 

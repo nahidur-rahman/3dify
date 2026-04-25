@@ -45,6 +45,14 @@ export const categoryDescriptions: Record<string, string> = {
   CUSTOM: "Got an idea? We can bring any custom design to reality",
 };
 
+export function hasWhatsAppConfigured(): boolean {
+  return Boolean((process.env.NEXT_PUBLIC_WHATSAPP || "").trim());
+}
+
+export function hasMessengerConfigured(): boolean {
+  return Boolean((process.env.NEXT_PUBLIC_MESSENGER || "").trim());
+}
+
 // Generate WhatsApp link with pre-filled message
 export function getWhatsAppLink(productName?: string, price?: number): string {
   const phone = process.env.NEXT_PUBLIC_WHATSAPP || "";

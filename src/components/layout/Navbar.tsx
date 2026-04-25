@@ -1,12 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { HiMenu, HiX } from "react-icons/hi";
+import { useEffect, useState } from "react";
+import { HiMenu, HiX, HiMoon, HiSun } from "react-icons/hi";
 import { BsPrinter } from "react-icons/bs";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+
+  useEffect(() => {
+    const isDark = document.documentElement.classList.contains("dark");
+    setTheme(isDark ? "dark" : "light");
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    if (nextTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    localStorage.setItem("theme", nextTheme);
+  };
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -39,6 +56,17 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+            <button
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+              className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-200 transition-colors"
+            >
+              {theme === "dark" ? (
+                <HiSun className="w-5 h-5" />
+              ) : (
+                <HiMoon className="w-5 h-5" />
+              )}
+            </button>
             <Link
               href="/products"
               className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-5 py-2 rounded-full font-medium hover:from-primary-600 hover:to-primary-700 transition-all hover:shadow-lg hover:shadow-primary-500/25"
@@ -69,6 +97,17 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+            <button
+              onClick={toggleTheme}
+              className="w-full mt-1 flex items-center justify-center gap-2 py-2.5 px-2 text-gray-600 dark:text-gray-300 hover:text-primary-500 font-medium"
+            >
+              {theme === "dark" ? (
+                <HiSun className="w-5 h-5" />
+              ) : (
+                <HiMoon className="w-5 h-5" />
+              )}
+              {theme === "dark" ? "Switch to Light" : "Switch to Dark"}
+            </button>
             <Link
               href="/products"
               onClick={() => setIsOpen(false)}

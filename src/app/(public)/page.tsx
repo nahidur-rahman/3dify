@@ -4,10 +4,13 @@ import HowItWorks from "@/components/HowItWorks";
 import ProductGrid from "@/components/ProductGrid";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { Product } from "@/lib/types";
 
 export default async function HomePage() {
+  const whatsappReady = Boolean((process.env.NEXT_PUBLIC_WHATSAPP || "").trim());
+
   // Fetch featured products
-  let featuredProducts: any[] = [];
+  let featuredProducts: Product[] = [];
   try {
     featuredProducts = await prisma.product.findMany({
       where: { featured: true, inStock: true },
@@ -15,7 +18,7 @@ export default async function HomePage() {
       orderBy: { createdAt: "desc" },
     });
   } catch {
-    // DB might not be connected yet — show empty state
+    // DB might not be connected yet - show empty state
   }
 
   return (
@@ -74,14 +77,24 @@ export default async function HomePage() {
             it happen.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a
-              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP || ""}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto bg-white text-primary-600 px-8 py-3.5 rounded-full font-semibold text-lg hover:bg-gray-50 transition-all hover:shadow-xl"
-            >
-              Contact Us on WhatsApp
-            </a>
+            {whatsappReady ? (
+              <a
+                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP || ""}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto bg-white text-primary-600 px-8 py-3.5 rounded-full font-semibold text-lg hover:bg-gray-50 transition-all hover:shadow-xl"
+              >
+                Contact Us on WhatsApp
+              </a>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="w-full sm:w-auto bg-gray-200 text-gray-500 px-8 py-3.5 rounded-full font-semibold text-lg cursor-not-allowed"
+              >
+                WhatsApp Unavailable
+              </button>
+            )}
             <Link
               href="/products"
               className="w-full sm:w-auto border-2 border-white/30 text-white px-8 py-3.5 rounded-full font-semibold text-lg hover:bg-white/10 transition-all"
@@ -89,6 +102,11 @@ export default async function HomePage() {
               Browse Products
             </Link>
           </div>
+          {!whatsappReady && (
+            <p className="mt-3 text-sm text-primary-100/90">
+              WhatsApp contact is not configured yet.
+            </p>
+          )}
         </div>
       </section>
     </>

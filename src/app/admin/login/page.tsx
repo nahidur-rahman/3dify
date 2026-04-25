@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { BsPrinter } from "react-icons/bs";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import { Card, CardContent } from "@/components/ui/Card";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -56,51 +59,46 @@ export default function AdminLoginPage() {
           </p>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 p-8 space-y-5"
-        >
-          {error && (
-            <div className="bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
-              {error}
-            </div>
-          )}
+        <form onSubmit={handleSubmit}>
+          <Card>
+            <CardContent className="p-8 space-y-5">
+              {error && (
+                <div className="bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
+                  {error}
+                </div>
+              )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-              placeholder="admin@3difybd.com"
-            />
-          </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Email
+                </label>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="admin@3difybd.com"
+                />
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-              placeholder="••••••••"
-            />
-          </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Password
+                </label>
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="••••••••"
+                />
+              </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-3 rounded-xl font-semibold hover:from-primary-600 hover:to-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "Signing in..." : "Sign In"}
-          </button>
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading ? "Signing in..." : "Sign In"}
+              </Button>
+            </CardContent>
+          </Card>
         </form>
       </div>
     </div>

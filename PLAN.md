@@ -1,284 +1,296 @@
-# 🏗️ 3Dify BD — Full Build Plan
+# 3Dify BD Implementation Plan (MVP First)
 
-> A 3D printed items e-commerce startup website — browse, contact, order.
+This plan is the source of truth for implementation from Apr 25, 2026 onward.
 
----
-
-## 🎯 Project Overview
+## 1) Product Summary
 
 | Field | Detail |
 |---|---|
-| **Brand Name** | 3Dify BD |
-| **Tagline** | Premium 3D Printed Products — Made to Order in Bangladesh |
-| **Products** | Figurines, Phone Cases, Home Decor, Custom Models |
-| **Order Flow** | Browse on site → Contact via WhatsApp/Messenger → We print & deliver |
-| **Payment** | Handled offline via messaging (no online payment) |
-| **Admin** | Single admin (you) manages products from the website |
-| **Language** | English |
+| Brand | 3Dify BD |
+| Tagline | Premium 3D Printed Products - Made to Order in Bangladesh |
+| Core flow | Browse -> Contact (WhatsApp/Messenger) -> We print -> Deliver |
+| Payments | Offline/manual via chat |
+| Admin model | Single admin account |
+| Language | English |
+| Release strategy | MVP first, hardening after MVP |
 
----
+## 2) Locked Decisions
 
-## 🧰 Tech Stack
+- Public routes will be refactored into src/app/(public) while preserving URLs.
+- Dark/light toggle is in scope now.
+- Theme preference persistence uses localStorage.
+- Reusable UI primitives (Button/Input/Card/Modal) are in scope now.
+- Seed strategy is idempotent mixed seed: admin upsert always, sample products optional.
+- If contact env vars are missing, show disabled CTAs (never broken links).
+
+## 3) Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Framework | Next.js 14+ (App Router) |
+| Framework | Next.js 14 App Router |
 | Language | TypeScript |
 | Styling | Tailwind CSS |
 | Database | PostgreSQL (Supabase) |
 | ORM | Prisma |
-| Auth | JWT (HTTP-only cookies) |
+| Auth | JWT in HTTP-only cookie |
 | Validation | Zod |
+| Image storage | Local public/uploads (Supabase storage later) |
 | Deployment | Vercel |
-| Image Storage | Local `/public/uploads` (Supabase Storage later) |
 
----
+## 4) Current vs Target Structure
 
-## 📁 Project Structure
+### 4.1 Current (implemented)
 
-```
+- Public pages currently live directly under src/app.
+- Admin pages are under src/app/admin with dashboard route group.
+- API routes exist for auth, products, categories, upload.
+- lib/middleware.ts does not exist yet.
+- components/ui primitives do not exist yet.
+
+### 4.2 Target (in progress)
+
+```text
 src/
-├── app/                    # Pages & API routes
-│   ├── (public)/           # Public layout group
-│   │   ├── page.tsx        # Homepage
-│   │   ├── products/
-│   │   │   ├── page.tsx    # Products listing
-│   │   │   └── [id]/
-│   │   │       └── page.tsx # Product detail
-│   │   └── about/
-│   │       └── page.tsx    # About page
-│   ├── admin/              # Admin dashboard
-│   │   ├── login/
-│   │   │   └── page.tsx    # Admin login
-│   │   ├── page.tsx        # Dashboard overview
-│   │   └── products/
-│   │       ├── page.tsx    # Product management table
-│   │       ├── new/
-│   │       │   └── page.tsx # Add product form
-│   │       └── [id]/
-│   │           └── edit/
-│   │               └── page.tsx # Edit product form
-│   └── api/                # Backend API routes
-│       ├── auth/
-│       │   ├── login/route.ts
-│       │   └── logout/route.ts
-│       ├── products/
-│       │   ├── route.ts         # GET all, POST new
-│       │   └── [id]/route.ts   # GET one, PUT, DELETE
-│       ├── categories/route.ts
-│       └── upload/route.ts
-├── components/             # Reusable UI components
-│   ├── layout/
-│   │   ├── Navbar.tsx
-│   │   ├── Footer.tsx
-│   │   └── AdminSidebar.tsx
-│   ├── ui/
-│   │   ├── Button.tsx
-│   │   ├── Input.tsx
-│   │   ├── Card.tsx
-│   │   └── Modal.tsx
-│   ├── ProductCard.tsx
-│   ├── ProductGrid.tsx
-│   ├── ContactButtons.tsx
-│   ├── FloatingContact.tsx
-│   ├── CategoryCard.tsx
-│   ├── HeroSection.tsx
-│   ├── HowItWorks.tsx
-│   └── SearchFilter.tsx
-├── lib/                    # Utilities & helpers
-│   ├── db.ts               # Prisma client
-│   ├── auth.ts             # JWT sign/verify helpers
-│   ├── middleware.ts        # Auth middleware for API
-│   ├── validation.ts       # Zod schemas
-│   └── utils.ts            # General helpers
-└── prisma/
-    ├── schema.prisma        # Database schema
-    └── seed.ts              # Seed admin + sample products
+    app/
+        (public)/
+            page.tsx
+            products/page.tsx
+            products/[id]/page.tsx
+            about/page.tsx
+        admin/
+            login/page.tsx
+            (dashboard)/layout.tsx
+            (dashboard)/page.tsx
+            (dashboard)/products/page.tsx
+            (dashboard)/products/new/page.tsx
+            (dashboard)/products/[id]/edit/page.tsx
+        api/
+            auth/login/route.ts
+            auth/logout/route.ts
+            auth/me/route.ts
+            products/route.ts
+            products/[id]/route.ts
+            categories/route.ts
+            upload/route.ts
+    components/
+        layout/
+        ui/ (new)
+    lib/
+        db.ts
+        auth.ts
+        validation.ts
+        utils.ts
+        middleware.ts (optional follow-up)
 ```
 
----
-
-## 🗄️ Database Schema
+## 5) Data Model (Prisma)
 
 ### Product
-| Field | Type | Notes |
-|---|---|---|
-| id | String (cuid) | Primary key |
-| name | String | Product name |
-| description | String | Detailed description |
-| price | Float | Price in BDT |
-| images | String[] | Array of image URLs |
-| category | Enum | FIGURINE, PHONE_CASE, HOME_DECOR, CUSTOM |
-| color | String | Available color(s) |
-| size | String | Dimensions (e.g., "10x5x3 cm") |
-| weight | Float | Weight in grams |
-| infillPercentage | Int | 3D print infill % (e.g., 20, 50, 100) |
-| customizable | Boolean | Whether customization is available |
-| inStock | Boolean | Availability status |
-| featured | Boolean | Show on homepage |
-| createdAt | DateTime | Auto-generated |
-| updatedAt | DateTime | Auto-updated |
+
+id, name, description, price, images[], category, color, size, weight,
+infillPercentage, customizable, inStock, featured, createdAt, updatedAt.
 
 ### Admin
-| Field | Type | Notes |
-|---|---|---|
-| id | String (cuid) | Primary key |
-| email | String | Unique, login credential |
-| password | String | Hashed with bcrypt |
-| name | String | Display name |
-| createdAt | DateTime | Auto-generated |
 
-### Category (Enum)
-- `FIGURINE`
-- `PHONE_CASE`
-- `HOME_DECOR`
-- `CUSTOM`
+id, email, password (bcrypt hash), name, createdAt.
 
----
+### Category enum
 
-## 📄 Pages & Features
+FIGURINE, PHONE_CASE, HOME_DECOR, CUSTOM.
 
-### Public Pages
+## 6) API Contract
 
-#### 1. Homepage (`/`)
-- Hero section with tagline and CTA
-- Featured products grid (3-6 items)
-- Category showcase cards (4 categories)
-- "How It Works" section: Browse → Contact → We Print → Deliver
-- Floating WhatsApp/Messenger contact widget
-
-#### 2. Products Page (`/products`)
-- Product grid with all items
-- Filter by category
-- Sort by price (low-high, high-low), newest
-- Search by name
-- Responsive grid (1 col mobile, 2 tablet, 3-4 desktop)
-
-#### 3. Product Detail Page (`/products/[id]`)
-- Large image display
-- Product name, price, description
-- Specs table: color, size, weight, infill %
-- Customization badge (if applicable)
-- **"Order via WhatsApp" button** — pre-filled message
-- **"Message on Messenger" button** — links to FB page
-- Related products section
-
-#### 4. About Page (`/about`)
-- Brief startup story
-- What is 3D printing
-- Why choose 3Dify BD
-
-### Admin Pages (Protected)
-
-#### 5. Admin Login (`/admin/login`)
-- Email + password form
-- JWT token on success → stored in HTTP-only cookie
-- Redirects to dashboard
-
-#### 6. Admin Dashboard (`/admin`)
-- Overview cards: total products, categories, featured items
-- Quick links to manage products
-
-#### 7. Product Management (`/admin/products`)
-- Table of all products (name, price, category, stock status)
-- Add new product button
-- Edit / Delete actions per row
-
-#### 8. Add/Edit Product (`/admin/products/new`, `/admin/products/[id]/edit`)
-- Form with all product fields
-- Image upload (multiple)
-- Validation with error messages
-
----
-
-## 🔌 API Routes
+### 6.1 Routes
 
 | Route | Method | Auth | Purpose |
 |---|---|---|---|
-| `/api/auth/login` | POST | ❌ | Admin login, returns JWT |
-| `/api/auth/logout` | POST | ✅ | Clear auth cookie |
-| `/api/products` | GET | ❌ | List products (with filters/search) |
-| `/api/products` | POST | ✅ | Create new product |
-| `/api/products/[id]` | GET | ❌ | Get single product details |
-| `/api/products/[id]` | PUT | ✅ | Update product |
-| `/api/products/[id]` | DELETE | ✅ | Delete product |
-| `/api/upload` | POST | ✅ | Upload product images |
-| `/api/categories` | GET | ❌ | List all categories |
+| /api/auth/login | POST | No | Admin login and session cookie set |
+| /api/auth/logout | POST | Yes | Clear session cookie |
+| /api/auth/me | GET | Yes | Return authenticated admin session |
+| /api/products | GET | No | List products with filtering/sort/pagination |
+| /api/products | POST | Yes | Create product |
+| /api/products/[id] | GET | No | Fetch one product |
+| /api/products/[id] | PUT | Yes | Update product |
+| /api/products/[id] | DELETE | Yes | Delete product |
+| /api/categories | GET | No | List categories |
+| /api/upload | POST | Yes | Upload one or more product images |
 
----
+### 6.2 /api/products query parameters
 
-## 🎨 Design System
+| Query key | Type | Notes |
+|---|---|---|
+| category | string | One enum value |
+| search | string | Case-insensitive search on name/description |
+| sort | string | newest, price-asc, price-desc |
+| featured | boolean string | true enables featured filter |
+| page | number | default 1 |
+| limit | number | default 12 |
 
-| Element | Choice |
-|---|---|
-| **Theme** | Dark background + light cards, with light mode toggle |
-| **Accent Color** | Cyan/Teal (`#06b6d4`) — techy 3D-printing vibe |
-| **Font** | Inter or Geist (system sans-serif) |
-| **Cards** | Rounded corners, subtle shadow, hover scale effect |
-| **Buttons** | Rounded, gradient accents for CTAs |
-| **Mobile** | Mobile-first responsive design |
+### 6.3 Upload constraints (current behavior)
 
----
+- Only image MIME types.
+- Max 5 MB per file.
+- Multiple files accepted in one request.
+- Stored in public/uploads and returned as /uploads/... URLs.
 
-## 📞 Contact Integration
+## 7) Page Requirements and Acceptance Criteria
 
-### WhatsApp Button
-```
-https://wa.me/{WHATSAPP_NUMBER}?text=Hi! I'm interested in "{product_name}" (Price: ৳{price}). Is it available?
-```
+### 7.1 Home (/)
 
-### Messenger Button
-```
-https://m.me/{FACEBOOK_PAGE_ID}
-```
+Requirements:
+- Hero, featured products, category showcase, how-it-works, CTA, floating contact.
 
-### Floating Contact Widget
-- Fixed position bottom-right on all pages
-- WhatsApp + Messenger icons
-- Expandable on click
+Acceptance criteria:
+- Featured section shows up to 4 featured in-stock products.
+- Page still renders if DB is unavailable (empty featured state is acceptable).
+- CTA links are valid or disabled if contact env vars are missing.
 
----
+### 7.2 Products (/products)
 
-## 🔐 Environment Variables
+Requirements:
+- Search, category filter, sorting, pagination, responsive grid.
+
+Acceptance criteria:
+- Search and filters update URL query params.
+- Default sort is newest.
+- Pagination appears only when total pages > 1.
+- Empty state message is shown when no products match.
+
+### 7.3 Product Detail (/products/[id])
+
+Requirements:
+- Image, description, specs, badges, contact buttons, related products.
+
+Acceptance criteria:
+- 404 for missing product ID.
+- Related products are from same category, in stock, excluding current product, max 4.
+- Contact buttons use prefilled WhatsApp message and Messenger link.
+
+### 7.4 About (/about)
+
+Requirements:
+- Startup story, 3D printing explanation, value proposition.
+
+Acceptance criteria:
+- Page is accessible from main navigation on mobile and desktop.
+
+### 7.5 Admin Login (/admin/login)
+
+Requirements:
+- Email/password form with validation and clear error states.
+
+Acceptance criteria:
+- Valid login sets HTTP-only cookie and redirects to /admin.
+- Invalid credentials return clear error message without exposing which field failed.
+
+### 7.6 Admin Dashboard (/admin)
+
+Requirements:
+- Overview stats and quick actions.
+
+Acceptance criteria:
+- Cards show total products, featured products, out-of-stock products.
+- Quick links to product management and add product are present.
+
+### 7.7 Product Management (/admin/products)
+
+Requirements:
+- Product table with edit/delete actions.
+
+Acceptance criteria:
+- Table includes name, category, price, stock status, featured badge.
+- Delete requires confirmation.
+
+### 7.8 Add/Edit Product
+
+Requirements:
+- Full product form with image upload and field validation.
+
+Acceptance criteria:
+- Create and update flows persist data correctly.
+- Upload errors surface friendly messages.
+
+## 8) Scope Split
+
+### 8.1 Now (MVP)
+
+1. Docs alignment (PLAN, TODO, README).
+2. Public route group refactor without URL changes.
+3. UI primitives baseline (Button, Input, Card, Modal).
+4. Dark/light toggle with localStorage persistence and first-paint mitigation.
+5. Contact env fallback: disabled CTA state when links are not configured.
+6. Seed strategy update for idempotent mixed behavior.
+7. Lint and smoke verification.
+
+### 8.2 Later (Hardening/Scale)
+
+1. Central auth middleware for API and role expansion.
+2. Rate limiting and optional CSRF protections.
+3. Stronger upload verification (magic bytes, limits by count/dimensions).
+4. Structured API error codes and logging improvements.
+5. Storage migration from local uploads to cloud storage.
+
+## 9) Security and Reliability Baseline
+
+MVP must include:
+- JWT secret must be explicitly configured in production.
+- Auth-only endpoints enforce session checks.
+- Upload endpoint enforces MIME and file-size limits.
+- Admin routes redirect unauthenticated users to /admin/login.
+
+## 10) Environment Variables
 
 ```env
 # Database
-DATABASE_URL=               # Supabase PostgreSQL connection string
+DATABASE_URL=
 
 # Auth
-JWT_SECRET=                 # Random secret for JWT tokens (min 32 chars)
+JWT_SECRET=
 
-# Admin Seed
-ADMIN_EMAIL=                # Your admin email
-ADMIN_PASSWORD=             # Your admin password
+# Admin seed
+ADMIN_EMAIL=
+ADMIN_PASSWORD=
 
 # Contact (public)
-NEXT_PUBLIC_WHATSAPP=       # Your WhatsApp number (with country code, e.g., 8801XXXXXXXXX)
-NEXT_PUBLIC_MESSENGER=      # Your Facebook Page ID or username
-NEXT_PUBLIC_SITE_URL=       # Your domain (e.g., https://3difybd.com)
+NEXT_PUBLIC_WHATSAPP=
+NEXT_PUBLIC_MESSENGER=
+NEXT_PUBLIC_SITE_URL=
 
 # App
 NEXT_PUBLIC_APP_NAME=3Dify BD
+
+# Seed behavior (new)
+SEED_SAMPLE_PRODUCTS=true
 ```
 
----
+## 11) Deployment Checklist
 
-## 🚀 Deployment Checklist
+- Create Supabase project and set DATABASE_URL.
+- Set all environment variables in Vercel.
+- Run prisma migrate deploy in production.
+- Run seed script (admin always, sample products optional).
+- Verify contact env values.
+- Smoke test public pages and admin flows on mobile and desktop.
 
-- [ ] Create Supabase project & get DATABASE_URL
-- [ ] Set all environment variables on Vercel
-- [ ] Run `npx prisma migrate deploy` on production
-- [ ] Run seed script to create admin account
-- [ ] Add WhatsApp number and Facebook Page ID
-- [ ] Connect custom domain (optional)
-- [ ] Test all pages on mobile and desktop
+## 12) Verification Matrix
 
----
+### 12.1 Automated
 
-## ❓ Pending From You
+- npm run lint passes.
 
-- [ ] WhatsApp number (with country code)
-- [ ] Facebook Page URL/ID
-- [ ] Supabase project credentials
-- [ ] Preferred admin email & password
-- [ ] Product images (or we use placeholders initially)
+### 12.2 Manual smoke checks
+
+1. Public pages load: /, /products, /products/[id], /about.
+2. Product filters/search/sort/pagination behave as expected.
+3. Admin login/logout and protected route redirect work.
+4. Product create/edit/delete works from admin UI.
+5. Image upload works and rejects invalid file types/sizes.
+6. Contact buttons are active when configured and disabled when not configured.
+
+## 13) Inputs Still Needed
+
+- WhatsApp number with country code.
+- Messenger page ID/username.
+- Production database credentials.
+- Final admin email/password.
+- Real product image set.

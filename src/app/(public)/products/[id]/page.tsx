@@ -21,11 +21,14 @@ async function getProduct(id: string) {
   }
 }
 
-async function getRelatedProducts(productId: string, category: string) {
+async function getRelatedProducts(
+  productId: string,
+  category: Product["category"]
+) {
   try {
     const products = await prisma.product.findMany({
       where: {
-        category: category as any,
+        category,
         id: { not: productId },
         inStock: true,
       },

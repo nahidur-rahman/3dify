@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { productSchema } from "@/lib/validation";
-import type { Prisma } from "@prisma/client";
 
 // GET /api/products — list all products with filters
 export async function GET(request: NextRequest) {

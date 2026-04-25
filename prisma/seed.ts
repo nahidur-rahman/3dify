@@ -3,6 +3,10 @@ import { hash } from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+function shouldSeedSampleProducts() {
+  return (process.env.SEED_SAMPLE_PRODUCTS || "true").toLowerCase() === "true";
+}
+
 async function main() {
   console.log("🌱 Seeding database...");
 
@@ -10,7 +14,10 @@ async function main() {
   const adminPassword = await hash(process.env.ADMIN_PASSWORD || "admin123", 12);
   const admin = await prisma.admin.upsert({
     where: { email: process.env.ADMIN_EMAIL || "admin@3difybd.com" },
-    update: {},
+    update: {
+      password: adminPassword,
+      name: "Admin",
+    },
     create: {
       email: process.env.ADMIN_EMAIL || "admin@3difybd.com",
       password: adminPassword,
@@ -18,6 +25,12 @@ async function main() {
     },
   });
   console.log(`✅ Admin created: ${admin.email}`);
+
+  if (!shouldSeedSampleProducts()) {
+    console.log("ℹ️ Skipping sample products (SEED_SAMPLE_PRODUCTS=false)");
+    console.log("🎉 Seeding complete!");
+    return;
+  }
 
   // Create sample products
   const sampleProducts = [
@@ -113,10 +126,29 @@ async function main() {
     },
   ];
 
+  let createdCount = 0;
+  let skippedCount = 0;
+
   for (const product of sampleProducts) {
+    const existing = await prisma.product.findFirst({
+      where: {
+        name: product.name,
+        category: product.category,
+      },
+      select: { id: true },
+    });
+
+    if (existing) {
+      skippedCount += 1;
+      continue;
+    }
+
     await prisma.product.create({ data: product });
+    createdCount += 1;
   }
-  console.log(`✅ ${sampleProducts.length} sample products created`);
+
+  console.log(`✅ ${createdCount} sample products created`);
+  console.log(`ℹ️ ${skippedCount} sample products already existed`);
 
   console.log("🎉 Seeding complete!");
 }

@@ -4,33 +4,40 @@ import { HiLightningBolt, HiHeart, HiCube, HiChat } from "react-icons/hi";
 
 export const metadata: Metadata = {
   title: "About Us",
-  description: "Learn about 3Dify BD — premium 3D printed products made to order in Bangladesh.",
+  description:
+    "Learn about 3Dify BD - premium 3D printed products made to order in Bangladesh.",
 };
 
 const features = [
   {
     icon: HiCube,
     title: "Premium Quality",
-    description: "We use high-quality materials and precise printing settings to ensure every product meets our standards.",
+    description:
+      "We use high-quality materials and precise printing settings to ensure every product meets our standards.",
   },
   {
     icon: HiLightningBolt,
     title: "Fast Turnaround",
-    description: "Most orders are printed and ready within 24-48 hours. We value your time as much as quality.",
+    description:
+      "Most orders are printed and ready within 24-48 hours. We value your time as much as quality.",
   },
   {
     icon: HiHeart,
     title: "Made with Care",
-    description: "Every item is carefully inspected and finished by hand before it reaches you.",
+    description:
+      "Every item is carefully inspected and finished by hand before it reaches you.",
   },
   {
     icon: HiChat,
     title: "Direct Communication",
-    description: "No middleman — chat with us directly on WhatsApp or Messenger to discuss your order.",
+    description:
+      "No middleman - chat with us directly on WhatsApp or Messenger to discuss your order.",
   },
 ];
 
 export default function AboutPage() {
+  const whatsappReady = Boolean((process.env.NEXT_PUBLIC_WHATSAPP || "").trim());
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Hero */}
@@ -47,9 +54,9 @@ export default function AboutPage() {
         </h1>
         <p className="mt-6 text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
           3Dify BD is a startup born out of passion for 3D printing technology. Based
-          in Bangladesh, we create premium 3D printed products — from detailed
-          figurines and custom phone cases to stunning home decor pieces. Every product
-          is printed to order with care and precision.
+          in Bangladesh, we create premium 3D printed products - from detailed
+          figurines and custom phone cases to stunning home decor pieces. Every
+          product is printed to order with care and precision.
         </p>
       </div>
 
@@ -107,14 +114,24 @@ export default function AboutPage() {
           find or create the perfect 3D printed item.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a
-            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP || ""}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full sm:w-auto bg-white text-primary-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-50 transition-all"
-          >
-            Chat on WhatsApp
-          </a>
+          {whatsappReady ? (
+            <a
+              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP || ""}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto bg-white text-primary-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-50 transition-all"
+            >
+              Chat on WhatsApp
+            </a>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="w-full sm:w-auto bg-gray-200 text-gray-500 px-8 py-3 rounded-full font-semibold cursor-not-allowed"
+            >
+              WhatsApp Unavailable
+            </button>
+          )}
           <a
             href="/products"
             className="w-full sm:w-auto border-2 border-white/30 text-white px-8 py-3 rounded-full font-semibold hover:bg-white/10 transition-all"
@@ -122,6 +139,11 @@ export default function AboutPage() {
             Browse Products
           </a>
         </div>
+        {!whatsappReady && (
+          <p className="mt-3 text-sm text-primary-100/90">
+            WhatsApp contact is not configured yet.
+          </p>
+        )}
       </div>
     </div>
   );

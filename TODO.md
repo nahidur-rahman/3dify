@@ -1,86 +1,89 @@
-# ✅ 3Dify BD — Build Todo List
+# 3Dify BD Implementation TODO (MVP First)
 
-## Phase 1: Project Setup
-- [ ] Initialize Next.js project (TypeScript, Tailwind CSS, App Router, src dir)
-- [ ] Install dependencies (Prisma, bcrypt, jsonwebtoken, zod, react-icons)
-- [ ] Configure Tailwind theme (colors, fonts)
-- [ ] Set up folder structure (components, lib, api, prisma)
-- [ ] Create `.env.example` with all required variables
+Updated on Apr 25, 2026 to match current codebase reality.
 
-## Phase 2: Database & Schema
-- [ ] Write Prisma schema (Product, Admin, Category enum)
-- [ ] Create Prisma client singleton (`lib/db.ts`)
-- [ ] Generate Prisma client
-- [ ] Create initial migration
-- [ ] Write seed script (admin user + sample products)
+## 1) Completed Baseline
 
-## Phase 3: Lib Utilities
-- [ ] Auth helpers — JWT sign, verify, cookie management (`lib/auth.ts`)
-- [ ] Auth middleware for protected API routes (`lib/middleware.ts`)
-- [ ] Zod validation schemas for Product, Login (`lib/validation.ts`)
-- [ ] General utility functions (`lib/utils.ts`)
+### Core setup and backend
+- [x] Next.js 14 App Router + TypeScript + Tailwind project scaffolded
+- [x] Dependencies installed (Prisma, jose, bcryptjs, zod, react-icons)
+- [x] Prisma models implemented (Product, Admin, Category enum)
+- [x] Prisma client singleton implemented
+- [x] Seed script exists (admin upsert + sample products)
+- [x] Auth helpers implemented (JWT sign/verify/session cookie)
+- [x] Zod validation schemas implemented
+- [x] Utility helpers implemented
 
-## Phase 4: API Routes
-- [ ] `POST /api/auth/login` — admin login
-- [ ] `POST /api/auth/logout` — admin logout
-- [ ] `GET /api/products` — list products (with filters, search, pagination)
-- [ ] `POST /api/products` — create product (admin only)
-- [ ] `GET /api/products/[id]` — get single product
-- [ ] `PUT /api/products/[id]` — update product (admin only)
-- [ ] `DELETE /api/products/[id]` — delete product (admin only)
-- [ ] `POST /api/upload` — image upload handler
-- [ ] `GET /api/categories` — list categories
+### API routes
+- [x] POST /api/auth/login
+- [x] POST /api/auth/logout
+- [x] GET /api/auth/me
+- [x] GET /api/products
+- [x] POST /api/products
+- [x] GET /api/products/[id]
+- [x] PUT /api/products/[id]
+- [x] DELETE /api/products/[id]
+- [x] GET /api/categories
+- [x] POST /api/upload
 
-## Phase 5: Shared Components
-- [ ] `Navbar` — logo, nav links, responsive mobile menu
-- [ ] `Footer` — links, contact info, copyright
-- [ ] `Button` — reusable button with variants
-- [ ] `Input` — reusable form input
-- [ ] `ProductCard` — image, name, price, category badge
-- [ ] `ProductGrid` — responsive grid of ProductCards
-- [ ] `ContactButtons` — WhatsApp + Messenger buttons
-- [ ] `FloatingContact` — fixed bottom-right contact widget
-- [ ] `CategoryCard` — category showcase card
-- [ ] `HeroSection` — homepage hero with tagline + CTA
-- [ ] `HowItWorks` — step-by-step process section
-- [ ] `SearchFilter` — search input + category filter + sort
-- [ ] `AdminSidebar` — admin navigation sidebar
+### Pages and major components
+- [x] Public pages: /, /products, /products/[id], /about
+- [x] Admin pages: /admin/login, /admin, /admin/products, /admin/products/new, /admin/products/[id]/edit
+- [x] Root layout with Navbar, Footer, FloatingContact
+- [x] Core components: HeroSection, CategoryShowcase, HowItWorks, ProductCard, ProductGrid, SearchFilter, ContactButtons, AdminSidebar
+- [x] .env.example exists and includes required variables
 
-## Phase 6: Public Pages
-- [ ] Homepage (`/`) — hero, featured products, categories, how it works
-- [ ] Products page (`/products`) — grid, filters, search
-- [ ] Product detail page (`/products/[id]`) — full info, contact buttons
-- [ ] About page (`/about`) — startup story
-- [ ] Layout — root layout with Navbar, Footer, FloatingContact
+## 2) Current Sprint (Docs First)
 
-## Phase 7: Admin Pages
-- [ ] Admin login page (`/admin/login`)
-- [ ] Admin layout — sidebar, auth check, redirect if not logged in
-- [ ] Admin dashboard (`/admin`) — overview stats
-- [ ] Products list (`/admin/products`) — table with actions
-- [ ] Add product (`/admin/products/new`) — form with validation
-- [ ] Edit product (`/admin/products/[id]/edit`) — pre-filled form
+- [x] Step 1: Rewrite PLAN.md with explicit scope, API contract, and acceptance criteria
+- [x] Step 2: Update TODO.md to real completion state
+- [x] Step 3: Rewrite README.md with project-specific setup/run/deploy guidance
 
-## Phase 8: Polish & Extras
-- [ ] Dark/light mode toggle
-- [ ] Loading states & skeletons
-- [ ] Error pages (404, 500)
-- [ ] Meta tags & SEO (title, description, OG images)
-- [ ] Responsive testing (mobile, tablet, desktop)
-- [ ] Toast notifications for admin actions
+## 3) MVP Work Remaining (Code)
 
-## Phase 9: Deployment
-- [ ] Create `.env.example` with all variables documented
-- [ ] Verify Vercel compatibility (no unsupported features)
-- [ ] Create Supabase project
-- [ ] Run migrations on production DB
-- [ ] Seed admin account
-- [ ] Set environment variables on Vercel
-- [ ] Deploy & test live site
+### Structure and UI foundation
+- [x] Refactor public routes into src/app/(public) without URL changes
+- [ ] Add reusable UI primitives in src/components/ui:
+- [x] Button
+- [x] Input
+- [x] Card
+- [x] Modal baseline
 
----
+### Theming
+- [x] Add dark/light mode toggle
+- [x] Persist theme in localStorage
+- [x] Prevent first-paint theme flash
 
-## 📌 Status Legend
-- [ ] Not started
-- [x] Completed
-- 🔄 In progress
+### Contact fallback behavior
+- [x] Show disabled WhatsApp CTA when NEXT_PUBLIC_WHATSAPP is missing
+- [x] Show disabled Messenger CTA when NEXT_PUBLIC_MESSENGER is missing
+- [x] Add clear helper text for disabled contact actions
+
+### Seed behavior
+- [x] Add SEED_SAMPLE_PRODUCTS flag support
+- [x] Keep admin upsert always idempotent
+- [x] Make sample product insertion optional and idempotent-safe
+
+## 4) MVP Verification
+
+- [x] npm run lint passes
+- [ ] Public smoke test: /, /products, /products/[id], /about
+- [ ] Product list behavior: search, category filter, sorting, pagination
+- [ ] Admin auth flow: login, protected routes, logout
+- [ ] Admin product CRUD flow: create, edit, delete
+- [ ] Upload validation: rejects non-image and >5MB files
+- [ ] Contact CTA behavior: active when configured, disabled when missing env
+
+## 5) Post-MVP (Later)
+
+- [ ] Add centralized API auth middleware (optional)
+- [ ] Add rate limiting on auth endpoints
+- [ ] Add stronger upload checks (magic bytes/dimensions/count limits)
+- [ ] Add structured API error codes
+- [ ] Add toast notifications for admin actions
+- [ ] Consider migrating uploads to cloud storage
+
+## Status legend
+
+- [ ] Not done
+- [x] Done

@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import FloatingContact from "@/components/FloatingContact";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,12 +28,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.className} antialiased bg-white dark:bg-dark text-gray-900 dark:text-gray-100 min-h-screen flex flex-col`}>
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <FloatingContact />
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var stored=localStorage.getItem('theme');var theme=stored==='light'?'light':'dark';var root=document.documentElement;if(theme==='dark'){root.classList.add('dark');}else{root.classList.remove('dark');}}catch(e){document.documentElement.classList.add('dark');}})();`,
+          }}
+        />
+      </head>
+      <body
+        className={`${inter.className} antialiased bg-white dark:bg-dark text-gray-900 dark:text-gray-100 min-h-screen`}
+      >
+        {children}
       </body>
     </html>
   );
