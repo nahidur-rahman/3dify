@@ -2,6 +2,12 @@
 // This avoids TS import issues with @prisma/client in some environments
 
 export type Category = "FIGURINE" | "PHONE_CASE" | "HOME_DECOR" | "CUSTOM";
+export type SizeMode = "FIXED" | "OPTIONS";
+
+export interface ProductSizeOption {
+  label: string;
+  price: number;
+}
 
 export interface Product {
   id: string;
@@ -12,8 +18,11 @@ export interface Product {
   category: Category;
   color: string;
   size: string;
+  sizeMode?: SizeMode;
+  sizeOptions?: ProductSizeOption[];
   weight: number;
   infillPercentage: number;
+  discountPercent?: number;
   customizable: boolean;
   inStock: boolean;
   featured: boolean;

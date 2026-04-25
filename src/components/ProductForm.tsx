@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Product } from "@/lib/types";
+import { Category, Product, ProductSizeOption, SizeMode } from "@/lib/types";
 import { categoryLabels } from "@/lib/utils";
 
 interface ProductFormProps {
@@ -16,6 +16,11 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
   const [error, setError] = useState("");
   const [imageUploading, setImageUploading] = useState(false);
 
+  const initialSizeOptions: ProductSizeOption[] =
+    product?.sizeOptions && product.sizeOptions.length > 0
+      ? product.sizeOptions
+      : [{ label: "Standard", price: product?.price || 0 }];
+
   const [form, setForm] = useState({
     name: product?.name || "",
     description: product?.description || "",
@@ -24,12 +29,49 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
     category: product?.category || "FIGURINE",
     color: product?.color || "",
     size: product?.size || "",
+    sizeMode: (product?.sizeMode || "FIXED") as SizeMode,
+    sizeOptions: initialSizeOptions,
     weight: product?.weight || 0,
     infillPercentage: product?.infillPercentage || 20,
+    discountPercent: product?.discountPercent || 0,
     customizable: product?.customizable || false,
     inStock: product?.inStock ?? true,
     featured: product?.featured || false,
   });
+
+  const updateSizeOption = (
+    index: number,
+    field: keyof ProductSizeOption,
+    value: string | number
+  ) => {
+    setForm((prev) => ({
+      ...prev,
+      sizeOptions: prev.sizeOptions.map((option, optionIndex) =>
+        optionIndex === index
+          ? {
+              ...option,
+              [field]: field === "price" ? Number(value) || 0 : value,
+            }
+          : option
+      ),
+    }));
+  };
+
+  const addSizeOption = () => {
+    setForm((prev) => ({
+      ...prev,
+      sizeMode: "OPTIONS",
+      sizeOptions: [...prev.sizeOptions, { label: "New size", price: prev.price }],
+      size: prev.size || "Multiple sizes available",
+    }));
+  };
+
+  const removeSizeOption = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      sizeOptions: prev.sizeOptions.filter((_, optionIndex) => optionIndex !== index),
+    }));
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -82,6 +124,14 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
           price: Number(form.price),
           weight: Number(form.weight),
           infillPercentage: Number(form.infillPercentage),
+          discountPercent: Number(form.discountPercent),
+          sizeOptions:
+            form.sizeMode === "OPTIONS"
+              ? form.sizeOptions.map((option) => ({
+                  label: option.label,
+                  price: Number(option.price),
+                }))
+              : [],
         }),
       });
 
@@ -161,7 +211,9 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
           </label>
           <select
             value={form.category}
-            onChange={(e) => setForm({ ...form, category: e.target.value })}
+            onChange={(e) =>
+              setForm({ ...form, category: e.target.value as Category })
+            }
             className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
           >
             {Object.entries(categoryLabels).map(([value, label]) => (
@@ -173,34 +225,146 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
         </div>
       </div>
 
-      {/* Color & Size */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Color *
+            Size Mode
           </label>
-          <input
-            type="text"
-            value={form.color}
-            onChange={(e) => setForm({ ...form, color: e.target.value })}
-            required
+          <select
+            value={form.sizeMode}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                sizeMode: e.target.value as SizeMode,
+                sizeOptions:
+                  e.target.value === "OPTIONS"
+                    ? prev.sizeOptions.length > 0
+                      ? prev.sizeOptions
+                      : [{ label: "Standard", price: prev.price }]
+                    : prev.sizeOptions,
+              }))
+            }
             className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-            placeholder="e.g., Matte Black"
-          />
+          >
+            <option value="FIXED">Fixed size</option>
+            <option value="OPTIONS">Size options</option>
+          </select>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Size *
+            Discount Percentage
           </label>
           <input
-            type="text"
-            value={form.size}
-            onChange={(e) => setForm({ ...form, size: e.target.value })}
-            required
+            type="number"
+            value={form.discountPercent}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                discountPercent: parseInt(e.target.value) || 0,
+              })
+            }
+            min="0"
+            max="100"
             className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-            placeholder="e.g., 15x10x8 cm"
+            placeholder="0"
           />
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          Size Summary *
+        </label>
+        <input
+          type="text"
+          value={form.size}
+          onChange={(e) => setForm({ ...form, size: e.target.value })}
+          required
+          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
+          placeholder={
+            form.sizeMode === "OPTIONS"
+              ? "e.g., Small / Medium / Large"
+              : "e.g., 15x10x8 cm"
+          }
+        />
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          {form.sizeMode === "OPTIONS"
+            ? "This summary appears next to the size choices."
+            : "Use the final finished size for fixed-size products."}
+        </p>
+      </div>
+
+      {form.sizeMode === "OPTIONS" && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Size Options
+            </label>
+            <button
+              type="button"
+              onClick={addSizeOption}
+              className="text-sm font-medium text-primary-500 hover:text-primary-400"
+            >
+              + Add option
+            </button>
+          </div>
+
+          {form.sizeOptions.map((option, index) => (
+            <div
+              key={`${option.label}-${index}`}
+              className="grid grid-cols-[1fr_140px_auto] gap-3 items-end"
+            >
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Label
+                </label>
+                <input
+                  type="text"
+                  value={option.label}
+                  onChange={(e) => updateSizeOption(index, "label", e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
+                  placeholder="Small"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Price
+                </label>
+                <input
+                  type="number"
+                  value={option.price}
+                  onChange={(e) => updateSizeOption(index, "price", e.target.value)}
+                  min="0"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
+                  placeholder="0"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => removeSizeOption(index)}
+                disabled={form.sizeOptions.length === 1}
+                className="h-12 px-4 rounded-xl border border-gray-200 dark:border-dark-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Color */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          Color *
+        </label>
+        <input
+          type="text"
+          value={form.color}
+          onChange={(e) => setForm({ ...form, color: e.target.value })}
+          required
+          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
+          placeholder="e.g., Matte Black"
+        />
       </div>
 
       {/* Weight & Infill */}

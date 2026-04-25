@@ -29,6 +29,15 @@ export function formatPrice(price: number): string {
   return `৳${price.toLocaleString("en-BD")}`;
 }
 
+export function calculateDiscountedPrice(
+  price: number,
+  discountPercent: number
+): number {
+  const clampedDiscount = Math.min(100, Math.max(0, discountPercent));
+  const discountedPrice = price * (1 - clampedDiscount / 100);
+  return Math.round(discountedPrice * 100) / 100;
+}
+
 // Category display names
 export const categoryLabels: Record<string, string> = {
   FIGURINE: "Figurines",

@@ -1,6 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
-import { formatPrice, categoryLabels } from "@/lib/utils";
+import {
+  calculateDiscountedPrice,
+  formatPrice,
+  categoryLabels,
+} from "@/lib/utils";
 import { Product } from "@/lib/types";
 
 interface ProductCardProps {
@@ -8,6 +12,12 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const sizeOptionPrices = product.sizeOptions?.map((option) => option.price) ?? [];
+  const startingPrice =
+    sizeOptionPrices.length > 0 ? Math.min(...sizeOptionPrices) : product.price;
+  const discountPercent = product.discountPercent ?? 0;
+  const displayPrice = calculateDiscountedPrice(startingPrice, discountPercent);
+
   return (
     <Link href={`/products/${product.id}`} className="group">
       <div className="bg-white dark:bg-dark-100 rounded-2xl overflow-hidden border border-gray-200 dark:border-dark-200 hover:border-primary-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 hover:-translate-y-1">
@@ -39,6 +49,11 @@ export default function ProductCard({ product }: ProductCardProps) {
                 Customizable
               </span>
             )}
+            {discountPercent > 0 && (
+              <span className="bg-rose-500/90 text-white text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-sm">
+                {discountPercent}% Off
+              </span>
+            )}
           </div>
 
           {/* Stock status */}
@@ -57,11 +72,19 @@ export default function ProductCard({ product }: ProductCardProps) {
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
             {product.description}
           </p>
-          <div className="flex items-center justify-between mt-3">
-            <span className="text-lg font-bold text-primary-500">
-              {formatPrice(product.price)}
-            </span>
-            <span className="text-xs text-gray-400 dark:text-gray-500">
+          <div className="flex items-end justify-between mt-3 gap-3">
+            <div>
+              {discountPercent > 0 && (
+                <div className="text-xs text-gray-400 dark:text-gray-500 line-through">
+                  {formatPrice(startingPrice)}
+                </div>
+              )}
+              <div className="text-lg font-bold text-primary-500">
+                {sizeOptionPrices.length > 0 ? "From " : ""}
+                {formatPrice(displayPrice)}
+              </div>
+            </div>
+            <span className="text-xs text-gray-400 dark:text-gray-500 text-right">
               {product.color}
             </span>
           </div>

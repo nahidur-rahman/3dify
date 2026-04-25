@@ -2,7 +2,11 @@ import { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { formatPrice, categoryLabels } from "@/lib/utils";
+import {
+  calculateDiscountedPrice,
+  formatPrice,
+  categoryLabels,
+} from "@/lib/utils";
 import ContactButtons from "@/components/ContactButtons";
 import ProductGrid from "@/components/ProductGrid";
 import { Product } from "@/lib/types";
@@ -59,6 +63,11 @@ export default async function ProductDetailPage({
   if (!product) notFound();
 
   const relatedProducts = await getRelatedProducts(product.id, product.category);
+  const sizeOptionPrices = product.sizeOptions?.map((option) => option.price) ?? [];
+  const startingPrice =
+    sizeOptionPrices.length > 0 ? Math.min(...sizeOptionPrices) : product.price;
+  const discountPercent = product.discountPercent ?? 0;
+  const discountedPrice = calculateDiscountedPrice(startingPrice, discountPercent);
 
   const specs = [
     { icon: HiColorSwatch, label: "Color", value: product.color },
@@ -116,6 +125,11 @@ export default async function ProductDetailPage({
                 Customizable
               </span>
             )}
+            {discountPercent > 0 && (
+              <span className="bg-rose-500/10 text-rose-500 text-sm font-medium px-3 py-1 rounded-full">
+                {discountPercent}% Off
+              </span>
+            )}
             {!product.inStock && (
               <span className="bg-red-500/10 text-red-500 text-sm font-medium px-3 py-1 rounded-full">
                 Out of Stock
@@ -127,8 +141,16 @@ export default async function ProductDetailPage({
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
             {product.name}
           </h1>
-          <div className="mt-3 text-3xl font-bold text-primary-500">
-            {formatPrice(product.price)}
+          <div className="mt-3 flex items-end gap-3 flex-wrap">
+            {discountPercent > 0 && (
+              <span className="text-lg text-gray-400 dark:text-gray-500 line-through">
+                {formatPrice(startingPrice)}
+              </span>
+            )}
+            <div className="text-3xl font-bold text-primary-500">
+              {sizeOptionPrices.length > 0 ? "From " : ""}
+              {formatPrice(discountedPrice)}
+            </div>
           </div>
 
           {/* Description */}
@@ -158,12 +180,47 @@ export default async function ProductDetailPage({
             ))}
           </div>
 
+          {sizeOptionPrices.length > 0 && product.sizeOptions && (
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                Size Options
+              </h3>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {product.sizeOptions.map((option) => {
+                  const optionPrice = calculateDiscountedPrice(
+                    option.price,
+                    discountPercent
+                  );
+
+                  return (
+                    <div
+                      key={option.label}
+                      className="rounded-xl border border-gray-200 dark:border-dark-200 bg-gray-50 dark:bg-dark-100 p-4"
+                    >
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        {option.label}
+                      </div>
+                      {discountPercent > 0 && (
+                        <div className="mt-1 text-sm text-gray-500 dark:text-gray-400 line-through">
+                          {formatPrice(option.price)}
+                        </div>
+                      )}
+                      <div className="text-lg font-semibold text-primary-500">
+                        {formatPrice(optionPrice)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Contact Buttons */}
           <div className="mt-8">
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
               Interested? Contact us to place your order:
             </p>
-            <ContactButtons productName={product.name} price={product.price} />
+            <ContactButtons productName={product.name} price={discountedPrice} />
           </div>
         </div>
       </div>

@@ -43,7 +43,7 @@ Updated on Apr 25, 2026 to match current codebase reality.
 
 ### Structure and UI foundation
 - [x] Refactor public routes into src/app/(public) without URL changes
-- [ ] Add reusable UI primitives in src/components/ui:
+- [x] Add reusable UI primitives in src/components/ui:
 - [x] Button
 - [x] Input
 - [x] Card

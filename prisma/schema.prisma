@@ -14,6 +14,11 @@ enum Category {
   CUSTOM
 }
 
+enum SizeMode {
+  FIXED
+  OPTIONS
+}
+
 model Product {
   id               String   @id @default(cuid())
   name             String
@@ -23,8 +28,11 @@ model Product {
   category         Category
   color            String
   size             String
+  sizeMode         SizeMode @default(FIXED)
+  sizeOptions      Json?
   weight           Float
   infillPercentage Int      @default(20)
+  discountPercent  Int      @default(0)
   customizable     Boolean  @default(false)
   inStock          Boolean  @default(true)
   featured         Boolean  @default(false)
