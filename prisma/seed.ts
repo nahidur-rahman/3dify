@@ -1,4 +1,4 @@
-import { PrismaClient, Category, SizeMode } from "@prisma/client";
+import { PrismaClient, Prisma, Category } from "@prisma/client";
 import { hash } from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -33,7 +33,7 @@ async function main() {
   }
 
   // Create sample products
-  const sampleProducts = [
+  const sampleProducts: Prisma.ProductCreateInput[] = [
     {
       name: "Dragon Figurine",
       description:
@@ -43,7 +43,7 @@ async function main() {
       category: Category.FIGURINE,
       color: "Metallic Silver",
       size: "15x10x8 cm",
-      sizeMode: SizeMode.FIXED,
+      sizeMode: "FIXED",
       sizeOptions: [],
       weight: 120,
       infillPercentage: 30,
@@ -61,7 +61,7 @@ async function main() {
       category: Category.PHONE_CASE,
       color: "Matte Black",
       size: "16x8x1.2 cm",
-      sizeMode: SizeMode.OPTIONS,
+      sizeMode: "OPTIONS",
       sizeOptions: [
         { label: "Standard", price: 800 },
         { label: "Premium Grip", price: 950 },
@@ -82,7 +82,7 @@ async function main() {
       category: Category.HOME_DECOR,
       color: "White",
       size: "20x10x10 cm",
-      sizeMode: SizeMode.FIXED,
+      sizeMode: "FIXED",
       sizeOptions: [],
       weight: 200,
       infillPercentage: 20,
@@ -100,7 +100,7 @@ async function main() {
       category: Category.CUSTOM,
       color: "Any Color",
       size: "20x5x2 cm",
-      sizeMode: SizeMode.OPTIONS,
+      sizeMode: "OPTIONS",
       sizeOptions: [
         { label: "Small", price: 500 },
         { label: "Medium", price: 600 },
@@ -122,7 +122,7 @@ async function main() {
       category: Category.FIGURINE,
       color: "Red & Gold",
       size: "30x25x25 cm",
-      sizeMode: SizeMode.FIXED,
+      sizeMode: "FIXED",
       sizeOptions: [],
       weight: 450,
       infillPercentage: 25,
@@ -140,7 +140,7 @@ async function main() {
       category: Category.HOME_DECOR,
       color: "White & Gray",
       size: "12x12x2 cm each",
-      sizeMode: SizeMode.OPTIONS,
+      sizeMode: "OPTIONS",
       sizeOptions: [
         { label: "Set of 4", price: 1600 },
         { label: "Set of 6", price: 2000 },

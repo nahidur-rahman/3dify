@@ -60,6 +60,7 @@
 
 ```env
 DATABASE_URL=
+DIRECT_URL=
 JWT_SECRET=
 
 ADMIN_EMAIL=
@@ -98,6 +99,11 @@ Seed database:
 npx prisma db seed
 ```
 
+If Prisma cannot reach Supabase from your network, run the SQL seed instead:
+
+1. Open `prisma/migrations/20260425000000_initial/migration.sql` in the Supabase SQL editor and run it once.
+2. Open `prisma/supabase-seed.sql` and run it to insert the admin record and sample products.
+
 Start dev server:
 
 ```bash
@@ -122,7 +128,7 @@ Open http://localhost:3000
 ## Deployment (Vercel)
 
 1. Create Supabase project and get DATABASE_URL.
-2. Set all environment variables in Vercel.
+2. Set all environment variables in Vercel, including DIRECT_URL.
 3. Run production migrations:
 
 ```bash
