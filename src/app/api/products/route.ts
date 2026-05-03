@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { productSchema } from "@/lib/validation";
+import { moveDraftImagesToProductFolder } from "@/lib/productImages";
 
 // GET /api/products — list all products with filters
 export async function GET(request: NextRequest) {
@@ -82,8 +83,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const product = await prisma.product.create({ data: parsed.data });
-    return NextResponse.json(product, { status: 201 });
+    const created = await prisma.product.create({
+      data: { ...parsed.data, images: [] },
+    });
+
+    try {
+      const finalizedImages = await moveDraftImagesToProductFolder(
+        parsed.data.images,
+        created.id
+      );
+
+      const product = await prisma.product.update({
+        where: { id: created.id },
+        data: { ...parsed.data, images: finalizedImages },
+      });
+
+      return NextResponse.json(product, { status: 201 });
+    } catch (error) {
+      await prisma.product.delete({ where: { id: created.id } });
+      throw error;
+    }
   } catch (error) {
     console.error("Create product error:", error);
     return NextResponse.json(

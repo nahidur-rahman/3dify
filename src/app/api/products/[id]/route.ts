@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { productUpdateSchema } from "@/lib/validation";
+import {
+  deleteProductImages,
+  moveDraftImagesToProductFolder,
+} from "@/lib/productImages";
 
 // GET /api/products/[id] — get single product
 export async function GET(
@@ -46,11 +50,33 @@ export async function PUT(
         { status: 400 }
       );
     }
+    const existing = await prisma.product.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    const updateData = { ...parsed.data };
+    if (updateData.images) {
+      updateData.images = await moveDraftImagesToProductFolder(
+        updateData.images,
+        params.id
+      );
+    }
 
     const product = await prisma.product.update({
       where: { id: params.id },
-      data: parsed.data,
+      data: updateData,
     });
+
+    if (updateData.images) {
+      const removedImages = existing.images.filter(
+        (url) => !updateData.images?.includes(url)
+      );
+      await deleteProductImages(removedImages);
+    }
 
     return NextResponse.json(product);
   } catch (error) {
@@ -73,6 +99,15 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const existing = await prisma.product.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    await deleteProductImages(existing.images);
     await prisma.product.delete({ where: { id: params.id } });
     return NextResponse.json({ success: true });
   } catch (error) {

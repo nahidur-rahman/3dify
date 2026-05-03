@@ -15,6 +15,9 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [imageUploading, setImageUploading] = useState(false);
+  const [uploadFolderKey, setUploadFolderKey] = useState(
+    product?.id || `draft-${crypto.randomUUID()}`
+  );
 
   const initialSizeOptions: ProductSizeOption[] =
     product?.sizeOptions && product.sizeOptions.length > 0
@@ -80,6 +83,7 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
     setImageUploading(true);
     const formData = new FormData();
     Array.from(files).forEach((file) => formData.append("files", file));
+    formData.append("folderKey", uploadFolderKey);
 
     try {
       const res = await fetch("/api/upload", {
@@ -88,8 +92,12 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
       });
       const data = await res.json();
       if (res.ok) {
+        if (typeof data.folderKey === "string" && data.folderKey.length > 0) {
+          setUploadFolderKey(data.folderKey);
+        }
         setForm((prev) => ({ ...prev, images: [...prev.images, ...data.urls] }));
       } else {
+        console.error("Image upload failed:", data);
         setError(data.error || "Upload failed");
       }
     } catch {

@@ -61,6 +61,9 @@
 ```env
 DATABASE_URL=
 DIRECT_URL=
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_STORAGE_BUCKET=product-images
 JWT_SECRET=
 
 ADMIN_EMAIL=
@@ -76,6 +79,7 @@ SEED_SAMPLE_PRODUCTS=true
 
 Notes:
 - JWT_SECRET should be a strong random value (minimum 32 characters).
+- SUPABASE_SERVICE_ROLE_KEY is required for server-side Storage upload/delete.
 - NEXT_PUBLIC_WHATSAPP format example: 8801XXXXXXXXX.
 
 ## Local development
@@ -127,16 +131,17 @@ Open http://localhost:3000
 
 ## Deployment (Vercel)
 
-1. Create Supabase project and get DATABASE_URL.
-2. Set all environment variables in Vercel, including DIRECT_URL.
-3. Run production migrations:
+1. Create Supabase project and get DATABASE_URL, DIRECT_URL, SUPABASE_URL, and SUPABASE_SERVICE_ROLE_KEY.
+2. Create the Storage bucket defined by SUPABASE_STORAGE_BUCKET (default: product-images).
+3. Set all environment variables in Vercel.
+4. Run production migrations:
 
 ```bash
 npx prisma migrate deploy
 ```
 
-4. Run seed for admin bootstrap.
-5. Verify:
+5. Run seed for admin bootstrap.
+6. Verify:
 - public pages load
 - admin login works
 - product CRUD works
