@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Category, Product, ProductSizeOption, SizeMode } from "@/lib/types";
 import { categoryLabels } from "@/lib/utils";
@@ -10,11 +10,18 @@ interface ProductFormProps {
   mode: "create" | "edit";
 }
 
+interface PendingImage {
+  id: string;
+  file: File;
+  previewUrl: string;
+}
+
 export default function ProductForm({ product, mode }: ProductFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [imageUploading, setImageUploading] = useState(false);
+  const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
   const [uploadFolderKey, setUploadFolderKey] = useState(
     product?.id || `draft-${crypto.randomUUID()}`
   );
@@ -41,6 +48,12 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
     inStock: product?.inStock ?? true,
     featured: product?.featured || false,
   });
+
+  useEffect(() => {
+    return () => {
+      pendingImages.forEach((image) => URL.revokeObjectURL(image.previewUrl));
+    };
+  }, [pendingImages]);
 
   const updateSizeOption = (
     index: number,
@@ -80,9 +93,23 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    const nextFiles = Array.from(files);
+    e.target.value = "";
+
+    if (mode === "edit") {
+      const stagedImages = nextFiles.map((file) => ({
+        id: crypto.randomUUID(),
+        file,
+        previewUrl: URL.createObjectURL(file),
+      }));
+
+      setPendingImages((prev) => [...prev, ...stagedImages]);
+      return;
+    }
+
     setImageUploading(true);
     const formData = new FormData();
-    Array.from(files).forEach((file) => formData.append("files", file));
+    nextFiles.forEach((file) => formData.append("files", file));
     formData.append("folderKey", uploadFolderKey);
 
     try {
@@ -114,6 +141,46 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
     }));
   };
 
+  const removePendingImage = (pendingImageId: string) => {
+    setPendingImages((prev) => {
+      const nextPendingImages = prev.filter((image) => image.id !== pendingImageId);
+      const removedImage = prev.find((image) => image.id === pendingImageId);
+      if (removedImage) {
+        URL.revokeObjectURL(removedImage.previewUrl);
+      }
+      return nextPendingImages;
+    });
+  };
+
+  const uploadPendingImages = async () => {
+    if (pendingImages.length === 0) return [];
+
+    setImageUploading(true);
+    const formData = new FormData();
+    pendingImages.forEach((image) => formData.append("files", image.file));
+    formData.append("folderKey", uploadFolderKey);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Upload failed");
+      }
+
+      if (typeof data.folderKey === "string" && data.folderKey.length > 0) {
+        setUploadFolderKey(data.folderKey);
+      }
+
+      return Array.isArray(data.urls) ? (data.urls as string[]) : [];
+    } finally {
+      setImageUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -124,11 +191,18 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
         mode === "create" ? "/api/products" : `/api/products/${product?.id}`;
       const method = mode === "create" ? "POST" : "PUT";
 
+      const images = [...form.images];
+      if (mode === "edit" && pendingImages.length > 0) {
+        const uploadedImages = await uploadPendingImages();
+        images.push(...uploadedImages);
+      }
+
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          images,
           price: Number(form.price),
           weight: Number(form.weight),
           infillPercentage: Number(form.infillPercentage),
@@ -149,6 +223,9 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
         setError(data.error || "Something went wrong");
         return;
       }
+
+      pendingImages.forEach((image) => URL.revokeObjectURL(image.previewUrl));
+      setPendingImages([]);
 
       router.push("/admin/products");
       router.refresh();
@@ -416,7 +493,7 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
         <div className="flex flex-wrap gap-3 mb-3">
           {form.images.map((url, i) => (
             <div
-              key={i}
+              key={`existing-${i}`}
               className="relative w-20 h-20 rounded-xl overflow-hidden bg-gray-100 dark:bg-dark-200 group"
             >
               <img src={url} alt="" className="w-full h-full object-cover" />
@@ -429,17 +506,34 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
               </button>
             </div>
           ))}
+          {pendingImages.map((image) => (
+            <div
+              key={image.id}
+              className="relative w-20 h-20 rounded-xl overflow-hidden bg-gray-100 dark:bg-dark-200 group"
+            >
+              <img src={image.previewUrl} alt="" className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => removePendingImage(image.id)}
+                className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
         </div>
         <input
           type="file"
           accept="image/*"
           multiple
           onChange={handleImageUpload}
-          disabled={imageUploading}
+          disabled={imageUploading || loading}
           className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 dark:file:bg-primary-500/10 file:text-primary-600 dark:file:text-primary-400 hover:file:bg-primary-100"
         />
         {imageUploading && (
-          <p className="text-sm text-primary-500 mt-1">Uploading...</p>
+          <p className="text-sm text-primary-500 mt-1">
+            {mode === "edit" ? "Uploading images..." : "Uploading..."}
+          </p>
         )}
       </div>
 
