@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { productSchema } from "@/lib/validation";
-import { moveDraftImagesToProductFolder } from "@/lib/productImages";
+import {
+  hydrateProductImages,
+  moveDraftImagesToProductFolder,
+  normalizeProductImages,
+} from "@/lib/productImages";
 
 // GET /api/products — list all products with filters
 export async function GET(request: NextRequest) {
@@ -49,7 +53,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     return NextResponse.json({
-      products,
+      products: products.map((product) => hydrateProductImages(product)),
       pagination: {
         page,
         limit,
@@ -83,13 +87,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const normalizedImages = normalizeProductImages(parsed.data.images);
+
     const created = await prisma.product.create({
       data: { ...parsed.data, images: [] },
     });
 
     try {
       const finalizedImages = await moveDraftImagesToProductFolder(
-        parsed.data.images,
+        normalizedImages,
         created.id
       );
 
@@ -98,7 +104,7 @@ export async function POST(request: NextRequest) {
         data: { ...parsed.data, images: finalizedImages },
       });
 
-      return NextResponse.json(product, { status: 201 });
+      return NextResponse.json(hydrateProductImages(product), { status: 201 });
     } catch (error) {
       await prisma.product.delete({ where: { id: created.id } });
       throw error;

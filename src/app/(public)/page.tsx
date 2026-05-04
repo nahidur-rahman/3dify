@@ -5,6 +5,7 @@ import ProductGrid from "@/components/ProductGrid";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { Product } from "@/lib/types";
+import { hydrateProductImages } from "@/lib/productImages";
 
 export default async function HomePage() {
   const whatsappReady = Boolean((process.env.NEXT_PUBLIC_WHATSAPP || "").trim());
@@ -12,11 +13,11 @@ export default async function HomePage() {
   // Fetch featured products
   let featuredProducts: Product[] = [];
   try {
-    featuredProducts = await prisma.product.findMany({
+    featuredProducts = (await prisma.product.findMany({
       where: { featured: true, inStock: true },
       take: 4,
       orderBy: { createdAt: "desc" },
-    });
+    })).map((product) => hydrateProductImages(product)) as Product[];
   } catch {
     // DB might not be connected yet - show empty state
   }

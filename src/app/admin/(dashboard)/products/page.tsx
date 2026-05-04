@@ -3,10 +3,12 @@ import { prisma } from "@/lib/db";
 import { formatPrice, categoryLabels } from "@/lib/utils";
 import DeleteProductButton from "./DeleteProductButton";
 import { HiOutlinePlusCircle, HiOutlinePencil } from "react-icons/hi";
+import { hydrateProductImages } from "@/lib/productImages";
 
 async function getProducts() {
   try {
-    return await prisma.product.findMany({ orderBy: { createdAt: "desc" } });
+    const products = await prisma.product.findMany({ orderBy: { createdAt: "desc" } });
+    return products.map((product) => hydrateProductImages(product));
   } catch {
     return [];
   }

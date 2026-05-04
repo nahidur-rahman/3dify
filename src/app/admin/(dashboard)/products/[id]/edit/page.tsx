@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import ProductForm from "@/components/ProductForm";
 import { Product } from "@/lib/types";
+import { hydrateProductImages } from "@/lib/productImages";
 
 interface EditProductPageProps {
   params: { id: string };
@@ -9,7 +10,8 @@ interface EditProductPageProps {
 
 async function getProduct(id: string) {
   try {
-    return await prisma.product.findUnique({ where: { id } });
+    const product = await prisma.product.findUnique({ where: { id } });
+    return product ? hydrateProductImages(product) : null;
   } catch {
     return null;
   }

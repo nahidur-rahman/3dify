@@ -4,6 +4,7 @@ import ProductGrid from "@/components/ProductGrid";
 import SearchFilter from "@/components/SearchFilter";
 import { prisma } from "@/lib/db";
 import { Product } from "@/lib/types";
+import { hydrateProductImages } from "@/lib/productImages";
 
 export const metadata: Metadata = {
   title: "Products",
@@ -50,7 +51,7 @@ async function getProducts(searchParams: ProductsPageProps["searchParams"]) {
     ]);
 
     return {
-      products: products as unknown as Product[],
+      products: products.map((product) => hydrateProductImages(product)) as Product[],
       totalPages: Math.ceil(total / limit),
       currentPage: parseInt(page),
     };

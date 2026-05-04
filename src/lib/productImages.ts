@@ -23,6 +23,39 @@ function buildPublicUrl(path: string) {
   return data.publicUrl;
 }
 
+function normalizeStoragePath(imageRef: string) {
+  const trimmed = imageRef.trim();
+  if (!trimmed) return null;
+
+  if (isUrlInBucket(trimmed)) {
+    return extractStoragePathFromUrl(trimmed);
+  }
+
+  return trimmed.replace(/^\/+/, "") || null;
+}
+
+function resolveDisplayUrl(imageRef: string) {
+  if (isUrlInBucket(imageRef)) {
+    return imageRef;
+  }
+
+  const storagePath = normalizeStoragePath(imageRef);
+  return storagePath ? buildPublicUrl(storagePath) : imageRef;
+}
+
+export function hydrateProductImages<T extends { images: string[] }>(item: T) {
+  return {
+    ...item,
+    images: item.images.map((imageRef) => resolveDisplayUrl(imageRef)),
+  };
+}
+
+export function normalizeProductImages(imageRefs: string[]) {
+  return imageRefs
+    .map((imageRef) => normalizeStoragePath(imageRef))
+    .filter((imageRef): imageRef is string => Boolean(imageRef));
+}
+
 export function getProductFolderPath(folderKey: string) {
   ensureFolderKey(folderKey);
   return `${PRODUCT_FOLDER_PREFIX}/${folderKey}`;
@@ -86,7 +119,7 @@ export async function uploadProductImage(file: File, folderKey: string) {
 
 export async function deleteProductImages(imageUrls: string[]) {
   const paths = imageUrls
-    .map((url) => extractStoragePathFromUrl(url))
+    .map((url) => normalizeStoragePath(url))
     .filter((path): path is string => Boolean(path));
 
   if (paths.length === 0) return;
@@ -106,12 +139,14 @@ export async function moveDraftImagesToProductFolder(
 ) {
   const targetFolder = getProductFolderPath(productId);
   const supabase = getSupabaseAdmin();
-  const nextUrls = [...imageUrls];
+  const nextPaths = imageUrls
+    .map((imageRef) => normalizeStoragePath(imageRef))
+    .filter((path): path is string => Boolean(path));
   const copiedPaths: string[] = [];
 
   for (let i = 0; i < imageUrls.length; i += 1) {
     const imageUrl = imageUrls[i];
-    const sourcePath = extractStoragePathFromUrl(imageUrl);
+    const sourcePath = normalizeStoragePath(imageUrl);
 
     if (!sourcePath || !sourcePath.startsWith(`${PRODUCT_FOLDER_PREFIX}/${DRAFT_FOLDER_PREFIX}-`)) {
       continue;
@@ -133,7 +168,7 @@ export async function moveDraftImagesToProductFolder(
     }
 
     copiedPaths.push(sourcePath);
-    nextUrls[i] = buildPublicUrl(destinationPath);
+    nextPaths[i] = destinationPath;
   }
 
   if (copiedPaths.length > 0) {
@@ -146,5 +181,5 @@ export async function moveDraftImagesToProductFolder(
     }
   }
 
-  return nextUrls;
+  return nextPaths;
 }

@@ -10,6 +10,7 @@ import {
 import ContactButtons from "@/components/ContactButtons";
 import ProductGrid from "@/components/ProductGrid";
 import { Product } from "@/lib/types";
+import { hydrateProductImages } from "@/lib/productImages";
 import { HiCube, HiColorSwatch, HiScale, HiTemplate } from "react-icons/hi";
 
 interface ProductDetailPageProps {
@@ -19,7 +20,7 @@ interface ProductDetailPageProps {
 async function getProduct(id: string) {
   try {
     const product = await prisma.product.findUnique({ where: { id } });
-    return product;
+    return product ? hydrateProductImages(product) : null;
   } catch {
     return null;
   }
@@ -39,7 +40,7 @@ async function getRelatedProducts(
       take: 4,
       orderBy: { createdAt: "desc" },
     });
-    return products as unknown as Product[];
+    return products.map((product) => hydrateProductImages(product)) as Product[];
   } catch {
     return [];
   }

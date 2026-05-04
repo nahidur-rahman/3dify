@@ -4,7 +4,9 @@ import { getSession } from "@/lib/auth";
 import { productUpdateSchema } from "@/lib/validation";
 import {
   deleteProductImages,
+  hydrateProductImages,
   moveDraftImagesToProductFolder,
+  normalizeProductImages,
 } from "@/lib/productImages";
 
 // GET /api/products/[id] — get single product
@@ -21,7 +23,7 @@ export async function GET(
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    return NextResponse.json(product);
+    return NextResponse.json(hydrateProductImages(product));
   } catch (error) {
     console.error("Get product error:", error);
     return NextResponse.json(
@@ -60,6 +62,7 @@ export async function PUT(
 
     const updateData = { ...parsed.data };
     if (updateData.images) {
+      updateData.images = normalizeProductImages(updateData.images);
       updateData.images = await moveDraftImagesToProductFolder(
         updateData.images,
         params.id
@@ -78,7 +81,7 @@ export async function PUT(
       await deleteProductImages(removedImages);
     }
 
-    return NextResponse.json(product);
+    return NextResponse.json(hydrateProductImages(product));
   } catch (error) {
     console.error("Update product error:", error);
     return NextResponse.json(
