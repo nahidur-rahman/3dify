@@ -13,11 +13,13 @@ export default async function HomePage() {
   // Fetch featured products
   let featuredProducts: Product[] = [];
   try {
-    featuredProducts = (await prisma.product.findMany({
+    featuredProducts = await prisma.product
+      .findMany({
       where: { featured: true, inStock: true },
       take: 4,
       orderBy: { createdAt: "desc" },
-    })).map((product) => hydrateProductImages(product)) as Product[];
+      })
+      .then((products) => products.map((product) => hydrateProductImages(product)));
   } catch {
     // DB might not be connected yet - show empty state
   }

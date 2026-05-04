@@ -1,4 +1,5 @@
 import { getSupabaseAdmin, productImageBucket } from "@/lib/supabaseAdmin";
+import type { Product, ProductSizeOption } from "@/lib/types";
 
 const PRODUCT_FOLDER_PREFIX = "products";
 const DRAFT_FOLDER_PREFIX = "draft";
@@ -43,11 +44,38 @@ function resolveDisplayUrl(imageRef: string) {
   return storagePath ? buildPublicUrl(storagePath) : imageRef;
 }
 
-export function hydrateProductImages<T extends { images: string[] }>(item: T) {
+function normalizeSizeOptions(
+  sizeOptions: unknown
+): ProductSizeOption[] | undefined {
+  if (!Array.isArray(sizeOptions)) return undefined;
+
+  const normalized = sizeOptions
+    .map((option) => {
+      if (!option || typeof option !== "object") return null;
+
+      const label = (option as { label?: unknown }).label;
+      const price = (option as { price?: unknown }).price;
+
+      if (typeof label !== "string" || typeof price !== "number") {
+        return null;
+      }
+
+      return { label, price };
+    })
+    .filter((option): option is ProductSizeOption => Boolean(option));
+
+  return normalized.length > 0 ? normalized : undefined;
+}
+
+export function hydrateProductImages(item: {
+  images: string[];
+  sizeOptions?: unknown;
+}): Product {
   return {
     ...item,
     images: item.images.map((imageRef) => resolveDisplayUrl(imageRef)),
-  };
+    sizeOptions: normalizeSizeOptions(item.sizeOptions),
+  } as Product;
 }
 
 export function normalizeProductImages(imageRefs: string[]) {

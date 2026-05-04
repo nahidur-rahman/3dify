@@ -40,7 +40,7 @@ async function getRelatedProducts(
       take: 4,
       orderBy: { createdAt: "desc" },
     });
-    return products.map((product) => hydrateProductImages(product)) as Product[];
+    return products.map((product) => hydrateProductImages(product));
   } catch {
     return [];
   }

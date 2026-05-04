@@ -51,7 +51,7 @@ async function getProducts(searchParams: ProductsPageProps["searchParams"]) {
     ]);
 
     return {
-      products: products.map((product) => hydrateProductImages(product)) as Product[],
+      products: products.map((product) => hydrateProductImages(product)),
       totalPages: Math.ceil(total / limit),
       currentPage: parseInt(page),
     };
