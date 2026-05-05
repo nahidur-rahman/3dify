@@ -33,8 +33,8 @@ export default function AdminDashboardLoading() {
 
       <div className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 p-6">
         <Skeleton className="h-6 w-32 mb-4" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {Array.from({ length: 2 }).map((_, index) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={index}
               className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-dark-200"

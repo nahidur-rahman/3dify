@@ -1,0 +1,68 @@
+import { NextRequest, NextResponse } from "next/server";
+import { hash } from "bcryptjs";
+import { prisma } from "@/lib/db";
+import { getSession } from "@/lib/auth";
+import { adminCreateSchema } from "@/lib/validation";
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const currentAdmin = await prisma.admin.findUnique({
+      where: { id: session.id },
+      select: { id: true },
+    });
+
+    if (!currentAdmin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const parsed = adminCreateSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid input", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const existingAdmin = await prisma.admin.findUnique({
+      where: { email: parsed.data.email },
+      select: { id: true },
+    });
+
+    if (existingAdmin) {
+      return NextResponse.json(
+        { error: "An admin with that email already exists." },
+        { status: 409 }
+      );
+    }
+
+    const passwordHash = await hash(parsed.data.password, 12);
+
+    const admin = await prisma.admin.create({
+      data: {
+        name: parsed.data.name,
+        email: parsed.data.email,
+        password: passwordHash,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        createdAt: true,
+      },
+    });
+
+    return NextResponse.json({ success: true, admin }, { status: 201 });
+  } catch (error) {
+    console.error("Create admin error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

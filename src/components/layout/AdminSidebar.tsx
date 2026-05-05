@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { BsPrinter } from "react-icons/bs";
-import { HiOutlineHome, HiOutlineCube, HiOutlinePlusCircle, HiOutlineLogout } from "react-icons/hi";
+import {
+  HiOutlineHome,
+  HiOutlineCube,
+  HiOutlinePlusCircle,
+  HiOutlineLogout,
+  HiOutlineUsers,
+} from "react-icons/hi";
 
 interface AdminSidebarProps {
   adminName: string;
@@ -16,6 +22,7 @@ export default function AdminSidebar({ adminName }: AdminSidebarProps) {
   const links = [
     { href: "/admin", label: "Dashboard", icon: HiOutlineHome },
     { href: "/admin/products", label: "Products", icon: HiOutlineCube },
+    { href: "/admin/admins", label: "Admins", icon: HiOutlineUsers },
     { href: "/admin/products/new", label: "Add Product", icon: HiOutlinePlusCircle },
   ];
 

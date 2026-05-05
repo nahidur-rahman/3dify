@@ -10,6 +10,18 @@ export const loginSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
+export const adminCreateSchema = z
+  .object({
+    name: z.string().min(1, "Admin name is required").max(100),
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(8, "Confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
 export const productSchema = z.object({
   name: z.string().min(1, "Product name is required").max(200),
   description: z.string().min(1, "Description is required"),
@@ -31,5 +43,6 @@ export const productSchema = z.object({
 export const productUpdateSchema = productSchema.partial();
 
 export type LoginInput = z.infer<typeof loginSchema>;
+export type AdminCreateInput = z.infer<typeof adminCreateSchema>;
 export type ProductInput = z.infer<typeof productSchema>;
 export type ProductUpdateInput = z.infer<typeof productUpdateSchema>;

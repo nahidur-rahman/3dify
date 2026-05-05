@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { HiOutlineCube, HiOutlineStar, HiOutlineTag, HiOutlinePlusCircle } from "react-icons/hi";
+import {
+  HiOutlineCube,
+  HiOutlineStar,
+  HiOutlineTag,
+  HiOutlinePlusCircle,
+  HiOutlineUserAdd,
+} from "react-icons/hi";
 
 async function getStats() {
   try {
@@ -90,7 +96,7 @@ export default async function AdminDashboardPage() {
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Quick Actions
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Link
             href="/admin/products"
             className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-dark-200 hover:bg-gray-100 dark:hover:bg-dark-300 transition-colors"
@@ -116,6 +122,20 @@ export default async function AdminDashboardPage() {
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Create a new 3D printed product listing
+              </p>
+            </div>
+          </Link>
+          <Link
+            href="/admin/admins"
+            className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-dark-200 hover:bg-gray-100 dark:hover:bg-dark-300 transition-colors"
+          >
+            <HiOutlineUserAdd className="w-8 h-8 text-primary-500" />
+            <div>
+              <p className="font-medium text-gray-900 dark:text-white">
+                Manage Admins
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Add or review admin accounts
               </p>
             </div>
           </Link>
