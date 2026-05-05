@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Category, Product, ProductSizeOption, SizeMode } from "@/lib/types";
@@ -496,7 +497,13 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
               key={`existing-${i}`}
               className="relative w-20 h-20 rounded-xl overflow-hidden bg-gray-100 dark:bg-dark-200 group"
             >
-              <img src={url} alt="" className="w-full h-full object-cover" />
+              <Image
+                src={url}
+                alt=""
+                fill
+                sizes="80px"
+                className="object-cover"
+              />
               <button
                 type="button"
                 onClick={() => removeImage(i)}
@@ -511,7 +518,11 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
               key={image.id}
               className="relative w-20 h-20 rounded-xl overflow-hidden bg-gray-100 dark:bg-dark-200 group"
             >
-              <img src={image.previewUrl} alt="" className="w-full h-full object-cover" />
+              <div
+                className="w-full h-full bg-cover bg-center"
+                style={{ backgroundImage: `url(${image.previewUrl})` }}
+                aria-hidden="true"
+              />
               <button
                 type="button"
                 onClick={() => removePendingImage(image.id)}

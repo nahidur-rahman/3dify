@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { Suspense, cache } from "react";
 import { prisma } from "@/lib/db";
 import {
   calculateDiscountedPrice,
@@ -17,14 +18,14 @@ interface ProductDetailPageProps {
   params: { id: string };
 }
 
-async function getProduct(id: string) {
+const getProduct = cache(async (id: string) => {
   try {
     const product = await prisma.product.findUnique({ where: { id } });
     return product ? hydrateProductImages(product) : null;
   } catch {
     return null;
   }
-}
+});
 
 async function getRelatedProducts(
   productId: string,
@@ -46,6 +47,27 @@ async function getRelatedProducts(
   }
 }
 
+async function RelatedProductsSection({
+  relatedProductsPromise,
+}: {
+  relatedProductsPromise: Promise<Product[]>;
+}) {
+  const relatedProducts = await relatedProductsPromise;
+
+  if (relatedProducts.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="mt-16">
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        Related Products
+      </h2>
+      <ProductGrid products={relatedProducts} />
+    </section>
+  );
+}
+
 export async function generateMetadata({
   params,
 }: ProductDetailPageProps): Promise<Metadata> {
@@ -63,7 +85,7 @@ export default async function ProductDetailPage({
   const product = await getProduct(params.id);
   if (!product) notFound();
 
-  const relatedProducts = await getRelatedProducts(product.id, product.category);
+  const relatedProductsPromise = getRelatedProducts(product.id, product.category);
   const sizeOptionPrices = product.sizeOptions?.map((option) => option.price) ?? [];
   const startingPrice =
     sizeOptionPrices.length > 0 ? Math.min(...sizeOptionPrices) : product.price;
@@ -226,15 +248,9 @@ export default async function ProductDetailPage({
         </div>
       </div>
 
-      {/* Related Products */}
-      {relatedProducts.length > 0 && (
-        <section className="mt-16">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-            Related Products
-          </h2>
-          <ProductGrid products={relatedProducts} />
-        </section>
-      )}
+      <Suspense fallback={null}>
+        <RelatedProductsSection relatedProductsPromise={relatedProductsPromise} />
+      </Suspense>
     </div>
   );
 }
