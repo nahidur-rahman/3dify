@@ -1,17 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "fallback-secret-do-not-use-in-production"
-);
-
-const COOKIE_NAME = "admin-token";
-
-export interface AdminPayload {
-  id: string;
-  email: string;
-  name: string;
-}
+import { ADMIN_TOKEN_COOKIE, AdminPayload, JWT_SECRET } from "@/lib/authConfig";
 
 export async function signToken(payload: AdminPayload): Promise<string> {
   return new SignJWT({ ...payload })
@@ -32,14 +21,14 @@ export async function verifyToken(token: string): Promise<AdminPayload | null> {
 
 export async function getSession(): Promise<AdminPayload | null> {
   const cookieStore = cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
+  const token = cookieStore.get(ADMIN_TOKEN_COOKIE)?.value;
   if (!token) return null;
   return verifyToken(token);
 }
 
 export function setSessionCookie(token: string) {
   const cookieStore = cookies();
-  cookieStore.set(COOKIE_NAME, token, {
+  cookieStore.set(ADMIN_TOKEN_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -50,5 +39,5 @@ export function setSessionCookie(token: string) {
 
 export function clearSessionCookie() {
   const cookieStore = cookies();
-  cookieStore.delete(COOKIE_NAME);
+  cookieStore.delete(ADMIN_TOKEN_COOKIE);
 }
