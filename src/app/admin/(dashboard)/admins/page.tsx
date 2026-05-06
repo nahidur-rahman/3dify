@@ -1,4 +1,4 @@
-import { headers } from "next/headers";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import AdminForm from "@/components/AdminForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -16,7 +16,8 @@ async function getAdmins() {
 }
 
 export default async function AdminsPage() {
-  const adminName = headers().get("x-admin-name") || "Admin";
+  const session = await getSession();
+  const adminName = session?.name || "Admin";
   const admins = await getAdmins();
 
   return (

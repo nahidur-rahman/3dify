@@ -1,13 +1,13 @@
-import { headers } from "next/headers";
+import { getSession } from "@/lib/auth";
 import AdminSidebar from "@/components/layout/AdminSidebar";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const requestHeaders = headers();
-  const adminName = requestHeaders.get("x-admin-name") || "Admin";
+  const session = await getSession();
+  const adminName = session?.name || "Admin";
 
   return (
     <div className="flex min-h-[calc(100vh-64px)]">
