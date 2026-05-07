@@ -10,21 +10,20 @@ function shouldSeedSampleProducts() {
 async function main() {
   console.log("🌱 Seeding database...");
 
-  // Create admin
   const adminPassword = await hash(process.env.ADMIN_PASSWORD || "admin123", 12);
-  const admin = await prisma.admin.upsert({
-    where: { email: process.env.ADMIN_EMAIL || "admin@3difybd.com" },
-    update: {
-      password: adminPassword,
-      name: "Admin",
-    },
-    create: {
-      email: process.env.ADMIN_EMAIL || "admin@3difybd.com",
-      password: adminPassword,
-      name: "Admin",
-    },
+  const admin = await prisma.$transaction(async (tx) => {
+    await tx.admin.deleteMany();
+
+    return tx.admin.create({
+      data: {
+        email: process.env.ADMIN_EMAIL || "admin@3difybd.com",
+        password: adminPassword,
+        name: "Admin",
+        role: "SUPER",
+      },
+    });
   });
-  console.log(`✅ Admin created: ${admin.email}`);
+  console.log(`✅ SUPER admin created: ${admin.email}`);
 
   if (!shouldSeedSampleProducts()) {
     console.log("ℹ️ Skipping sample products (SEED_SAMPLE_PRODUCTS=false)");
