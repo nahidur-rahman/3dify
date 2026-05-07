@@ -3,6 +3,7 @@
 
 export type Category = "FIGURINE" | "PHONE_CASE" | "HOME_DECOR" | "CUSTOM";
 export type SizeMode = "FIXED" | "OPTIONS";
+export type AdminRole = "SUPER" | "ADMIN";
 
 export interface ProductSizeOption {
   label: string;
@@ -34,6 +35,7 @@ export interface Admin {
   id: string;
   email: string;
   name: string;
+  role: AdminRole;
 }
 
 export interface ProductsResponse {
