@@ -2,19 +2,18 @@
 -- Run this in the Supabase SQL editor after the schema migration.
 -- It is idempotent: it removes prior sample rows by name/category, then reinserts them.
 
--- Upsert admin (password is bcrypt-hashed for the current seed password)
-INSERT INTO "admins" ("id", "email", "password", "name", "createdAt")
+-- Reset admins, then insert the initial SUPER admin.
+DELETE FROM "admins";
+
+INSERT INTO "admins" ("id", "email", "password", "name", "role", "createdAt")
 VALUES (
   'admin_3dify_bd',
   'admin@3difybd.com',
   '$2b$12$hQFu270I6fq5Di9hy4rUUuUV7aHqN2rr5mJoWc6mVWhpyCHrPHcwC',
   'Admin',
+  'SUPER',
   NOW()
-)
-ON CONFLICT ("email") DO UPDATE
-SET
-  "password" = EXCLUDED."password",
-  "name" = EXCLUDED."name";
+);
 
 -- Remove any previous sample rows so this script can be rerun safely.
 DELETE FROM "products"
