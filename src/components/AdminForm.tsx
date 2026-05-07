@@ -77,7 +77,7 @@ export default function AdminForm() {
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="rounded-xl border border-primary-500/20 bg-primary-500/5 px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
-          Only authenticated admins can access this page. New admins are enabled immediately after creation.
+          Only SUPER admins can create new admin accounts. New accounts are created with the ADMIN role.
         </div>
 
         {error && (

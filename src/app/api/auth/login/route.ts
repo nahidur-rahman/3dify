@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      admin: { id: admin.id, email: admin.email, name: admin.name },
+      admin: { id: admin.id, email: admin.email, name: admin.name, role: admin.role },
     });
   } catch (error) {
     console.error("Login error:", error);

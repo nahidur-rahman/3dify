@@ -1,23 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/db";
-import { getSession } from "@/lib/auth";
+import { getCurrentAdmin } from "@/lib/adminSession";
 import { adminCreateSchema } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const currentAdmin = await getCurrentAdmin();
+    if (!currentAdmin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const currentAdmin = await prisma.admin.findUnique({
-      where: { id: session.id },
-      select: { id: true },
-    });
-
-    if (!currentAdmin) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (currentAdmin.role !== "SUPER") {
+      return NextResponse.json(
+        { error: "Only SUPER admins can create admin accounts." },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();
@@ -48,11 +46,13 @@ export async function POST(request: NextRequest) {
         name: parsed.data.name,
         email: parsed.data.email,
         password: passwordHash,
+        role: "ADMIN",
       },
       select: {
         id: true,
         name: true,
         email: true,
+        role: true,
         createdAt: true,
       },
     });

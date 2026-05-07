@@ -10,12 +10,14 @@ import {
   HiOutlineLogout,
   HiOutlineUsers,
 } from "react-icons/hi";
+import type { AdminRole } from "@/lib/types";
 
 interface AdminSidebarProps {
   adminName: string;
+  adminRole: AdminRole;
 }
 
-export default function AdminSidebar({ adminName }: AdminSidebarProps) {
+export default function AdminSidebar({ adminName, adminRole }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -45,6 +47,15 @@ export default function AdminSidebar({ adminName }: AdminSidebarProps) {
               Admin Panel
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">{adminName}</p>
+            <span
+              className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-[0.18em] ${
+                adminRole === "SUPER"
+                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-300"
+                  : "bg-slate-500/10 text-slate-600 dark:text-slate-300"
+              }`}
+            >
+              {adminRole === "SUPER" ? "SUPER ADMIN" : "ADMIN"}
+            </span>
           </div>
         </div>
       </div>

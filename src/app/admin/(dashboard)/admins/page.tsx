@@ -1,5 +1,5 @@
-import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { getCurrentAdmin } from "@/lib/adminSession";
 import AdminForm from "@/components/AdminForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
@@ -9,6 +9,7 @@ async function getAdmins() {
       id: true,
       name: true,
       email: true,
+      role: true,
       createdAt: true,
     },
     orderBy: { createdAt: "desc" },
@@ -16,9 +17,11 @@ async function getAdmins() {
 }
 
 export default async function AdminsPage() {
-  const session = await getSession();
-  const adminName = session?.name || "Admin";
-  const admins = await getAdmins();
+  const [currentAdmin, admins] = await Promise.all([getCurrentAdmin(), getAdmins()]);
+
+  const adminName = currentAdmin?.name || "Admin";
+  const adminRole = currentAdmin?.role === "SUPER" ? "SUPER" : "ADMIN";
+  const canCreateAdmins = adminRole === "SUPER";
 
   return (
     <div className="space-y-8">
@@ -28,16 +31,32 @@ export default async function AdminsPage() {
             Admins
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Create and review administrator accounts.
+            Review administrator accounts. Only SUPER admins can create new ones.
           </p>
         </div>
         <div className="inline-flex items-center gap-2 rounded-full border border-primary-500/20 bg-primary-500/5 px-4 py-2 text-sm text-primary-500">
           Signed in as {adminName}
+          <span className="rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-semibold tracking-[0.18em] text-primary-500 dark:bg-dark-100/80 dark:text-primary-300">
+            {adminRole === "SUPER" ? "SUPER ADMIN" : "ADMIN"}
+          </span>
         </div>
       </div>
 
       <div className="grid gap-8 xl:grid-cols-[0.95fr_1.05fr]">
-        <AdminForm />
+        {canCreateAdmins ? (
+          <AdminForm />
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Admin Creation</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
+                Only SUPER admins can create new admin accounts. Request access from a SUPER admin when a new ADMIN is needed.
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="h-fit">
           <CardHeader>
@@ -55,6 +74,7 @@ export default async function AdminsPage() {
                     <tr className="border-b border-gray-200 dark:border-dark-200 text-left text-sm text-gray-500 dark:text-gray-400">
                       <th className="px-4 py-3 font-medium">Name</th>
                       <th className="px-4 py-3 font-medium">Email</th>
+                      <th className="px-4 py-3 font-medium">Role</th>
                       <th className="px-4 py-3 font-medium">Created</th>
                     </tr>
                   </thead>
@@ -71,6 +91,17 @@ export default async function AdminsPage() {
                         </td>
                         <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
                           {admin.email}
+                        </td>
+                        <td className="px-4 py-4 text-sm">
+                          <span
+                            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold tracking-[0.16em] ${
+                              admin.role === "SUPER"
+                                ? "bg-amber-500/10 text-amber-600 dark:text-amber-300"
+                                : "bg-slate-500/10 text-slate-600 dark:text-slate-300"
+                            }`}
+                          >
+                            {admin.role}
+                          </span>
                         </td>
                         <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
                           {admin.createdAt.toLocaleDateString("en-US", {
