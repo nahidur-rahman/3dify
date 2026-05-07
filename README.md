@@ -126,7 +126,7 @@ Open http://localhost:3000
 
 ## Seed behavior
 
-- Admin is created/upserted using ADMIN_EMAIL and ADMIN_PASSWORD.
+- Seed resets the admins table and recreates the initial SUPER admin using ADMIN_EMAIL and ADMIN_PASSWORD.
 - Sample products can be controlled by SEED_SAMPLE_PRODUCTS.
 
 ## Deployment (Vercel)
