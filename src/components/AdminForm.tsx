@@ -92,16 +92,18 @@ export default function AdminForm() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} autoComplete="off" className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Name
             </label>
             <Input
+              name="admin-name"
               type="text"
               value={form.name}
               onChange={handleChange("name")}
               required
+              autoComplete="off"
               placeholder="Admin name"
             />
           </div>
@@ -111,10 +113,12 @@ export default function AdminForm() {
               Email
             </label>
             <Input
+              name="admin-email"
               type="email"
               value={form.email}
               onChange={handleChange("email")}
               required
+              autoComplete="off"
               placeholder="new-admin@3difybd.com"
             />
           </div>
@@ -124,11 +128,13 @@ export default function AdminForm() {
               Password
             </label>
             <Input
+              name="admin-password"
               type="password"
               value={form.password}
               onChange={handleChange("password")}
               required
               minLength={8}
+              autoComplete="new-password"
               placeholder="At least 8 characters"
             />
           </div>
@@ -138,11 +144,13 @@ export default function AdminForm() {
               Confirm Password
             </label>
             <Input
+              name="admin-confirm-password"
               type="password"
               value={form.confirmPassword}
               onChange={handleChange("confirmPassword")}
               required
               minLength={8}
+              autoComplete="new-password"
               placeholder="Re-enter the password"
             />
           </div>
