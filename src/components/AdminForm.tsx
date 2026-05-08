@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  HiOutlineCheck,
   HiOutlineEye,
   HiOutlineEyeOff,
   HiOutlineX,
@@ -12,7 +11,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import {
-  getPasswordRequirementChecks,
+  getStrongPasswordWarning,
   isStrongPassword,
   STRONG_PASSWORD_MESSAGE,
 } from "@/lib/validation";
@@ -30,7 +29,8 @@ export default function AdminForm() {
     password: "",
     confirmPassword: "",
   });
-  const passwordRequirements = getPasswordRequirementChecks(form.password);
+  const passwordWarning =
+    form.password.length > 0 ? getStrongPasswordWarning(form.password) : "";
   const showPasswordMatchFeedback = form.confirmPassword.length > 0;
   const passwordsMatch = form.password === form.confirmPassword;
   const canCreateAdmin = Boolean(
@@ -190,30 +190,12 @@ export default function AdminForm() {
                 )}
               </button>
             </div>
-            <div className="mt-2 space-y-1">
-              <p className="text-[11px] leading-4 text-red-500">
-                {STRONG_PASSWORD_MESSAGE}
+            {passwordWarning && (
+              <p className="mt-2 flex items-center gap-1 text-[11px] leading-4 text-red-500">
+                <HiOutlineX className="h-3.5 w-3.5 shrink-0" />
+                <span>{passwordWarning}</span>
               </p>
-              <div className="flex flex-wrap gap-2 text-[11px]">
-                {passwordRequirements.map((requirement) => (
-                  <span
-                    key={requirement.key}
-                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium ${
-                      requirement.met
-                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                        : "bg-gray-100 text-gray-500 dark:bg-dark-200 dark:text-gray-400"
-                    }`}
-                  >
-                    {requirement.met ? (
-                      <HiOutlineCheck className="h-3.5 w-3.5 shrink-0" />
-                    ) : (
-                      <HiOutlineX className="h-3.5 w-3.5 shrink-0" />
-                    )}
-                    <span>{requirement.label}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
 
           <div>
@@ -246,22 +228,12 @@ export default function AdminForm() {
                 )}
               </button>
             </div>
-            {showPasswordMatchFeedback && (
+            {showPasswordMatchFeedback && !passwordsMatch && (
               <p
-                className={`mt-2 flex items-center gap-1 text-[11px] leading-4 ${
-                  passwordsMatch
-                    ? "text-emerald-600 dark:text-emerald-400"
-                    : "text-red-500"
-                }`}
+                className="mt-2 flex items-center gap-1 text-[11px] leading-4 text-red-500"
               >
-                {passwordsMatch ? (
-                  <HiOutlineCheck className="h-3.5 w-3.5 shrink-0" />
-                ) : (
-                  <HiOutlineX className="h-3.5 w-3.5 shrink-0" />
-                )}
-                <span>
-                  {passwordsMatch ? "Passwords match" : "Passwords do not match"}
-                </span>
+                <HiOutlineX className="h-3.5 w-3.5 shrink-0" />
+                <span>Passwords do not match</span>
               </p>
             )}
           </div>
