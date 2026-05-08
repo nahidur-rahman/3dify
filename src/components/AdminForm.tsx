@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -11,6 +12,8 @@ export default function AdminForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -127,32 +130,64 @@ export default function AdminForm() {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Password
             </label>
-            <Input
-              name="admin-password"
-              type="password"
-              value={form.password}
-              onChange={handleChange("password")}
-              required
-              minLength={8}
-              autoComplete="new-password"
-              placeholder="At least 8 characters"
-            />
+            <div className="relative">
+              <Input
+                name="admin-password"
+                type={showPassword ? "text" : "password"}
+                value={form.password}
+                onChange={handleChange("password")}
+                required
+                minLength={8}
+                autoComplete="new-password"
+                placeholder="At least 8 characters"
+                className="pr-12"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+              >
+                {showPassword ? (
+                  <HiOutlineEyeOff className="h-5 w-5" />
+                ) : (
+                  <HiOutlineEye className="h-5 w-5" />
+                )}
+              </button>
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Confirm Password
             </label>
-            <Input
-              name="admin-confirm-password"
-              type="password"
-              value={form.confirmPassword}
-              onChange={handleChange("confirmPassword")}
-              required
-              minLength={8}
-              autoComplete="new-password"
-              placeholder="Re-enter the password"
-            />
+            <div className="relative">
+              <Input
+                name="admin-confirm-password"
+                type={showConfirmPassword ? "text" : "password"}
+                value={form.confirmPassword}
+                onChange={handleChange("confirmPassword")}
+                required
+                minLength={8}
+                autoComplete="new-password"
+                placeholder="Re-enter the password"
+                className="pr-12"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                aria-pressed={showConfirmPassword}
+              >
+                {showConfirmPassword ? (
+                  <HiOutlineEyeOff className="h-5 w-5" />
+                ) : (
+                  <HiOutlineEye className="h-5 w-5" />
+                )}
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center gap-3 pt-1">
