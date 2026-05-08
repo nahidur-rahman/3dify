@@ -2,10 +2,20 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
+import {
+  HiOutlineCheck,
+  HiOutlineEye,
+  HiOutlineEyeOff,
+  HiOutlineX,
+} from "react-icons/hi";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import {
+  getPasswordRequirementChecks,
+  isStrongPassword,
+  STRONG_PASSWORD_MESSAGE,
+} from "@/lib/validation";
 
 export default function AdminForm() {
   const router = useRouter();
@@ -20,6 +30,7 @@ export default function AdminForm() {
     password: "",
     confirmPassword: "",
   });
+  const passwordRequirements = getPasswordRequirementChecks(form.password);
 
   const handleChange =
     (field: keyof typeof form) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,6 +41,11 @@ export default function AdminForm() {
     event.preventDefault();
     setError("");
     setSuccess("");
+
+    if (!isStrongPassword(form.password)) {
+      setError(STRONG_PASSWORD_MESSAGE);
+      return;
+    }
 
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match.");
@@ -54,7 +70,13 @@ export default function AdminForm() {
       }
 
       if (!res.ok) {
-        setError(data.error || "Failed to create admin");
+        const backendError =
+          data?.details?.fieldErrors?.password?.[0] ||
+          data?.details?.fieldErrors?.confirmPassword?.[0] ||
+          data?.details?.fieldErrors?.name?.[0] ||
+          data?.details?.fieldErrors?.email?.[0];
+
+        setError(backendError || data.error || "Failed to create admin");
         return;
       }
 
@@ -65,6 +87,8 @@ export default function AdminForm() {
         password: "",
         confirmPassword: "",
       });
+      setShowPassword(false);
+      setShowConfirmPassword(false);
       router.refresh();
     } catch {
       setError("Something went wrong. Please try again.");
@@ -155,6 +179,30 @@ export default function AdminForm() {
                   <HiOutlineEye className="h-5 w-5" />
                 )}
               </button>
+            </div>
+            <div className="mt-2 space-y-1">
+              <p className="text-[11px] leading-4 text-red-500">
+                {STRONG_PASSWORD_MESSAGE}
+              </p>
+              <div className="flex flex-wrap gap-2 text-[11px]">
+                {passwordRequirements.map((requirement) => (
+                  <span
+                    key={requirement.key}
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium ${
+                      requirement.met
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        : "bg-gray-100 text-gray-500 dark:bg-dark-200 dark:text-gray-400"
+                    }`}
+                  >
+                    {requirement.met ? (
+                      <HiOutlineCheck className="h-3.5 w-3.5 shrink-0" />
+                    ) : (
+                      <HiOutlineX className="h-3.5 w-3.5 shrink-0" />
+                    )}
+                    <span>{requirement.label}</span>
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
 
