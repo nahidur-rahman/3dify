@@ -27,6 +27,7 @@
 
 ## UI and UX Conventions
 - Styling is Tailwind-first with reusable primitives in `src/components/ui/*`; prefer existing `Button`, `Input`, `Card`, `Modal`, and `Skeleton` components before adding bespoke markup.
+- For frontend-heavy changes, consult `.github/frontend-design.md` in addition to this file; use it as the design brief for page, component, and visual polish work.
 - Use `cn()` from `src/lib/utils.ts` for class merging and `categoryLabels` / pricing helpers from the same file instead of duplicating display logic.
 - The app defaults to dark mode via the inline script in `src/app/layout.tsx`; avoid introducing theme logic that fights that bootstrap behavior.
 - Commerce is chat-driven, not checkout-driven: contact CTAs depend on `NEXT_PUBLIC_WHATSAPP` and `NEXT_PUBLIC_MESSENGER`, and should degrade gracefully when env vars are missing.
