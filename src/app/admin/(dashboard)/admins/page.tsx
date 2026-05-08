@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/adminSession";
 import AdminForm from "@/components/AdminForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import DeleteAdminButton from "./DeleteAdminButton";
 
 async function getAdmins() {
   return prisma.admin.findMany({
@@ -22,6 +23,7 @@ export default async function AdminsPage() {
   const adminName = currentAdmin?.name || "Admin";
   const adminRole = currentAdmin?.role === "SUPER" ? "SUPER" : "ADMIN";
   const canCreateAdmins = adminRole === "SUPER";
+  const canDeleteAdmins = adminRole === "SUPER";
 
   return (
     <div className="space-y-8">
@@ -31,7 +33,7 @@ export default async function AdminsPage() {
             Admins
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Review administrator accounts. Only SUPER admins can create new ones.
+            Review administrator accounts. Only SUPER admins can create or delete admin accounts.
           </p>
         </div>
         <div className="inline-flex items-center gap-2 rounded-full border border-primary-500/20 bg-primary-500/5 px-4 py-2 text-sm text-primary-500">
@@ -76,6 +78,9 @@ export default async function AdminsPage() {
                       <th className="px-4 py-3 font-medium">Email</th>
                       <th className="px-4 py-3 font-medium">Role</th>
                       <th className="px-4 py-3 font-medium">Created</th>
+                      {canDeleteAdmins && (
+                        <th className="px-4 py-3 font-medium text-right">Actions</th>
+                      )}
                     </tr>
                   </thead>
                   <tbody>
@@ -110,6 +115,17 @@ export default async function AdminsPage() {
                             day: "numeric",
                           })}
                         </td>
+                        {canDeleteAdmins && (
+                          <td className="px-4 py-4 text-right">
+                            {admin.id === currentAdmin?.id ? (
+                              <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-dark-200 dark:text-gray-300">
+                                Current
+                              </span>
+                            ) : (
+                              <DeleteAdminButton adminId={admin.id} adminName={admin.name} />
+                            )}
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>
