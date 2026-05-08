@@ -33,6 +33,14 @@ export default function AdminForm() {
   const passwordRequirements = getPasswordRequirementChecks(form.password);
   const showPasswordMatchFeedback = form.confirmPassword.length > 0;
   const passwordsMatch = form.password === form.confirmPassword;
+  const canCreateAdmin = Boolean(
+    form.name.trim() &&
+      form.email.trim() &&
+      form.password &&
+      form.confirmPassword &&
+      isStrongPassword(form.password) &&
+      passwordsMatch
+  );
 
   const handleChange =
     (field: keyof typeof form) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -259,7 +267,11 @@ export default function AdminForm() {
           </div>
 
           <div className="flex items-center gap-3 pt-1">
-            <Button type="submit" disabled={loading} className="flex-1">
+            <Button
+              type="submit"
+              disabled={loading || !canCreateAdmin}
+              className="flex-1"
+            >
               {loading ? "Creating..." : "Create Admin"}
             </Button>
           </div>
