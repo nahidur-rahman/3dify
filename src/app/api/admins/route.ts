@@ -27,14 +27,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const existingAdmin = await prisma.admin.findUnique({
-      where: { email: parsed.data.email },
+    const name = parsed.data.name.trim();
+    const email = parsed.data.email.trim();
+
+    const existingEmailAdmin = await prisma.admin.findUnique({
+      where: { email },
       select: { id: true },
     });
 
-    if (existingAdmin) {
+    if (existingEmailAdmin) {
       return NextResponse.json(
-        { error: "An admin with that email already exists." },
+        {
+          error: "An admin with that email already exists.",
+          details: {
+            fieldErrors: {
+              email: ["An admin with that email already exists."],
+            },
+          },
+        },
+        { status: 409 }
+      );
+    }
+
+    const existingNameAdmin = await prisma.admin.findFirst({
+      where: { name },
+      select: { id: true },
+    });
+
+    if (existingNameAdmin) {
+      return NextResponse.json(
+        {
+          error: "An admin with that name already exists.",
+          details: {
+            fieldErrors: {
+              name: ["An admin with that name already exists."],
+            },
+          },
+        },
         { status: 409 }
       );
     }
@@ -43,8 +72,8 @@ export async function POST(request: NextRequest) {
 
     const admin = await prisma.admin.create({
       data: {
-        name: parsed.data.name,
-        email: parsed.data.email,
+        name,
+        email,
         password: passwordHash,
         role: "ADMIN",
       },
