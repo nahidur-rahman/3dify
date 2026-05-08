@@ -31,6 +31,8 @@ export default function AdminForm() {
     confirmPassword: "",
   });
   const passwordRequirements = getPasswordRequirementChecks(form.password);
+  const showPasswordMatchFeedback = form.confirmPassword.length > 0;
+  const passwordsMatch = form.password === form.confirmPassword;
 
   const handleChange =
     (field: keyof typeof form) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -236,6 +238,24 @@ export default function AdminForm() {
                 )}
               </button>
             </div>
+            {showPasswordMatchFeedback && (
+              <p
+                className={`mt-2 flex items-center gap-1 text-[11px] leading-4 ${
+                  passwordsMatch
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-red-500"
+                }`}
+              >
+                {passwordsMatch ? (
+                  <HiOutlineCheck className="h-3.5 w-3.5 shrink-0" />
+                ) : (
+                  <HiOutlineX className="h-3.5 w-3.5 shrink-0" />
+                )}
+                <span>
+                  {passwordsMatch ? "Passwords match" : "Passwords do not match"}
+                </span>
+              </p>
+            )}
           </div>
 
           <div className="flex items-center gap-3 pt-1">
