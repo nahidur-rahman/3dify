@@ -150,12 +150,18 @@ export default function AdminForm() {
               Email
             </label>
             <Input
-              name="admin-email"
-              type="email"
+              name="admin-contact"
+              type="text"
               value={form.email}
               onChange={handleChange("email")}
               required
               autoComplete="off"
+              inputMode="email"
+              autoCapitalize="none"
+              spellCheck={false}
+              data-lpignore="true"
+              data-1p-ignore="true"
+              data-form-type="other"
               placeholder="new-admin@3difybd.com"
             />
           </div>
@@ -166,15 +172,23 @@ export default function AdminForm() {
             </label>
             <div className="relative">
               <Input
-                name="admin-password"
-                type={showPassword ? "text" : "password"}
+                name="admin-secret"
+                type="text"
                 value={form.password}
                 onChange={handleChange("password")}
                 required
                 minLength={8}
-                autoComplete="new-password"
+                autoComplete="off"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                data-lpignore="true"
+                data-1p-ignore="true"
+                data-form-type="other"
                 placeholder="At least 8 characters"
-                className="pr-12"
+                className={`pr-12 ${
+                  showPassword ? "[-webkit-text-security:none]" : "[-webkit-text-security:disc]"
+                }`}
               />
               <button
                 type="button"
@@ -204,15 +218,25 @@ export default function AdminForm() {
             </label>
             <div className="relative">
               <Input
-                name="admin-confirm-password"
-                type={showConfirmPassword ? "text" : "password"}
+                name="admin-secret-confirm"
+                type="text"
                 value={form.confirmPassword}
                 onChange={handleChange("confirmPassword")}
                 required
                 minLength={8}
-                autoComplete="new-password"
+                autoComplete="off"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                data-lpignore="true"
+                data-1p-ignore="true"
+                data-form-type="other"
                 placeholder="Re-enter the password"
-                className="pr-12"
+                className={`pr-12 ${
+                  showConfirmPassword
+                    ? "[-webkit-text-security:none]"
+                    : "[-webkit-text-security:disc]"
+                }`}
               />
               <button
                 type="button"
