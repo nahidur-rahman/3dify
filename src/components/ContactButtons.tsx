@@ -37,7 +37,7 @@ export default function ContactButtons({
             href={whatsappLink}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${baseClasses} bg-green-500 hover:bg-green-600 hover:shadow-green-500/25`}
+            className={`${baseClasses} bg-green-500 hover:bg-green-600 hover:shadow-green-500/25 focus-visible:ring-2 focus-visible:ring-green-400/60`}
           >
             <FaWhatsapp className={size === "lg" ? "w-6 h-6" : "w-4 h-4"} />
             Order via WhatsApp
@@ -46,7 +46,8 @@ export default function ContactButtons({
           <button
             type="button"
             disabled
-            className={`${baseClasses} bg-gray-300 dark:bg-dark-300 text-gray-600 dark:text-gray-400 cursor-not-allowed`}
+            aria-disabled="true"
+            className={`${baseClasses} cursor-not-allowed bg-gray-300 text-gray-600 dark:bg-dark-300 dark:text-gray-400`}
           >
             <FaWhatsapp className={size === "lg" ? "w-6 h-6" : "w-4 h-4"} />
             WhatsApp Unavailable
@@ -58,7 +59,7 @@ export default function ContactButtons({
             href={messengerLink}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${baseClasses} bg-blue-500 hover:bg-blue-600 hover:shadow-blue-500/25`}
+            className={`${baseClasses} bg-blue-500 hover:bg-blue-600 hover:shadow-blue-500/25 focus-visible:ring-2 focus-visible:ring-blue-400/60`}
           >
             <FaFacebookMessenger className={size === "lg" ? "w-6 h-6" : "w-4 h-4"} />
             Message on Messenger
@@ -67,7 +68,8 @@ export default function ContactButtons({
           <button
             type="button"
             disabled
-            className={`${baseClasses} bg-gray-300 dark:bg-dark-300 text-gray-600 dark:text-gray-400 cursor-not-allowed`}
+            aria-disabled="true"
+            className={`${baseClasses} cursor-not-allowed bg-gray-300 text-gray-600 dark:bg-dark-300 dark:text-gray-400`}
           >
             <FaFacebookMessenger className={size === "lg" ? "w-6 h-6" : "w-4 h-4"} />
             Messenger Unavailable
@@ -76,8 +78,8 @@ export default function ContactButtons({
       </div>
 
       {(!whatsappReady || !messengerReady) && (
-        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-          One or more contact channels are being configured.
+        <p className="mt-3 text-xs leading-5 text-gray-500 dark:text-gray-400">
+          One or more contact channels are still being configured. We only show live links when they are ready.
         </p>
       )}
     </div>

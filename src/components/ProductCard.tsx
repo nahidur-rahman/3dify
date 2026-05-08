@@ -20,9 +20,10 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/products/${product.id}`} className="group">
-      <div className="bg-white dark:bg-dark-100 rounded-2xl overflow-hidden border border-gray-200 dark:border-dark-200 hover:border-primary-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 hover:-translate-y-1">
+      <div className="overflow-hidden rounded-[1.75rem] border border-gray-200/80 bg-white/90 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary-500/40 hover:shadow-2xl hover:shadow-primary-500/10 dark:border-dark-200 dark:bg-dark-100/90">
         {/* Image */}
         <div className="relative aspect-square overflow-hidden bg-gray-100 dark:bg-dark-200">
+          <div className="absolute inset-x-0 top-0 z-10 h-24 bg-gradient-to-b from-black/20 to-transparent" />
           {product.images[0] ? (
             <Image
               src={product.images[0]}
@@ -65,14 +66,18 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Content */}
-        <div className="p-4">
-          <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-primary-500 transition-colors line-clamp-1">
+        <div className="p-5">
+          <div className="mb-3 flex items-center justify-between gap-2 text-xs uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
+            <span>{product.inStock ? "Ready to order" : "Currently unavailable"}</span>
+            <span>{product.color}</span>
+          </div>
+          <h3 className="line-clamp-1 font-semibold text-gray-900 transition-colors group-hover:text-primary-500 dark:text-white">
             {product.name}
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+          <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-500 dark:text-gray-400">
             {product.description}
           </p>
-          <div className="flex items-end justify-between mt-3 gap-3">
+          <div className="mt-4 flex items-end justify-between gap-3">
             <div>
               {discountPercent > 0 && (
                 <div className="text-xs text-gray-400 dark:text-gray-500 line-through">
@@ -84,8 +89,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                 {formatPrice(displayPrice)}
               </div>
             </div>
-            <span className="text-xs text-gray-400 dark:text-gray-500 text-right">
-              {product.color}
+            <span className="rounded-full bg-gray-100 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-gray-500 dark:bg-dark dark:text-gray-400">
+              Details
             </span>
           </div>
         </div>

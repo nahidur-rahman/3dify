@@ -1,24 +1,30 @@
 import Link from "next/link";
 import { BsPrinter } from "react-icons/bs";
 import { FaFacebookMessenger, FaWhatsapp } from "react-icons/fa";
+import { getMessengerLink, getWhatsAppLink } from "@/lib/utils";
 
 export default function Footer() {
   const whatsappReady = Boolean((process.env.NEXT_PUBLIC_WHATSAPP || "").trim());
   const messengerReady = Boolean((process.env.NEXT_PUBLIC_MESSENGER || "").trim());
 
   return (
-    <footer className="bg-gray-50 dark:bg-dark-100 border-t border-gray-200 dark:border-dark-200">
+    <footer className="border-t border-gray-200/80 bg-gray-50/80 dark:border-dark-200 dark:bg-dark-100/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 bg-gradient-to-br from-primary-400 to-primary-600 rounded-lg flex items-center justify-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600">
                 <BsPrinter className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-transparent">
-                3Dify BD
-              </span>
+              <div>
+                <span className="block bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-xl font-bold text-transparent">
+                  3Dify BD
+                </span>
+                <span className="text-[11px] uppercase tracking-[0.24em] text-gray-400">
+                  Modern 3D craftsmanship
+                </span>
+              </div>
             </Link>
             <p className="text-gray-500 dark:text-gray-400 max-w-md">
               Premium 3D printed products made to order in Bangladesh. From figurines
@@ -27,10 +33,11 @@ export default function Footer() {
             <div className="flex gap-3 mt-4">
               {whatsappReady ? (
                 <a
-                  href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP || ""}`}
+                  href={getWhatsAppLink()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white hover:bg-green-600 transition-colors"
+                  aria-label="Contact on WhatsApp"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500 text-white transition-colors hover:bg-green-600"
                 >
                   <FaWhatsapp className="w-5 h-5" />
                 </a>
@@ -42,10 +49,11 @@ export default function Footer() {
 
               {messengerReady ? (
                 <a
-                  href={`https://m.me/${process.env.NEXT_PUBLIC_MESSENGER || ""}`}
+                  href={getMessengerLink()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white hover:bg-blue-600 transition-colors"
+                  aria-label="Contact on Messenger"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 text-white transition-colors hover:bg-blue-600"
                 >
                   <FaFacebookMessenger className="w-5 h-5" />
                 </a>
@@ -57,7 +65,7 @@ export default function Footer() {
             </div>
             {(!whatsappReady || !messengerReady) && (
               <p className="text-xs text-gray-400 mt-2">
-                Contact links are being configured.
+                Contact links appear only after they are configured and verified.
               </p>
             )}
           </div>

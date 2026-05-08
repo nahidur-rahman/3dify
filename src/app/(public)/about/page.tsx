@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import { BsPrinter } from "react-icons/bs";
 import { HiLightningBolt, HiHeart, HiCube, HiChat } from "react-icons/hi";
 
@@ -41,8 +42,8 @@ export default function AboutPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Hero */}
-      <div className="text-center max-w-3xl mx-auto mb-16">
-        <div className="inline-flex items-center gap-2 bg-primary-500/10 border border-primary-500/20 rounded-full px-4 py-1.5 mb-6">
+      <div className="mx-auto mb-16 max-w-4xl text-center">
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary-500/20 bg-primary-500/10 px-4 py-1.5">
           <BsPrinter className="w-4 h-4 text-primary-400" />
           <span className="text-sm font-medium text-primary-500">Our Story</span>
         </div>
@@ -61,7 +62,7 @@ export default function AboutPage() {
       </div>
 
       {/* What is 3D Printing */}
-      <div className="bg-gray-50 dark:bg-dark-100 rounded-3xl p-8 sm:p-12 mb-16">
+      <div className="mb-16 rounded-[2rem] border border-gray-200/70 bg-gray-50/80 p-8 shadow-sm dark:border-dark-200 dark:bg-dark-100/80 sm:p-12">
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
           What is 3D Printing?
         </h2>
@@ -105,7 +106,7 @@ export default function AboutPage() {
       </div>
 
       {/* CTA */}
-      <div className="text-center bg-gradient-to-r from-primary-600 to-primary-800 rounded-3xl p-8 sm:p-12">
+      <div className="rounded-[2rem] bg-gradient-to-r from-primary-600 to-primary-800 p-8 text-center shadow-2xl shadow-primary-900/20 sm:p-12">
         <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
           Ready to Get Started?
         </h2>
@@ -132,12 +133,12 @@ export default function AboutPage() {
               WhatsApp Unavailable
             </button>
           )}
-          <a
+          <Link
             href="/products"
             className="w-full sm:w-auto border-2 border-white/30 text-white px-8 py-3 rounded-full font-semibold hover:bg-white/10 transition-all"
           >
             Browse Products
-          </a>
+          </Link>
         </div>
         {!whatsappReady && (
           <p className="mt-3 text-sm text-primary-100/90">

@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
+import Link from "next/link";
 import ProductGrid from "@/components/ProductGrid";
 import SearchFilter from "@/components/SearchFilter";
 import { prisma } from "@/lib/db";
-import { Product } from "@/lib/types";
 import { hydrateProductImages } from "@/lib/productImages";
 
 export const metadata: Metadata = {
@@ -66,16 +66,26 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-8 rounded-[2rem] border border-gray-200/70 bg-white/85 p-6 shadow-sm dark:border-dark-200 dark:bg-dark-100/85 sm:p-8">
+        <div className="mb-3 inline-flex rounded-full border border-primary-500/15 bg-primary-500/5 px-4 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-primary-500 dark:text-primary-300">
+          Storefront Catalog
+        </div>
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
           Our{" "}
           <span className="bg-gradient-to-r from-primary-500 to-primary-400 bg-clip-text text-transparent">
             Products
           </span>
         </h1>
-        <p className="mt-2 text-gray-500 dark:text-gray-400">
-          Discover our collection of premium 3D printed items
-        </p>
+        <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <p className="max-w-2xl text-lg text-gray-500 dark:text-gray-400">
+            Discover premium 3D printed items built for collectors, gift buyers, and custom requests.
+          </p>
+          <div className="flex flex-wrap gap-2 text-xs font-medium uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
+            <span className="rounded-full bg-gray-100 px-3 py-1.5 dark:bg-dark">Made to order</span>
+            <span className="rounded-full bg-gray-100 px-3 py-1.5 dark:bg-dark">Direct support</span>
+            <span className="rounded-full bg-gray-100 px-3 py-1.5 dark:bg-dark">Clear pricing</span>
+          </div>
+        </div>
       </div>
 
       {/* Filters */}
@@ -94,7 +104,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       {totalPages > 1 && (
         <div className="mt-12 flex items-center justify-center gap-2">
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <a
+            <Link
               key={page}
               href={`/products?${new URLSearchParams({
                 ...searchParams,
@@ -107,7 +117,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               }`}
             >
               {page}
-            </a>
+            </Link>
           ))}
         </div>
       )}

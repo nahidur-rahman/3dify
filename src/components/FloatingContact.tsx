@@ -3,15 +3,20 @@
 import { useState } from "react";
 import { FaWhatsapp, FaFacebookMessenger } from "react-icons/fa";
 import { HiChat, HiX } from "react-icons/hi";
-import { hasMessengerConfigured, hasWhatsAppConfigured } from "@/lib/utils";
+import {
+  getMessengerLink,
+  getWhatsAppLink,
+  hasMessengerConfigured,
+  hasWhatsAppConfigured,
+} from "@/lib/utils";
 
 export default function FloatingContact() {
   const [isOpen, setIsOpen] = useState(false);
   const whatsappReady = hasWhatsAppConfigured();
   const messengerReady = hasMessengerConfigured();
 
-  const whatsappLink = `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP || ""}?text=${encodeURIComponent("Hi! I'm interested in your 3D printed products.")}`;
-  const messengerLink = `https://m.me/${process.env.NEXT_PUBLIC_MESSENGER || ""}`;
+  const whatsappLink = getWhatsAppLink();
+  const messengerLink = getMessengerLink();
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
@@ -23,7 +28,7 @@ export default function FloatingContact() {
               href={whatsappLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 bg-green-500 text-white pl-4 pr-5 py-3 rounded-full shadow-lg hover:bg-green-600 hover:shadow-xl transition-all hover:-translate-y-0.5"
+              className="flex items-center gap-3 rounded-full bg-green-500 py-3 pl-4 pr-5 text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-green-600 hover:shadow-xl focus-visible:ring-2 focus-visible:ring-green-400/60"
             >
               <FaWhatsapp className="w-5 h-5" />
               <span className="font-medium text-sm">WhatsApp</span>
@@ -40,7 +45,7 @@ export default function FloatingContact() {
               href={messengerLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 bg-blue-500 text-white pl-4 pr-5 py-3 rounded-full shadow-lg hover:bg-blue-600 hover:shadow-xl transition-all hover:-translate-y-0.5"
+              className="flex items-center gap-3 rounded-full bg-blue-500 py-3 pl-4 pr-5 text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-blue-600 hover:shadow-xl focus-visible:ring-2 focus-visible:ring-blue-400/60"
             >
               <FaFacebookMessenger className="w-5 h-5" />
               <span className="font-medium text-sm">Messenger</span>
@@ -57,6 +62,8 @@ export default function FloatingContact() {
       {/* Toggle button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-label={isOpen ? "Close contact menu" : "Open contact menu"}
         className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 ${
           isOpen
             ? "bg-gray-600 hover:bg-gray-700 rotate-0"
