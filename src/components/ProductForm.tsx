@@ -248,8 +248,8 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
         </div>
       )}
 
-      <div className="space-y-4">
-        <section className="rounded-2xl border border-gray-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100/90 sm:p-4">
+      <div className="space-y-4 xl:contents">
+        <section className="rounded-2xl border border-gray-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100/90 sm:p-4 xl:col-start-1 xl:row-start-1">
           <div className="mb-3 flex items-start justify-between gap-3">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary-500 dark:text-primary-300">
@@ -288,14 +288,14 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 required
                 rows={2}
-                className="w-full resize-none rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+                className="w-full min-h-[5rem] resize-y rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
                 placeholder="Describe your product..."
               />
             </div>
           </div>
         </section>
 
-        <section className="rounded-2xl border border-gray-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100/90 sm:p-4">
+        <section className="rounded-2xl border border-gray-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100/90 sm:p-4 xl:col-start-1 xl:row-start-2">
           <div className="mb-3">
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary-500 dark:text-primary-300">
               Size Details
@@ -419,8 +419,8 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
         </section>
       </div>
 
-      <div className="space-y-4">
-        <section className="rounded-2xl border border-gray-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100/90 sm:p-4">
+      <div className="space-y-4 xl:contents">
+        <section className="rounded-2xl border border-gray-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100/90 sm:p-4 xl:col-start-2 xl:row-start-1">
           <div className="mb-3">
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary-500 dark:text-primary-300">
               Catalog Setup
@@ -532,7 +532,7 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-gray-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100/90 sm:p-4">
+        <section className="rounded-2xl border border-gray-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100/90 sm:p-4 xl:col-start-1 xl:row-start-3">
           <div className="mb-3">
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary-500 dark:text-primary-300">
               Media
@@ -542,7 +542,7 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
             </h2>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 xl:grid-cols-3">
+          <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-10 xl:grid-cols-10">
             {form.images.map((url, i) => (
               <div
                 key={`existing-${i}`}
@@ -594,7 +594,7 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
           )}
         </section>
 
-        <section className="rounded-2xl border border-gray-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100/90 sm:p-4">
+        <section className="rounded-2xl border border-gray-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100/90 sm:p-4 xl:col-start-2 xl:row-start-2">
           <div className="mb-3">
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary-500 dark:text-primary-300">
               Visibility
@@ -642,7 +642,7 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
         </section>
       </div>
 
-      <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:justify-end xl:col-span-2">
+      <div className="flex flex-col gap-2 pt-1 sm:flex-row xl:col-span-2">
         <button
           type="submit"
           disabled={loading}
