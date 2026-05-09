@@ -238,359 +238,415 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
+    <form
+      onSubmit={handleSubmit}
+      className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]"
+    >
       {error && (
-        <div className="bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
+        <div className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-500/10 dark:text-red-400 xl:col-span-2">
           {error}
         </div>
       )}
 
-      {/* Name */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-          Product Name *
-        </label>
-        <input
-          type="text"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          required
-          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-          placeholder="e.g., Dragon Figurine"
-        />
-      </div>
-
-      {/* Description */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-          Description *
-        </label>
-        <textarea
-          value={form.description}
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
-          required
-          rows={4}
-          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 resize-none"
-          placeholder="Describe your product..."
-        />
-      </div>
-
-      {/* Price & Category */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Price (BDT) *
-          </label>
-          <input
-            type="number"
-            value={form.price}
-            onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })}
-            required
-            min="0"
-            step="0.01"
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Category *
-          </label>
-          <select
-            value={form.category}
-            onChange={(e) =>
-              setForm({ ...form, category: e.target.value as Category })
-            }
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-          >
-            {Object.entries(categoryLabels).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Size Mode
-          </label>
-          <select
-            value={form.sizeMode}
-            onChange={(e) =>
-              setForm((prev) => ({
-                ...prev,
-                sizeMode: e.target.value as SizeMode,
-                sizeOptions:
-                  e.target.value === "OPTIONS"
-                    ? prev.sizeOptions.length > 0
-                      ? prev.sizeOptions
-                      : [{ label: "Standard", price: prev.price }]
-                    : prev.sizeOptions,
-              }))
-            }
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-          >
-            <option value="FIXED">Fixed size</option>
-            <option value="OPTIONS">Size options</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Discount Percentage
-          </label>
-          <input
-            type="number"
-            value={form.discountPercent}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                discountPercent: parseInt(e.target.value) || 0,
-              })
-            }
-            min="0"
-            max="100"
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-            placeholder="0"
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-          Size Summary *
-        </label>
-        <input
-          type="text"
-          value={form.size}
-          onChange={(e) => setForm({ ...form, size: e.target.value })}
-          required
-          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-          placeholder={
-            form.sizeMode === "OPTIONS"
-              ? "e.g., Small / Medium / Large"
-              : "e.g., 15x10x8 cm"
-          }
-        />
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          {form.sizeMode === "OPTIONS"
-            ? "This summary appears next to the size choices."
-            : "Use the final finished size for fixed-size products."}
-        </p>
-      </div>
-
-      {form.sizeMode === "OPTIONS" && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between gap-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Size Options
-            </label>
-            <button
-              type="button"
-              onClick={addSizeOption}
-              className="text-sm font-medium text-primary-500 hover:text-primary-400"
-            >
-              + Add option
-            </button>
+      <div className="space-y-4">
+        <section className="rounded-2xl border border-gray-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100/90 sm:p-4">
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary-500 dark:text-primary-300">
+                Core Details
+              </p>
+              <h2 className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
+                Product information
+              </h2>
+            </div>
+            <span className="rounded-full border border-gray-200/80 bg-gray-50 px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.18em] text-gray-400 dark:border-dark-200 dark:bg-dark-200 dark:text-gray-500">
+              Required
+            </span>
           </div>
 
-          {form.sizeOptions.map((option, index) => (
-            <div
-              key={`${option.label}-${index}`}
-              className="grid grid-cols-[1fr_140px_auto] gap-3 items-end"
-            >
+          <div className="grid gap-3">
+            <div>
+              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                Product Name *
+              </label>
+              <input
+                type="text"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                required
+                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+                placeholder="e.g., Dragon Figurine"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                Description *
+              </label>
+              <textarea
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                required
+                rows={2}
+                className="w-full resize-none rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+                placeholder="Describe your product..."
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-gray-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100/90 sm:p-4">
+          <div className="mb-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary-500 dark:text-primary-300">
+              Size Details
+            </p>
+            <h2 className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
+              Dimensions and options
+            </h2>
+          </div>
+
+          <div className="grid gap-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                  Label
+                <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Size Mode
+                </label>
+                <select
+                  value={form.sizeMode}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      sizeMode: e.target.value as SizeMode,
+                      sizeOptions:
+                        e.target.value === "OPTIONS"
+                          ? prev.sizeOptions.length > 0
+                            ? prev.sizeOptions
+                            : [{ label: "Standard", price: prev.price }]
+                          : prev.sizeOptions,
+                    }))
+                  }
+                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+                >
+                  <option value="FIXED">Fixed size</option>
+                  <option value="OPTIONS">Size options</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Size Summary *
                 </label>
                 <input
                   type="text"
-                  value={option.label}
-                  onChange={(e) => updateSizeOption(index, "label", e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-                  placeholder="Small"
+                  value={form.size}
+                  onChange={(e) => setForm({ ...form, size: e.target.value })}
+                  required
+                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+                  placeholder={
+                    form.sizeMode === "OPTIONS"
+                      ? "e.g., Small / Medium / Large"
+                      : "e.g., 15x10x8 cm"
+                  }
                 />
+                <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                  {form.sizeMode === "OPTIONS"
+                    ? "Shown beside the size choices."
+                    : "Use the final finished size for fixed-size products."}
+                </p>
               </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                  Price
-                </label>
-                <input
-                  type="number"
-                  value={option.price}
-                  onChange={(e) => updateSizeOption(index, "price", e.target.value)}
-                  min="0"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-                  placeholder="0"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => removeSizeOption(index)}
-                disabled={form.sizeOptions.length === 1}
-                className="h-12 px-4 rounded-xl border border-gray-200 dark:border-dark-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Remove
-              </button>
             </div>
-          ))}
-        </div>
-      )}
 
-      {/* Color */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-          Color *
-        </label>
-        <input
-          type="text"
-          value={form.color}
-          onChange={(e) => setForm({ ...form, color: e.target.value })}
-          required
-          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-          placeholder="e.g., Matte Black"
-        />
+            {form.sizeMode === "OPTIONS" && (
+              <div className="space-y-2.5 rounded-xl border border-dashed border-gray-200/80 bg-gray-50/60 p-3">
+                <div className="flex items-center justify-between gap-4">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Size Options
+                  </label>
+                  <button
+                    type="button"
+                    onClick={addSizeOption}
+                    className="text-xs font-medium text-primary-500 hover:text-primary-400"
+                  >
+                    + Add option
+                  </button>
+                </div>
+
+                <div className="space-y-2.5">
+                  {form.sizeOptions.map((option, index) => (
+                    <div
+                      key={`${option.label}-${index}`}
+                      className="grid gap-2.5 md:grid-cols-[minmax(0,1fr)_96px_auto] md:items-end"
+                    >
+                      <div>
+                        <label className="mb-1 block text-[10px] font-medium text-gray-500 dark:text-gray-400">
+                          Label
+                        </label>
+                        <input
+                          type="text"
+                          value={option.label}
+                          onChange={(e) => updateSizeOption(index, "label", e.target.value)}
+                          className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+                          placeholder="Small"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-[10px] font-medium text-gray-500 dark:text-gray-400">
+                          Price
+                        </label>
+                        <input
+                          type="number"
+                          value={option.price}
+                          onChange={(e) => updateSizeOption(index, "price", e.target.value)}
+                          min="0"
+                          className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+                          placeholder="0"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeSizeOption(index)}
+                        disabled={form.sizeOptions.length === 1}
+                        className="h-10 rounded-xl border border-gray-200 px-3 text-sm text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-200 dark:text-gray-400 dark:hover:bg-dark-200"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
       </div>
 
-      {/* Weight & Infill */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Weight (grams) *
-          </label>
-          <input
-            type="number"
-            value={form.weight}
-            onChange={(e) => setForm({ ...form, weight: parseFloat(e.target.value) || 0 })}
-            required
-            min="0"
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Infill Percentage *
-          </label>
-          <input
-            type="number"
-            value={form.infillPercentage}
-            onChange={(e) =>
-              setForm({ ...form, infillPercentage: parseInt(e.target.value) || 0 })
-            }
-            required
-            min="0"
-            max="100"
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500"
-          />
-        </div>
-      </div>
+      <div className="space-y-4">
+        <section className="rounded-2xl border border-gray-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100/90 sm:p-4">
+          <div className="mb-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary-500 dark:text-primary-300">
+              Catalog Setup
+            </p>
+            <h2 className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
+              Pricing and product specs
+            </h2>
+          </div>
 
-      {/* Images */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-          Product Images
-        </label>
-        <div className="flex flex-wrap gap-3 mb-3">
-          {form.images.map((url, i) => (
-            <div
-              key={`existing-${i}`}
-              className="relative w-20 h-20 rounded-xl overflow-hidden bg-gray-100 dark:bg-dark-200 group"
-            >
-              <Image
-                src={url}
-                alt=""
-                fill
-                sizes="80px"
-                className="object-cover"
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                Price (BDT) *
+              </label>
+              <input
+                type="number"
+                value={form.price}
+                onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })}
+                required
+                min="0"
+                step="0.01"
+                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
               />
-              <button
-                type="button"
-                onClick={() => removeImage(i)}
-                className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs"
-              >
-                Remove
-              </button>
             </div>
-          ))}
-          {pendingImages.map((image) => (
-            <div
-              key={image.id}
-              className="relative w-20 h-20 rounded-xl overflow-hidden bg-gray-100 dark:bg-dark-200 group"
-            >
+
+            <div>
+              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                Category *
+              </label>
+              <select
+                value={form.category}
+                onChange={(e) =>
+                  setForm({ ...form, category: e.target.value as Category })
+                }
+                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+              >
+                {Object.entries(categoryLabels).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                Discount Percentage
+              </label>
+              <input
+                type="number"
+                value={form.discountPercent}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    discountPercent: parseInt(e.target.value) || 0,
+                  })
+                }
+                min="0"
+                max="100"
+                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+                placeholder="0"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                Color *
+              </label>
+              <input
+                type="text"
+                value={form.color}
+                onChange={(e) => setForm({ ...form, color: e.target.value })}
+                required
+                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+                placeholder="e.g., Matte Black"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                Weight (grams) *
+              </label>
+              <input
+                type="number"
+                value={form.weight}
+                onChange={(e) => setForm({ ...form, weight: parseFloat(e.target.value) || 0 })}
+                required
+                min="0"
+                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                Infill Percentage *
+              </label>
+              <input
+                type="number"
+                value={form.infillPercentage}
+                onChange={(e) =>
+                  setForm({ ...form, infillPercentage: parseInt(e.target.value) || 0 })
+                }
+                required
+                min="0"
+                max="100"
+                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-gray-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100/90 sm:p-4">
+          <div className="mb-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary-500 dark:text-primary-300">
+              Media
+            </p>
+            <h2 className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
+              Product images
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 xl:grid-cols-3">
+            {form.images.map((url, i) => (
               <div
-                className="w-full h-full bg-cover bg-center"
-                style={{ backgroundImage: `url(${image.previewUrl})` }}
-                aria-hidden="true"
-              />
-              <button
-                type="button"
-                onClick={() => removePendingImage(image.id)}
-                className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs"
+                key={`existing-${i}`}
+                className="group relative aspect-square overflow-hidden rounded-xl bg-gray-100 dark:bg-dark-200"
               >
-                Remove
-              </button>
-            </div>
-          ))}
-        </div>
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleImageUpload}
-          disabled={imageUploading || loading}
-          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 dark:file:bg-primary-500/10 file:text-primary-600 dark:file:text-primary-400 hover:file:bg-primary-100"
-        />
-        {imageUploading && (
-          <p className="text-sm text-primary-500 mt-1">
-            {mode === "edit" ? "Uploading images..." : "Uploading..."}
-          </p>
-        )}
+                <Image src={url} alt="" fill sizes="80px" className="object-cover" />
+                <button
+                  type="button"
+                  onClick={() => removeImage(i)}
+                  className="absolute inset-0 flex items-center justify-center bg-black/50 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            {pendingImages.map((image) => (
+              <div
+                key={image.id}
+                className="group relative aspect-square overflow-hidden rounded-xl bg-gray-100 dark:bg-dark-200"
+              >
+                <div
+                  className="h-full w-full bg-cover bg-center"
+                  style={{ backgroundImage: `url(${image.previewUrl})` }}
+                  aria-hidden="true"
+                />
+                <button
+                  type="button"
+                  onClick={() => removePendingImage(image.id)}
+                  className="absolute inset-0 flex items-center justify-center bg-black/50 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageUpload}
+            disabled={imageUploading || loading}
+            className="mt-3 block w-full text-xs text-gray-500 file:mr-3 file:rounded-full file:border-0 file:bg-primary-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-primary-600 hover:file:bg-primary-100 dark:file:bg-primary-500/10 dark:file:text-primary-400"
+          />
+          {imageUploading && (
+            <p className="mt-1 text-xs text-primary-500">
+              {mode === "edit" ? "Uploading images..." : "Uploading..."}
+            </p>
+          )}
+        </section>
+
+        <section className="rounded-2xl border border-gray-200/80 bg-white/90 p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100/90 sm:p-4">
+          <div className="mb-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary-500 dark:text-primary-300">
+              Visibility
+            </p>
+            <h2 className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
+              Storefront flags
+            </h2>
+          </div>
+
+          <div className="grid gap-2.5 sm:grid-cols-2">
+            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200/80 bg-gray-50/70 px-3 py-2 dark:border-dark-200 dark:bg-dark-200/40">
+              <input
+                type="checkbox"
+                checked={form.customizable}
+                onChange={(e) => setForm({ ...form, customizable: e.target.checked })}
+                className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
+              />
+              <span className="text-xs text-gray-700 dark:text-gray-300">
+                Customizable
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200/80 bg-gray-50/70 px-3 py-2 dark:border-dark-200 dark:bg-dark-200/40">
+              <input
+                type="checkbox"
+                checked={form.inStock}
+                onChange={(e) => setForm({ ...form, inStock: e.target.checked })}
+                className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
+              />
+              <span className="text-xs text-gray-700 dark:text-gray-300">
+                In Stock
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200/80 bg-gray-50/70 px-3 py-2 dark:border-dark-200 dark:bg-dark-200/40 sm:col-span-2">
+              <input
+                type="checkbox"
+                checked={form.featured}
+                onChange={(e) => setForm({ ...form, featured: e.target.checked })}
+                className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
+              />
+              <span className="text-xs text-gray-700 dark:text-gray-300">
+                Featured (show on homepage)
+              </span>
+            </label>
+          </div>
+        </section>
       </div>
 
-      {/* Toggles */}
-      <div className="flex flex-wrap gap-6">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={form.customizable}
-            onChange={(e) => setForm({ ...form, customizable: e.target.checked })}
-            className="w-4 h-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
-          />
-          <span className="text-sm text-gray-700 dark:text-gray-300">
-            Customizable
-          </span>
-        </label>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={form.inStock}
-            onChange={(e) => setForm({ ...form, inStock: e.target.checked })}
-            className="w-4 h-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
-          />
-          <span className="text-sm text-gray-700 dark:text-gray-300">
-            In Stock
-          </span>
-        </label>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={form.featured}
-            onChange={(e) => setForm({ ...form, featured: e.target.checked })}
-            className="w-4 h-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
-          />
-          <span className="text-sm text-gray-700 dark:text-gray-300">
-            Featured (show on homepage)
-          </span>
-        </label>
-      </div>
-
-      {/* Submit */}
-      <div className="flex gap-4">
+      <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:justify-end xl:col-span-2">
         <button
           type="submit"
           disabled={loading}
-          className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-primary-600 hover:to-primary-700 transition-all disabled:opacity-50"
+          className="rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 px-5 py-2 font-semibold text-sm text-white transition-all hover:from-primary-600 hover:to-primary-700 disabled:opacity-50"
         >
           {loading
             ? mode === "create"
@@ -603,7 +659,7 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-8 py-3 rounded-xl font-semibold border border-gray-200 dark:border-dark-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-200 transition-colors"
+          className="rounded-xl border border-gray-200 px-5 py-2 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-50 dark:border-dark-200 dark:text-gray-400 dark:hover:bg-dark-200"
         >
           Cancel
         </button>
