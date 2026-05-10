@@ -36,36 +36,25 @@ export default function AdminsLoading() {
         <Skeleton className="h-10 w-44 rounded-full" />
       </div>
 
-      <div className="grid gap-8 xl:grid-cols-[0.95fr_1.05fr]">
-        <div className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 p-6 space-y-5">
-          <Skeleton className="h-6 w-32" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-36 rounded-xl" />
-        </div>
-
-        <div className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 p-6 space-y-5">
-          <Skeleton className="h-6 w-32" />
-          <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-dark-200">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200 dark:border-dark-200 text-left">
-                  {Array.from({ length: 6 }).map((_, index) => (
-                    <th key={index} className="px-4 py-3">
-                      <Skeleton className="h-4 w-20" />
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <AdminRowSkeleton key={index} />
+      <div className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 p-6 space-y-5">
+        <Skeleton className="h-6 w-32" />
+        <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-dark-200">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-200 dark:border-dark-200 text-left">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <th key={index} className="px-4 py-3">
+                    <Skeleton className="h-4 w-20" />
+                  </th>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 4 }).map((_, index) => (
+                <AdminRowSkeleton key={index} />
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

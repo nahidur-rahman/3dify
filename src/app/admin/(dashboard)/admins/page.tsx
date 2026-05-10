@@ -45,21 +45,10 @@ export default async function AdminsPage() {
         </div>
       </div>
 
-      <div className="grid gap-8 xl:grid-cols-[0.95fr_1.05fr]">
-        {canCreateAdmins ? (
-          <AdminForm />
-        ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle>Admin Creation</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
-                Only SUPER admins can create new admin accounts. Request access from a SUPER admin when a new ADMIN is needed.
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      <div
+        className={canCreateAdmins ? "grid gap-8 xl:grid-cols-[0.95fr_1.05fr]" : "space-y-8"}
+      >
+        {canCreateAdmins && <AdminForm />}
 
         <Card className="h-fit">
           <CardHeader>
