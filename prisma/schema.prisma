@@ -49,12 +49,13 @@ model Product {
 }
 
 model Admin {
-  id        String   @id @default(cuid())
-  email     String   @unique
+  id        String    @id @default(cuid())
+  email     String    @unique
   password  String
+  username  String    @unique
   name      String
   role      AdminRole @default(ADMIN)
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@map("admins")
 }
