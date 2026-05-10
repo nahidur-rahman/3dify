@@ -24,6 +24,7 @@ export default function AdminForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [form, setForm] = useState({
+    username: "",
     name: "",
     email: "",
     password: "",
@@ -34,6 +35,7 @@ export default function AdminForm() {
   const showPasswordMatchFeedback = form.confirmPassword.length > 0;
   const passwordsMatch = form.password === form.confirmPassword;
   const canCreateAdmin = Boolean(
+    form.username.trim() &&
     form.name.trim() &&
       form.email.trim() &&
       form.password &&
@@ -83,6 +85,7 @@ export default function AdminForm() {
         const backendError =
           data?.details?.fieldErrors?.password?.[0] ||
           data?.details?.fieldErrors?.confirmPassword?.[0] ||
+          data?.details?.fieldErrors?.username?.[0] ||
           data?.details?.fieldErrors?.name?.[0] ||
           data?.details?.fieldErrors?.email?.[0];
 
@@ -90,8 +93,9 @@ export default function AdminForm() {
         return;
       }
 
-      setSuccess(`Admin ${data.admin.name} created successfully.`);
+      setSuccess(`Admin ${data.admin.username} created successfully.`);
       setForm({
+        username: "",
         name: "",
         email: "",
         password: "",
@@ -114,7 +118,7 @@ export default function AdminForm() {
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="rounded-xl border border-primary-500/20 bg-primary-500/5 px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
-          Only SUPER admins can create new admin accounts. New accounts are created with the ADMIN role.
+          Only SUPER admins can create new admin accounts. New accounts are created with the ADMIN role. Usernames must be unique; names can be shared.
         </div>
 
         {error && (
@@ -132,6 +136,23 @@ export default function AdminForm() {
         <form onSubmit={handleSubmit} autoComplete="off" className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Username
+            </label>
+            <Input
+              name="admin-username"
+              type="text"
+              value={form.username}
+              onChange={handleChange("username")}
+              required
+              autoComplete="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              placeholder="unique-username"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Name
             </label>
             <Input
@@ -141,7 +162,7 @@ export default function AdminForm() {
               onChange={handleChange("name")}
               required
               autoComplete="off"
-              placeholder="Admin name"
+              placeholder="Display name"
             />
           </div>
 
