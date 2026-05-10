@@ -11,6 +11,8 @@ async function main() {
   console.log("🌱 Seeding database...");
 
   const adminPassword = await hash(process.env.ADMIN_PASSWORD || "admin123", 12);
+  const adminUsername = process.env.ADMIN_USERNAME || "admin";
+  const adminName = process.env.ADMIN_NAME || "Admin";
   const admin = await prisma.$transaction(async (tx) => {
     await tx.admin.deleteMany();
 
@@ -18,7 +20,8 @@ async function main() {
       data: {
         email: process.env.ADMIN_EMAIL || "admin@3difybd.com",
         password: adminPassword,
-        name: "Admin",
+        username: adminUsername,
+        name: adminName,
         role: "SUPER",
       },
     });
