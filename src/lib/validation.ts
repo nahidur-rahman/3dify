@@ -98,8 +98,9 @@ export const loginSchema = z.object({
 
 export const adminCreateSchema = z
   .object({
-    name: z.string().min(1, "Admin name is required").max(100),
-    email: z.string().email("Invalid email address"),
+    username: z.string().trim().min(1, "Username is required").max(100),
+    name: z.string().trim().min(1, "Name is required").max(100),
+    email: z.string().trim().email("Invalid email address"),
     password: z
       .string()
       .regex(STRONG_PASSWORD_REGEX, STRONG_PASSWORD_MESSAGE),
