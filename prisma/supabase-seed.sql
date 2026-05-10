@@ -5,11 +5,12 @@
 -- Reset admins, then insert the initial SUPER admin.
 DELETE FROM "admins";
 
-INSERT INTO "admins" ("id", "email", "password", "name", "role", "createdAt")
+INSERT INTO "admins" ("id", "email", "password", "username", "name", "role", "createdAt")
 VALUES (
   'admin_3dify_bd',
   'admin@3difybd.com',
   '$2b$12$hQFu270I6fq5Di9hy4rUUuUV7aHqN2rr5mJoWc6mVWhpyCHrPHcwC',
+  'admin',
   'Admin',
   'SUPER',
   NOW()
