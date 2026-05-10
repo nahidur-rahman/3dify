@@ -8,6 +8,7 @@ async function getAdmins() {
   return prisma.admin.findMany({
     select: {
       id: true,
+      username: true,
       name: true,
       email: true,
       role: true,
@@ -20,7 +21,7 @@ async function getAdmins() {
 export default async function AdminsPage() {
   const [currentAdmin, admins] = await Promise.all([getCurrentAdmin(), getAdmins()]);
 
-  const adminName = currentAdmin?.name || "Admin";
+  const adminUsername = currentAdmin?.username || "Admin";
   const adminRole = currentAdmin?.role === "SUPER" ? "SUPER" : "ADMIN";
   const canCreateAdmins = adminRole === "SUPER";
   const canDeleteAdmins = adminRole === "SUPER";
@@ -37,7 +38,7 @@ export default async function AdminsPage() {
           </p>
         </div>
         <div className="inline-flex items-center gap-2 rounded-full border border-primary-500/20 bg-primary-500/5 px-4 py-2 text-sm text-primary-500">
-          Signed in as {adminName}
+          Signed in as {adminUsername}
           <span className="rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-semibold tracking-[0.18em] text-primary-500 dark:bg-dark-100/80 dark:text-primary-300">
             {adminRole === "SUPER" ? "SUPER ADMIN" : "ADMIN"}
           </span>
@@ -74,6 +75,7 @@ export default async function AdminsPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-200 dark:border-dark-200 text-left text-sm text-gray-500 dark:text-gray-400">
+                      <th className="px-4 py-3 font-medium">Username</th>
                       <th className="px-4 py-3 font-medium">Name</th>
                       <th className="px-4 py-3 font-medium">Email</th>
                       <th className="px-4 py-3 font-medium">Role</th>
@@ -89,6 +91,11 @@ export default async function AdminsPage() {
                         key={admin.id}
                         className="border-b border-gray-100 dark:border-dark-200 last:border-0"
                       >
+                        <td className="px-4 py-4">
+                          <div className="font-medium text-gray-900 dark:text-white">
+                            {admin.username}
+                          </div>
+                        </td>
                         <td className="px-4 py-4">
                           <div className="font-medium text-gray-900 dark:text-white">
                             {admin.name}
@@ -122,7 +129,7 @@ export default async function AdminsPage() {
                                 Current
                               </span>
                             ) : (
-                              <DeleteAdminButton adminId={admin.id} adminName={admin.name} />
+                              <DeleteAdminButton adminId={admin.id} adminUsername={admin.username} />
                             )}
                           </td>
                         )}
