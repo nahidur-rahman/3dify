@@ -34,6 +34,7 @@ export interface Product {
 export interface Admin {
   id: string;
   email: string;
+  username: string;
   name: string;
   role: AdminRole;
 }
