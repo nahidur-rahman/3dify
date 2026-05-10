@@ -13,6 +13,7 @@ export async function getCurrentAdmin() {
     select: {
       id: true,
       email: true,
+      username: true,
       name: true,
       role: true,
       createdAt: true,
