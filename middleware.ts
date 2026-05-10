@@ -10,11 +10,17 @@ async function verifyAdminToken(token: string): Promise<AdminPayload | null> {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
     const typedPayload = payload as Partial<AdminPayload>;
+    const username =
+      typeof typedPayload.username === "string"
+        ? typedPayload.username
+        : typeof typedPayload.name === "string"
+          ? typedPayload.name
+          : null;
 
     if (
       typeof typedPayload.id !== "string" ||
       typeof typedPayload.email !== "string" ||
-      typeof typedPayload.name !== "string"
+      !username
     ) {
       return null;
     }
@@ -22,7 +28,7 @@ async function verifyAdminToken(token: string): Promise<AdminPayload | null> {
     return {
       id: typedPayload.id,
       email: typedPayload.email,
-      name: typedPayload.name,
+      username,
     };
   } catch {
     return null;
@@ -57,7 +63,8 @@ export async function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-admin-id", session.id);
   requestHeaders.set("x-admin-email", session.email);
-  requestHeaders.set("x-admin-name", session.name);
+  requestHeaders.set("x-admin-username", session.username);
+  requestHeaders.set("x-admin-name", session.username);
 
   return NextResponse.next({
     request: {
