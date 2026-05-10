@@ -7,10 +7,19 @@ function AdminRowSkeleton() {
         <Skeleton className="h-4 w-28" />
       </td>
       <td className="px-4 py-4">
+        <Skeleton className="h-4 w-36" />
+      </td>
+      <td className="px-4 py-4">
         <Skeleton className="h-4 w-40" />
       </td>
       <td className="px-4 py-4">
         <Skeleton className="h-4 w-24" />
+      </td>
+      <td className="px-4 py-4">
+        <Skeleton className="h-4 w-24" />
+      </td>
+      <td className="px-4 py-4 text-right">
+        <Skeleton className="h-8 w-20 rounded-full" />
       </td>
     </tr>
   );
@@ -43,7 +52,7 @@ export default function AdminsLoading() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-dark-200 text-left">
-                  {Array.from({ length: 3 }).map((_, index) => (
+                  {Array.from({ length: 6 }).map((_, index) => (
                     <th key={index} className="px-4 py-3">
                       <Skeleton className="h-4 w-20" />
                     </th>
