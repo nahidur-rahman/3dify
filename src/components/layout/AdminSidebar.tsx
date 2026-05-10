@@ -13,11 +13,11 @@ import {
 import type { AdminRole } from "@/lib/types";
 
 interface AdminSidebarProps {
-  adminName: string;
+  adminUsername: string;
   adminRole: AdminRole;
 }
 
-export default function AdminSidebar({ adminName, adminRole }: AdminSidebarProps) {
+export default function AdminSidebar({ adminUsername, adminRole }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -46,7 +46,7 @@ export default function AdminSidebar({ adminName, adminRole }: AdminSidebarProps
             <p className="font-semibold text-sm text-gray-900 dark:text-white">
               Admin Panel
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{adminName}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{adminUsername}</p>
             <span
               className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-[0.18em] ${
                 adminRole === "SUPER"
