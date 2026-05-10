@@ -7,18 +7,18 @@ import Button from "@/components/ui/Button";
 
 interface DeleteAdminButtonProps {
   adminId: string;
-  adminName: string;
+  adminUsername: string;
 }
 
 export default function DeleteAdminButton({
   adminId,
-  adminName,
+  adminUsername,
 }: DeleteAdminButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async () => {
-    if (!confirm(`Are you sure you want to delete admin "${adminName}"?`)) {
+    if (!confirm(`Are you sure you want to delete admin "${adminUsername}"?`)) {
       return;
     }
 
@@ -56,7 +56,7 @@ export default function DeleteAdminButton({
       size="sm"
       onClick={handleDelete}
       disabled={loading}
-      title={`Delete ${adminName}`}
+      title={`Delete ${adminUsername}`}
       className="px-3"
     >
       <HiOutlineTrash className="h-4 w-4" />
