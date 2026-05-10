@@ -1,7 +1,8 @@
 export interface AdminPayload {
   id: string;
   email: string;
-  name: string;
+  username: string;
+  name?: string;
 }
 
 export const ADMIN_TOKEN_COOKIE = "admin-token";
