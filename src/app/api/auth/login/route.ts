@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
     const token = await signToken({
       id: admin.id,
       email: admin.email,
+      username: admin.username,
       name: admin.name,
     });
 
@@ -49,7 +50,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      admin: { id: admin.id, email: admin.email, name: admin.name, role: admin.role },
+      admin: {
+        id: admin.id,
+        email: admin.email,
+        username: admin.username,
+        name: admin.name,
+        role: admin.role,
+      },
     });
   } catch (error) {
     console.error("Login error:", error);
