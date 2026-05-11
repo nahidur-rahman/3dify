@@ -117,9 +117,6 @@ export default function AdminForm() {
         <CardTitle>Create Admin</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
-        <div className="rounded-xl border border-primary-500/20 bg-primary-500/5 px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
-          Only SUPER admins can create new admin accounts. New accounts are created with the ADMIN role. Usernames must be unique; names can be shared.
-        </div>
 
         {error && (
           <div className="bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
