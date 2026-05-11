@@ -57,10 +57,18 @@ export default function DeleteAdminButton({
       onClick={handleDelete}
       disabled={loading}
       title={`Delete ${adminUsername}`}
+      aria-label={loading ? `Deleting ${adminUsername}` : `Delete ${adminUsername}`}
+      aria-busy={loading}
       className="px-3"
     >
-      <HiOutlineTrash className="h-4 w-4" />
-      {/* <span>{loading ? "Deleting..." : "Delete"}</span> */}
+      {loading ? (
+        <span
+          aria-hidden="true"
+          className="h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent"
+        />
+      ) : (
+        <HiOutlineTrash className="h-4 w-4" aria-hidden="true" />
+      )}
     </Button>
   );
 }
