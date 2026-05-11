@@ -60,7 +60,7 @@ export default function DeleteAdminButton({
       className="px-3"
     >
       <HiOutlineTrash className="h-4 w-4" />
-      <span>{loading ? "Deleting..." : "Delete"}</span>
+      {/* <span>{loading ? "Deleting..." : "Delete"}</span> */}
     </Button>
   );
 }
