@@ -46,7 +46,7 @@ export default async function AdminsPage() {
       </div>
 
       <div
-        className={canCreateAdmins ? "grid gap-8 xl:grid-cols-[0.95fr_1.05fr]" : "space-y-8"}
+        className={canCreateAdmins ? "grid gap-8 xl:grid-cols-[375px_minmax(0,1fr)]" : "space-y-8"}
       >
         {canCreateAdmins && <AdminForm />}
 
@@ -60,17 +60,16 @@ export default async function AdminsPage() {
                 No admins found.
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <table className="w-full table-fixed">
                   <thead>
                     <tr className="border-b border-gray-200 dark:border-dark-200 text-left text-sm text-gray-500 dark:text-gray-400">
-                      <th className="px-4 py-3 font-medium">Username</th>
-                      <th className="px-4 py-3 font-medium">Name</th>
-                      <th className="px-4 py-3 font-medium">Email</th>
-                      <th className="px-4 py-3 font-medium">Role</th>
-                      <th className="px-4 py-3 font-medium">Created</th>
+                      <th className="w-[16%] px-4 py-3 font-medium">Username</th>
+                      <th className="w-[18%] px-4 py-3 font-medium">Name</th>
+                      <th className="w-[30%] px-4 py-3 font-medium">Email</th>
+                      <th className="w-[10%] px-4 py-3 font-medium">Role</th>
+                      <th className="w-[16%] px-4 py-3 font-medium">Created</th>
                       {canDeleteAdmins && (
-                        <th className="px-4 py-3 font-medium text-right">Actions</th>
+                        <th className="w-[10%] px-4 py-3 font-medium text-right">Actions</th>
                       )}
                     </tr>
                   </thead>
@@ -78,24 +77,32 @@ export default async function AdminsPage() {
                     {admins.map((admin) => (
                       <tr
                         key={admin.id}
-                        className="border-b border-gray-100 dark:border-dark-200 last:border-0"
+                        className="group border-b border-gray-100 dark:border-dark-200 last:border-0"
                       >
                         <td className="px-4 py-4">
-                          <div className="font-medium text-gray-900 dark:text-white">
+                          <div className="truncate font-medium text-gray-900 dark:text-white">
                             {admin.username}
                           </div>
                         </td>
                         <td className="px-4 py-4">
-                          <div className="font-medium text-gray-900 dark:text-white">
+                          <div className="truncate font-medium text-gray-900 dark:text-white">
                             {admin.name}
                           </div>
                         </td>
-                        <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
-                          {admin.email}
+                        <td className="relative px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
+                          <span className="block truncate transition-opacity duration-200 group-hover:opacity-0">
+                            {admin.email}
+                          </span>
+                          <span
+                            aria-hidden="true"
+                            className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 whitespace-nowrap rounded-md border border-gray-200 bg-white px-2.5 py-1 text-gray-700 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 dark:border-dark-200 dark:bg-dark-100 dark:text-gray-100"
+                          >
+                            {admin.email}
+                          </span>
                         </td>
                         <td className="px-4 py-4 text-sm">
                           <span
-                            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold tracking-[0.16em] ${
+                            className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-[0.12em] ${
                               admin.role === "SUPER"
                                 ? "bg-amber-500/10 text-amber-600 dark:text-amber-300"
                                 : "bg-slate-500/10 text-slate-600 dark:text-slate-300"
@@ -104,7 +111,7 @@ export default async function AdminsPage() {
                             {admin.role}
                           </span>
                         </td>
-                        <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
+                        <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
                           {admin.createdAt.toLocaleDateString("en-US", {
                             year: "numeric",
                             month: "short",
@@ -113,11 +120,7 @@ export default async function AdminsPage() {
                         </td>
                         {canDeleteAdmins && (
                           <td className="px-4 py-4 text-right">
-                            {admin.id === currentAdmin?.id ? (
-                              <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-dark-200 dark:text-gray-300">
-                                Current
-                              </span>
-                            ) : (
+                            {admin.id !== currentAdmin?.id && (
                               <DeleteAdminButton adminId={admin.id} adminUsername={admin.username} />
                             )}
                           </td>
@@ -126,7 +129,6 @@ export default async function AdminsPage() {
                     ))}
                   </tbody>
                 </table>
-              </div>
             )}
           </CardContent>
         </Card>
