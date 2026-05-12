@@ -101,14 +101,8 @@ export default async function AdminsPage() {
                           {admin.name}
                         </div>
                       </td>
-                      <td className="relative px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
-                        <span className="block truncate transition-opacity duration-200 group-hover:opacity-0">
-                          {admin.email}
-                        </span>
-                        <span
-                          aria-hidden="true"
-                          className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 whitespace-nowrap rounded-md border border-gray-200 bg-white px-2.5 py-1 text-gray-700 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 dark:border-dark-200 dark:bg-dark-100 dark:text-gray-100"
-                        >
+                      <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
+                        <span title={admin.email} className="block truncate">
                           {admin.email}
                         </span>
                       </td>
