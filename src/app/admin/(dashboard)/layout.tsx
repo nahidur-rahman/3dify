@@ -17,7 +17,7 @@ export default async function AdminLayout({
   const adminRole = currentAdmin?.role === "SUPER" ? "SUPER" : "ADMIN";
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)]">
+    <div className="flex min-h-screen">
       <AdminSidebar adminUsername={adminUsername} adminRole={adminRole} />
       <div className="flex-1 p-6 sm:p-8 overflow-auto">{children}</div>
     </div>
