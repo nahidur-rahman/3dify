@@ -72,6 +72,12 @@ export default async function AdminProductsPage() {
                   <th className="text-left px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">
                     Status
                   </th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Created by
+                  </th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Updated by
+                  </th>
                   <th className="text-right px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">
                     Actions
                   </th>
@@ -130,6 +136,16 @@ export default async function AdminProductsPage() {
                           </span>
                         )}
                       </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {product.createdBy ?? "—"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {product.updatedBy ?? "—"}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
