@@ -25,6 +25,12 @@ function TableRowSkeleton() {
         </div>
       </td>
       <td className="px-6 py-4">
+        <Skeleton className="h-4 w-24" />
+      </td>
+      <td className="px-6 py-4">
+        <Skeleton className="h-4 w-24" />
+      </td>
+      <td className="px-6 py-4">
         <div className="flex items-center justify-end gap-2">
           <Skeleton className="h-9 w-9 rounded-lg" />
           <Skeleton className="h-9 w-9 rounded-lg" />
@@ -50,7 +56,7 @@ export default function AdminProductsLoading() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-dark-200">
-                {Array.from({ length: 5 }).map((_, index) => (
+                {Array.from({ length: 7 }).map((_, index) => (
                   <th key={index} className="px-6 py-4 text-left">
                     <Skeleton className="h-4 w-24" />
                   </th>
