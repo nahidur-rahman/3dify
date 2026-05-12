@@ -43,7 +43,9 @@ INSERT INTO "products" (
   "inStock",
   "featured",
   "createdAt",
-  "updatedAt"
+  "updatedAt",
+  "createdBy",
+  "updatedBy"
 )
 VALUES
 (
@@ -64,7 +66,9 @@ VALUES
   TRUE,
   TRUE,
   NOW(),
-  NOW()
+  NOW(),
+  'admin',
+  'admin'
 ),
 (
   'prod_geometric_phone_case',
@@ -84,7 +88,9 @@ VALUES
   TRUE,
   TRUE,
   NOW(),
-  NOW()
+  NOW(),
+  'admin',
+  'admin'
 ),
 (
   'prod_modern_vase',
@@ -104,7 +110,9 @@ VALUES
   TRUE,
   TRUE,
   NOW(),
-  NOW()
+  NOW(),
+  'admin',
+  'admin'
 ),
 (
   'prod_custom_name_plate',
@@ -124,7 +132,9 @@ VALUES
   TRUE,
   TRUE,
   NOW(),
-  NOW()
+  NOW(),
+  'admin',
+  'admin'
 ),
 (
   'prod_iron_man_helmet',
@@ -144,7 +154,9 @@ VALUES
   TRUE,
   FALSE,
   NOW(),
-  NOW()
+  NOW(),
+  'admin',
+  'admin'
 ),
 (
   'prod_hexagonal_wall_art_set',
@@ -164,7 +176,9 @@ VALUES
   TRUE,
   FALSE,
   NOW(),
-  NOW()
+  NOW(),
+  'admin',
+  'admin'
 )
 ON CONFLICT ("id") DO UPDATE
 SET
@@ -183,4 +197,6 @@ SET
   "customizable" = EXCLUDED."customizable",
   "inStock" = EXCLUDED."inStock",
   "featured" = EXCLUDED."featured",
+  "createdBy" = EXCLUDED."createdBy",
+  "updatedBy" = EXCLUDED."updatedBy",
   "updatedAt" = NOW();
