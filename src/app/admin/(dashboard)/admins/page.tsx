@@ -23,6 +23,8 @@ export default async function AdminsPage() {
 
   const adminUsername = currentAdmin?.username || "Admin";
   const adminRole = currentAdmin?.role === "SUPER" ? "SUPER" : "ADMIN";
+  const isSuperAdmin = currentAdmin?.role === "SUPER";
+  const showRoleColumn = !isSuperAdmin;
   const canCreateAdmins = adminRole === "SUPER";
   const canDeleteAdmins = adminRole === "SUPER";
 
@@ -61,48 +63,59 @@ export default async function AdminsPage() {
               </div>
             ) : (
               <table className="w-full table-fixed">
-                  <thead>
-                    <tr className="border-b border-gray-200 dark:border-dark-200 text-left text-sm text-gray-500 dark:text-gray-400">
-                      <th className="w-[16%] px-4 py-3 font-medium">Username</th>
-                      <th className="w-[18%] px-4 py-3 font-medium">Name</th>
-                      <th className="w-[30%] px-4 py-3 font-medium">Email</th>
-                      <th className="w-[10%] px-4 py-3 font-medium">Role</th>
-                      <th className="w-[16%] px-4 py-3 font-medium">Created</th>
-                      {canDeleteAdmins && (
-                        <th className="w-[10%] px-4 py-3 font-medium text-right">Actions</th>
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {admins.map((admin) => (
-                      <tr
-                        key={admin.id}
-                        className="group border-b border-gray-100 dark:border-dark-200 last:border-0"
-                      >
-                        <td className="px-4 py-4">
+                <thead>
+                  <tr className="border-b border-gray-200 text-left text-sm text-gray-500 dark:border-dark-200 dark:text-gray-400">
+                    <th className="w-[16%] px-4 py-3 font-medium">Username</th>
+                    <th className="w-[18%] px-4 py-3 font-medium">Name</th>
+                    <th className={showRoleColumn ? "w-[30%] px-4 py-3 font-medium" : "w-[40%] px-4 py-3 font-medium"}>
+                      Email
+                    </th>
+                    {showRoleColumn && <th className="w-[10%] px-4 py-3 font-medium">Role</th>}
+                    <th className={canDeleteAdmins ? "w-[16%] px-4 py-3 font-medium" : "w-[22%] px-4 py-3 font-medium"}>
+                      Created
+                    </th>
+                    {canDeleteAdmins && (
+                      <th className="w-[10%] px-4 py-3 font-medium text-right">Actions</th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {admins.map((admin) => (
+                    <tr
+                      key={admin.id}
+                      className="group border-b border-gray-100 dark:border-dark-200 last:border-0"
+                    >
+                      <td className="px-4 py-4">
+                        {isSuperAdmin && admin.id === currentAdmin?.id ? (
+                          <span className="inline-flex max-w-full truncate rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold tracking-[0.12em] text-amber-600 dark:text-amber-300">
+                            {admin.username}
+                          </span>
+                        ) : (
                           <div className="truncate font-medium text-gray-900 dark:text-white">
                             {admin.username}
                           </div>
-                        </td>
-                        <td className="px-4 py-4">
-                          <div className="truncate font-medium text-gray-900 dark:text-white">
-                            {admin.name}
-                          </div>
-                        </td>
-                        <td className="relative px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
-                          <span className="block truncate transition-opacity duration-200 group-hover:opacity-0">
-                            {admin.email}
-                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="truncate font-medium text-gray-900 dark:text-white">
+                          {admin.name}
+                        </div>
+                      </td>
+                      <td className="relative px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
+                        <span className="block truncate transition-opacity duration-200 group-hover:opacity-0">
+                          {admin.email}
+                        </span>
+                        <span
+                          aria-hidden="true"
+                          className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 whitespace-nowrap rounded-md border border-gray-200 bg-white px-2.5 py-1 text-gray-700 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 dark:border-dark-200 dark:bg-dark-100 dark:text-gray-100"
+                        >
+                          {admin.email}
+                        </span>
+                      </td>
+                      {showRoleColumn && (
+                        <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
                           <span
-                            aria-hidden="true"
-                            className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 whitespace-nowrap rounded-md border border-gray-200 bg-white px-2.5 py-1 text-gray-700 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 dark:border-dark-200 dark:bg-dark-100 dark:text-gray-100"
-                          >
-                            {admin.email}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-sm">
-                          <span
-                            className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-[0.12em] ${
+                            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold tracking-[0.16em] ${
                               admin.role === "SUPER"
                                 ? "bg-amber-500/10 text-amber-600 dark:text-amber-300"
                                 : "bg-slate-500/10 text-slate-600 dark:text-slate-300"
@@ -111,24 +124,25 @@ export default async function AdminsPage() {
                             {admin.role}
                           </span>
                         </td>
-                        <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
-                          {admin.createdAt.toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}
+                      )}
+                      <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
+                        {admin.createdAt.toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </td>
+                      {canDeleteAdmins && (
+                        <td className="px-4 py-4 text-right">
+                          {admin.id !== currentAdmin?.id && (
+                            <DeleteAdminButton adminId={admin.id} adminUsername={admin.username} />
+                          )}
                         </td>
-                        {canDeleteAdmins && (
-                          <td className="px-4 py-4 text-right">
-                            {admin.id !== currentAdmin?.id && (
-                              <DeleteAdminButton adminId={admin.id} adminUsername={admin.username} />
-                            )}
-                          </td>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
           </CardContent>
         </Card>
