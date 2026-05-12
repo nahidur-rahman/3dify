@@ -44,6 +44,8 @@ model Product {
   featured         Boolean  @default(false)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+  createdBy        String?
+  updatedBy        String?
 
   @@map("products")
 }
