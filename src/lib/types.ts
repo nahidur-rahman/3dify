@@ -29,6 +29,8 @@ export interface Product {
   featured: boolean;
   createdAt: string | Date;
   updatedAt: string | Date;
+  createdBy: string | null;
+  updatedBy: string | null;
 }
 
 export interface Admin {
