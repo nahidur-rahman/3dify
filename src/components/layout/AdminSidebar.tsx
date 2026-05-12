@@ -35,7 +35,7 @@ export default function AdminSidebar({ adminUsername, adminRole }: AdminSidebarP
   };
 
   return (
-    <aside className="w-64 bg-white dark:bg-dark-100 border-r border-gray-200 dark:border-dark-200 hidden md:flex flex-col">
+    <aside className="hidden h-screen w-64 flex-col border-r border-gray-200 bg-white dark:border-dark-200 dark:bg-dark-100 md:flex">
       {/* Admin header */}
       <div className="p-6 border-b border-gray-200 dark:border-dark-200">
         <div className="flex items-center gap-2">
@@ -61,7 +61,7 @@ export default function AdminSidebar({ adminUsername, adminRole }: AdminSidebarP
       </div>
 
       {/* Nav links */}
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-4 space-y-1 overflow-hidden">
         {links.map((link) => {
           const isActive =
             link.href === "/admin"
@@ -85,7 +85,7 @@ export default function AdminSidebar({ adminUsername, adminRole }: AdminSidebarP
       </nav>
 
       {/* Logout */}
-      <div className="p-4 border-t border-gray-200 dark:border-dark-200">
+      <div className="mt-auto border-t border-gray-200 p-4 dark:border-dark-200">
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors w-full"
