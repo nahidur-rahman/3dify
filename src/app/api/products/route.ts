@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getSession } from "@/lib/auth";
+import { getCurrentAdmin } from "@/lib/adminSession";
 import { productSchema } from "@/lib/validation";
 import {
   hydrateProductImages,
@@ -73,8 +73,8 @@ export async function GET(request: NextRequest) {
 // POST /api/products — create a new product (admin only)
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const admin = await getCurrentAdmin();
+    if (!admin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -90,7 +90,12 @@ export async function POST(request: NextRequest) {
     const normalizedImages = normalizeProductImages(parsed.data.images);
 
     const created = await prisma.product.create({
-      data: { ...parsed.data, images: [] },
+      data: {
+        ...parsed.data,
+        images: [],
+        createdBy: admin.username,
+        updatedBy: admin.username,
+      },
     });
 
     try {
@@ -101,7 +106,11 @@ export async function POST(request: NextRequest) {
 
       const product = await prisma.product.update({
         where: { id: created.id },
-        data: { ...parsed.data, images: finalizedImages },
+        data: {
+          ...parsed.data,
+          images: finalizedImages,
+          updatedBy: admin.username,
+        },
       });
 
       return NextResponse.json(hydrateProductImages(product), { status: 201 });
