@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { getCurrentAdmin } from "@/lib/adminSession";
 import { getSession } from "@/lib/auth";
 import { productUpdateSchema } from "@/lib/validation";
 import {
@@ -39,8 +40,8 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const admin = await getCurrentAdmin();
+    if (!admin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -60,7 +61,7 @@ export async function PUT(
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    const updateData = { ...parsed.data };
+    const updateData = { ...parsed.data, updatedBy: admin.username };
     if (updateData.images) {
       updateData.images = normalizeProductImages(updateData.images);
       updateData.images = await moveDraftImagesToProductFolder(
