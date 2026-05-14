@@ -66,7 +66,11 @@ export default function AdminSidebar({ adminUsername, adminRole }: AdminSidebarP
           const isActive =
             link.href === "/admin"
               ? pathname === "/admin"
-              : pathname.startsWith(link.href);
+              : link.href === "/admin/products"
+                ? pathname === "/admin/products" ||
+                  (pathname.startsWith("/admin/products/") &&
+                    !pathname.startsWith("/admin/products/new"))
+                : pathname === link.href;
           return (
             <Link
               key={link.href}
