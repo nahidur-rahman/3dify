@@ -110,8 +110,8 @@ export default async function AdminProductsPage({
         </Link>
       </div>
 
-      <div className="mb-6 rounded-[1.5rem] border border-gray-200/80 bg-white/90 p-4 shadow-sm dark:border-dark-200 dark:bg-dark-100/90">
-        <div className="mb-4">
+      <div className="mb-6 rounded-[1.5rem] border border-gray-200/80 bg-white/90 p-3.5 shadow-sm dark:border-dark-200 dark:bg-dark-100/90">
+        <div className="mb-3">
           <p className="text-sm font-semibold text-gray-900 dark:text-white">
             Search and refine
           </p>
@@ -120,25 +120,29 @@ export default async function AdminProductsPage({
           </p>
         </div>
 
-        <form key={filterSignature} method="get" className="grid gap-3 lg:grid-cols-4">
-          <label className="relative lg:col-span-2">
+        <form
+          key={filterSignature}
+          method="get"
+          className="flex flex-wrap items-end gap-2"
+        >
+          <label className="relative min-w-[220px] flex-[2_1_280px]">
             <span className="sr-only">Search by product name</span>
-            <HiOutlineSearch className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <HiOutlineSearch className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               name="name"
               defaultValue={filters.name}
               placeholder="Search by product name"
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-11 pr-4 text-sm text-gray-900 placeholder:text-gray-400 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-dark-200 dark:bg-dark-200 dark:text-white"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pl-10 pr-3.5 text-sm text-gray-900 placeholder:text-gray-400 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-dark-200 dark:bg-dark-200 dark:text-white"
             />
           </label>
 
-          <label>
+          <label className="min-w-[140px] flex-[1_1_160px]">
             <span className="sr-only">Filter by category</span>
             <select
               name="category"
               defaultValue={filters.category}
-              className="w-full cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-dark-200 dark:bg-dark-200 dark:text-white"
+              className="w-full cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-dark-200 dark:bg-dark-200 dark:text-white"
             >
               <option value="">All categories</option>
               {Object.entries(categoryLabels).map(([value, label]) => (
@@ -149,12 +153,12 @@ export default async function AdminProductsPage({
             </select>
           </label>
 
-          <label>
+          <label className="min-w-[140px] flex-[1_1_160px]">
             <span className="sr-only">Filter by status</span>
             <select
               name="status"
               defaultValue={filters.status}
-              className="w-full cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-dark-200 dark:bg-dark-200 dark:text-white"
+              className="w-full cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-dark-200 dark:bg-dark-200 dark:text-white"
             >
               {statusOptions.map((option) => (
                 <option key={option.value || "all"} value={option.value}>
@@ -164,29 +168,29 @@ export default async function AdminProductsPage({
             </select>
           </label>
 
-          <label className="lg:col-span-2">
+          <label className="min-w-[150px] flex-[1_1_180px]">
             <span className="sr-only">Filter by creator</span>
             <input
               type="text"
               name="createdBy"
               defaultValue={filters.createdBy}
               placeholder="Created by username"
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-dark-200 dark:bg-dark-200 dark:text-white"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2 text-sm text-gray-900 placeholder:text-gray-400 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-dark-200 dark:bg-dark-200 dark:text-white"
             />
           </label>
 
-          <div className="flex flex-wrap items-center gap-2 lg:col-span-4">
+          <div className="flex flex-none flex-wrap items-center gap-2">
             <button
               type="submit"
-              className="inline-flex items-center gap-2 rounded-xl bg-primary-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-600"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary-500 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600"
             >
-              <HiOutlineSearch className="h-4 w-4" />
+              <HiOutlineSearch className="h-3.5 w-3.5" />
               Apply filters
             </button>
             {hasActiveFilters && (
               <Link
                 href="/admin/products"
-                className="inline-flex items-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:border-primary-500 hover:text-primary-500 dark:border-dark-200 dark:bg-dark-100 dark:text-gray-300"
+                className="inline-flex items-center rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-sm font-medium text-gray-600 transition-colors hover:border-primary-500 hover:text-primary-500 dark:border-dark-200 dark:bg-dark-100 dark:text-gray-300"
               >
                 Clear filters
               </Link>
