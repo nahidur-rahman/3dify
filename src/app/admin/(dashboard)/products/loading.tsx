@@ -51,20 +51,20 @@ export default function AdminProductsLoading() {
         <Skeleton className="h-11 w-36 rounded-xl" />
       </div>
 
-      <div className="mb-6 rounded-[1.5rem] border border-gray-200/80 bg-white/90 p-4 shadow-sm dark:border-dark-200 dark:bg-dark-100/90">
-        <div className="mb-4 space-y-2">
+      <div className="mb-6 rounded-[1.5rem] border border-gray-200/80 bg-white/90 p-3.5 shadow-sm dark:border-dark-200 dark:bg-dark-100/90">
+        <div className="mb-3 space-y-2">
           <Skeleton className="h-4 w-36" />
           <Skeleton className="h-3 w-80" />
         </div>
 
-        <div className="grid gap-3 lg:grid-cols-4">
-          <Skeleton className="h-11 rounded-xl lg:col-span-2" />
-          <Skeleton className="h-11 rounded-xl" />
-          <Skeleton className="h-11 rounded-xl" />
-          <Skeleton className="h-11 rounded-xl lg:col-span-2" />
-          <div className="flex flex-wrap items-center gap-2 lg:col-span-4">
-            <Skeleton className="h-11 w-36 rounded-xl" />
-            <Skeleton className="h-11 w-28 rounded-xl" />
+        <div className="flex flex-wrap items-end gap-2">
+          <Skeleton className="h-10 min-w-[220px] flex-[2_1_280px] rounded-xl" />
+          <Skeleton className="h-10 min-w-[140px] flex-[1_1_160px] rounded-xl" />
+          <Skeleton className="h-10 min-w-[140px] flex-[1_1_160px] rounded-xl" />
+          <Skeleton className="h-10 min-w-[150px] flex-[1_1_180px] rounded-xl" />
+          <div className="flex flex-none flex-wrap items-center gap-2">
+            <Skeleton className="h-10 w-32 rounded-xl" />
+            <Skeleton className="h-10 w-28 rounded-xl" />
           </div>
         </div>
       </div>
