@@ -82,6 +82,12 @@ export default async function AdminProductsPage({
   searchParams: ProductsPageSearchParams;
 }) {
   const { products, filters, hasActiveFilters } = await getProducts(searchParams);
+  const filterSignature = [
+    filters.name,
+    filters.category,
+    filters.status,
+    filters.createdBy,
+  ].join("|");
   const productSummary = hasActiveFilters
     ? `Showing ${products.length} matching product${products.length === 1 ? "" : "s"}`
     : `Manage your product listings (${products.length} total)`;
@@ -114,7 +120,7 @@ export default async function AdminProductsPage({
           </p>
         </div>
 
-        <form method="get" className="grid gap-3 lg:grid-cols-4">
+        <form key={filterSignature} method="get" className="grid gap-3 lg:grid-cols-4">
           <label className="relative lg:col-span-2">
             <span className="sr-only">Search by product name</span>
             <HiOutlineSearch className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
