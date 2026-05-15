@@ -2,13 +2,13 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import ProductForm from "@/components/ProductForm";
 import { Product } from "@/lib/types";
-import { hydrateProductImages } from "@/lib/productImages";
+import { getImageSignatures, hydrateProductImages } from "@/lib/productImages";
 
 interface EditProductPageProps {
   params: { id: string };
 }
 
-async function getProduct(id: string) {
+async function getProduct(id: string): Promise<Product | null> {
   try {
     const product = await prisma.product.findUnique({ where: { id } });
     return product ? hydrateProductImages(product) : null;
@@ -22,6 +22,7 @@ export default async function AdminEditProductPage({
 }: EditProductPageProps) {
   const product = await getProduct(params.id);
   if (!product) notFound();
+  const existingImageSignatures = await getImageSignatures(product.images);
 
   return (
     <div>
@@ -33,7 +34,11 @@ export default async function AdminEditProductPage({
           Update &ldquo;{product.name}&rdquo;
         </p>
       </div>
-      <ProductForm mode="edit" product={product as unknown as Product} />
+      <ProductForm
+        mode="edit"
+        product={product}
+        existingImageSignatures={existingImageSignatures}
+      />
     </div>
   );
 }
