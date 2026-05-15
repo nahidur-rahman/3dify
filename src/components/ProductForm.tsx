@@ -97,42 +97,13 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
     const nextFiles = Array.from(files);
     e.target.value = "";
 
-    if (mode === "edit") {
-      const stagedImages = nextFiles.map((file) => ({
-        id: crypto.randomUUID(),
-        file,
-        previewUrl: URL.createObjectURL(file),
-      }));
+    const stagedImages = nextFiles.map((file) => ({
+      id: crypto.randomUUID(),
+      file,
+      previewUrl: URL.createObjectURL(file),
+    }));
 
-      setPendingImages((prev) => [...prev, ...stagedImages]);
-      return;
-    }
-
-    setImageUploading(true);
-    const formData = new FormData();
-    nextFiles.forEach((file) => formData.append("files", file));
-    formData.append("folderKey", uploadFolderKey);
-
-    try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      if (res.ok) {
-        if (typeof data.folderKey === "string" && data.folderKey.length > 0) {
-          setUploadFolderKey(data.folderKey);
-        }
-        setForm((prev) => ({ ...prev, images: [...prev.images, ...data.urls] }));
-      } else {
-        console.error("Image upload failed:", data);
-        setError(data.error || "Upload failed");
-      }
-    } catch {
-      setError("Image upload failed");
-    } finally {
-      setImageUploading(false);
-    }
+    setPendingImages((prev) => [...prev, ...stagedImages]);
   };
 
   const removeImage = (index: number) => {
@@ -193,7 +164,7 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
       const method = mode === "create" ? "POST" : "PUT";
 
       const images = [...form.images];
-      if (mode === "edit" && pendingImages.length > 0) {
+      if (pendingImages.length > 0) {
         const uploadedImages = await uploadPendingImages();
         images.push(...uploadedImages);
       }
