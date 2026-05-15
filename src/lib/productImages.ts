@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { getSupabaseAdmin, productImageBucket } from "@/lib/supabaseAdmin";
 import type { Product, ProductSizeOption } from "@/lib/types";
 
@@ -22,6 +23,29 @@ function buildPublicUrl(path: string) {
     .getPublicUrl(path);
 
   return data.publicUrl;
+}
+
+function hashBuffer(buffer: ArrayBuffer) {
+  return createHash("sha256").update(new Uint8Array(buffer)).digest("hex");
+}
+
+async function getBlobHash(blob: Blob) {
+  return hashBuffer(await blob.arrayBuffer());
+}
+
+async function getRemoteImageHash(imageUrl: string) {
+  const response = await fetch(imageUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image: ${response.status}`);
+  }
+
+  return hashBuffer(await response.arrayBuffer());
+}
+
+function uniqueStrings(values: Array<string | null | undefined>) {
+  return Array.from(
+    new Set(values.filter((value): value is string => Boolean(value)))
+  );
 }
 
 function normalizeStoragePath(imageRef: string) {
@@ -73,15 +97,27 @@ export function hydrateProductImages(item: {
 }): Product {
   return {
     ...item,
-    images: item.images.map((imageRef) => resolveDisplayUrl(imageRef)),
+    images: uniqueStrings(item.images.map((imageRef) => resolveDisplayUrl(imageRef))),
     sizeOptions: normalizeSizeOptions(item.sizeOptions),
   } as Product;
 }
 
+export async function getImageSignatures(imageUrls: string[]) {
+  const signatures = await Promise.all(
+    imageUrls.map(async (imageUrl) => {
+      try {
+        return await getRemoteImageHash(imageUrl);
+      } catch {
+        return null;
+      }
+    })
+  );
+
+  return signatures.filter((signature): signature is string => Boolean(signature));
+}
+
 export function normalizeProductImages(imageRefs: string[]) {
-  return imageRefs
-    .map((imageRef) => normalizeStoragePath(imageRef))
-    .filter((imageRef): imageRef is string => Boolean(imageRef));
+  return uniqueStrings(imageRefs.map((imageRef) => normalizeStoragePath(imageRef)));
 }
 
 export function getProductFolderPath(folderKey: string) {
@@ -127,13 +163,14 @@ export async function uploadProductImage(file: File, folderKey: string) {
 
   const folderPath = getProductFolderPath(folderKey);
   const ext = getExtension(file.name);
-  const imagePath = `${folderPath}/${crypto.randomUUID()}.${ext}`;
+  const fileHash = await getBlobHash(file);
+  const imagePath = `${folderPath}/${fileHash}.${ext}`;
   const contentType = file.type || `image/${ext}`;
 
   const { error } = await getSupabaseAdmin()
     .storage.from(productImageBucket)
     .upload(imagePath, file, {
-      upsert: false,
+      upsert: true,
       contentType,
       cacheControl: "3600",
     });
@@ -146,9 +183,7 @@ export async function uploadProductImage(file: File, folderKey: string) {
 }
 
 export async function deleteProductImages(imageUrls: string[]) {
-  const paths = imageUrls
-    .map((url) => normalizeStoragePath(url))
-    .filter((path): path is string => Boolean(path));
+  const paths = uniqueStrings(imageUrls.map((url) => normalizeStoragePath(url)));
 
   if (paths.length === 0) return;
 
@@ -167,16 +202,18 @@ export async function moveDraftImagesToProductFolder(
 ) {
   const targetFolder = getProductFolderPath(productId);
   const supabase = getSupabaseAdmin();
-  const nextPaths = imageUrls
-    .map((imageRef) => normalizeStoragePath(imageRef))
-    .filter((path): path is string => Boolean(path));
+  const sourcePaths = uniqueStrings(
+    imageUrls.map((imageRef) => normalizeStoragePath(imageRef))
+  );
+  const nextPaths = [...sourcePaths];
   const copiedPaths: string[] = [];
 
-  for (let i = 0; i < imageUrls.length; i += 1) {
-    const imageUrl = imageUrls[i];
-    const sourcePath = normalizeStoragePath(imageUrl);
+  for (let i = 0; i < sourcePaths.length; i += 1) {
+    const sourcePath = sourcePaths[i];
 
-    if (!sourcePath || !sourcePath.startsWith(`${PRODUCT_FOLDER_PREFIX}/${DRAFT_FOLDER_PREFIX}-`)) {
+    if (
+      !sourcePath.startsWith(`${PRODUCT_FOLDER_PREFIX}/${DRAFT_FOLDER_PREFIX}-`)
+    ) {
       continue;
     }
 
