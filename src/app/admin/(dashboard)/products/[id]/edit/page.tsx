@@ -2,7 +2,11 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import ProductForm from "@/components/ProductForm";
 import { Product } from "@/lib/types";
-import { getImageSignatures, hydrateProductImages } from "@/lib/productImages";
+import {
+  getImageSignatures,
+  getProductImageLimit,
+  hydrateProductImages,
+} from "@/lib/productImages";
 
 interface EditProductPageProps {
   params: { id: string };
@@ -23,6 +27,7 @@ export default async function AdminEditProductPage({
   const product = await getProduct(params.id);
   if (!product) notFound();
   const existingImageSignatures = await getImageSignatures(product.images);
+  const imageLimit = getProductImageLimit();
 
   return (
     <div>
@@ -38,6 +43,7 @@ export default async function AdminEditProductPage({
         mode="edit"
         product={product}
         existingImageSignatures={existingImageSignatures}
+        imageLimit={imageLimit}
       />
     </div>
   );

@@ -1,6 +1,9 @@
 import ProductForm from "@/components/ProductForm";
+import { getProductImageLimit } from "@/lib/productImages";
 
 export default function AdminNewProductPage() {
+  const imageLimit = getProductImageLimit();
+
   return (
     <div>
       <div className="mb-5">
@@ -11,7 +14,7 @@ export default function AdminNewProductPage() {
           Create a new 3D printed product listing
         </p>
       </div>
-      <ProductForm mode="create" />
+      <ProductForm mode="create" imageLimit={imageLimit} />
     </div>
   );
 }
