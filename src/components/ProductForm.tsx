@@ -10,6 +10,7 @@ interface ProductFormProps {
   product?: Product;
   mode: "create" | "edit";
   existingImageSignatures?: string[];
+  imageLimit?: number | null;
 }
 
 interface PendingImage {
@@ -39,10 +40,12 @@ export default function ProductForm({
   product,
   mode,
   existingImageSignatures = [],
+  imageLimit = null,
 }: ProductFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [imageLimitWarning, setImageLimitWarning] = useState("");
   const [imageUploading, setImageUploading] = useState(false);
   const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
   const [existingImageHashes, setExistingImageHashes] = useState(
@@ -74,6 +77,14 @@ export default function ProductForm({
     inStock: product?.inStock ?? true,
     featured: product?.featured || false,
   });
+
+  const hasImageLimit = typeof imageLimit === "number" && imageLimit > 0;
+  const uniqueExistingImageCount = new Set(form.images).size;
+  const totalImageCount = uniqueExistingImageCount + pendingImages.length;
+  const remainingImageSlots = hasImageLimit
+    ? Math.max(0, imageLimit - totalImageCount)
+    : null;
+  const imageLimitReached = hasImageLimit && totalImageCount >= imageLimit;
 
   useEffect(() => {
     return () => {
@@ -121,6 +132,14 @@ export default function ProductForm({
 
     const nextFiles = Array.from(files);
     e.target.value = "";
+    setImageLimitWarning("");
+
+    if (hasImageLimit && remainingImageSlots === 0) {
+      setImageLimitWarning(
+        `Image limit reached. Maximum ${imageLimit} images per product.`
+      );
+      return;
+    }
 
     setImageUploading(true);
     try {
@@ -130,11 +149,21 @@ export default function ProductForm({
       ]);
 
       const stagedImages: PendingImage[] = [];
+      const slotsLeft = hasImageLimit
+        ? Math.max(0, imageLimit - uniqueExistingImageCount - pendingImages.length)
+        : Number.POSITIVE_INFINITY;
+      let skippedBecauseOfLimit = 0;
 
-      for (const file of nextFiles) {
+      for (let index = 0; index < nextFiles.length; index += 1) {
+        const file = nextFiles[index];
         const signature = await getFileSignature(file);
         if (seenSignatures.has(signature)) {
           continue;
+        }
+
+        if (stagedImages.length >= slotsLeft) {
+          skippedBecauseOfLimit += nextFiles.length - index;
+          break;
         }
 
         seenSignatures.add(signature);
@@ -149,6 +178,14 @@ export default function ProductForm({
       if (stagedImages.length > 0) {
         setPendingImages((prev) => [...prev, ...stagedImages]);
       }
+
+      if (skippedBecauseOfLimit > 0) {
+        setImageLimitWarning(
+          `Only ${imageLimit} images are allowed per product. ${skippedBecauseOfLimit} selected image${
+            skippedBecauseOfLimit === 1 ? " was" : "s were"
+          } skipped.`
+        );
+      }
     } finally {
       setImageUploading(false);
     }
@@ -160,6 +197,7 @@ export default function ProductForm({
       images: prev.images.filter((_, i) => i !== index),
     }));
     setExistingImageHashes((prev) => prev.filter((_, i) => i !== index));
+    setImageLimitWarning("");
   };
 
   const removePendingImage = (pendingImageId: string) => {
@@ -219,6 +257,12 @@ export default function ProductForm({
       const method = mode === "create" ? "POST" : "PUT";
 
       const images = [...new Set(form.images)];
+      if (hasImageLimit && images.length + pendingImages.length > imageLimit) {
+        setImageLimitWarning(
+          `Image limit reached. Maximum ${imageLimit} images per product.`
+        );
+        return;
+      }
       if (pendingImages.length > 0) {
         const uploadedImages = await uploadPendingImages();
         images.push(...uploadedImages);
@@ -254,6 +298,7 @@ export default function ProductForm({
 
       pendingImages.forEach((image) => URL.revokeObjectURL(image.previewUrl));
       setPendingImages([]);
+      setImageLimitWarning("");
 
       router.push("/admin/products");
       router.refresh();
@@ -272,6 +317,12 @@ export default function ProductForm({
       {error && (
         <div className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-500/10 dark:text-red-400 xl:col-span-2">
           {error}
+        </div>
+      )}
+
+      {imageLimitWarning && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300 xl:col-span-2">
+          {imageLimitWarning}
         </div>
       )}
 
@@ -614,6 +665,21 @@ export default function ProductForm({
             disabled={imageUploading || loading}
             className="mt-3 block w-full text-xs text-gray-500 file:mr-3 file:rounded-full file:border-0 file:bg-primary-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-primary-600 hover:file:bg-primary-100 dark:file:bg-primary-500/10 dark:file:text-primary-400"
           />
+          {hasImageLimit && remainingImageSlots !== null && (
+            <p
+              className={`mt-1 text-xs ${
+                imageLimitReached
+                  ? "text-amber-500"
+                  : "text-gray-500 dark:text-gray-400"
+              }`}
+            >
+              {imageLimitReached
+                ? `Maximum ${imageLimit} images reached. Remove one to add more.`
+                : `${totalImageCount} / ${imageLimit} images used · ${remainingImageSlots} slot${
+                    remainingImageSlots === 1 ? "" : "s"
+                  } left`}
+            </p>
+          )}
           {imageUploading && (
             <p className="mt-1 text-xs text-primary-500">Processing images...</p>
           )}
