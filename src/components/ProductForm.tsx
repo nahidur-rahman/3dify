@@ -9,20 +9,45 @@ import { categoryLabels } from "@/lib/utils";
 interface ProductFormProps {
   product?: Product;
   mode: "create" | "edit";
+  existingImageSignatures?: string[];
 }
 
 interface PendingImage {
   id: string;
   file: File;
   previewUrl: string;
+  signature: string;
 }
 
-export default function ProductForm({ product, mode }: ProductFormProps) {
+function bytesToHex(bytes: Uint8Array) {
+  return Array.from(bytes)
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function getFileSignature(file: File) {
+  try {
+    const buffer = await file.arrayBuffer();
+    const digest = await globalThis.crypto.subtle.digest("SHA-256", buffer);
+    return bytesToHex(new Uint8Array(digest));
+  } catch {
+    return `${file.name}:${file.size}:${file.lastModified}`;
+  }
+}
+
+export default function ProductForm({
+  product,
+  mode,
+  existingImageSignatures = [],
+}: ProductFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [imageUploading, setImageUploading] = useState(false);
   const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
+  const [existingImageHashes, setExistingImageHashes] = useState(
+    existingImageSignatures
+  );
   const [uploadFolderKey, setUploadFolderKey] = useState(
     product?.id || `draft-${crypto.randomUUID()}`
   );
@@ -97,13 +122,36 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
     const nextFiles = Array.from(files);
     e.target.value = "";
 
-    const stagedImages = nextFiles.map((file) => ({
-      id: crypto.randomUUID(),
-      file,
-      previewUrl: URL.createObjectURL(file),
-    }));
+    setImageUploading(true);
+    try {
+      const seenSignatures = new Set([
+        ...existingImageHashes,
+        ...pendingImages.map((image) => image.signature),
+      ]);
 
-    setPendingImages((prev) => [...prev, ...stagedImages]);
+      const stagedImages: PendingImage[] = [];
+
+      for (const file of nextFiles) {
+        const signature = await getFileSignature(file);
+        if (seenSignatures.has(signature)) {
+          continue;
+        }
+
+        seenSignatures.add(signature);
+        stagedImages.push({
+          id: crypto.randomUUID(),
+          file,
+          previewUrl: URL.createObjectURL(file),
+          signature,
+        });
+      }
+
+      if (stagedImages.length > 0) {
+        setPendingImages((prev) => [...prev, ...stagedImages]);
+      }
+    } finally {
+      setImageUploading(false);
+    }
   };
 
   const removeImage = (index: number) => {
@@ -111,6 +159,7 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
     }));
+    setExistingImageHashes((prev) => prev.filter((_, i) => i !== index));
   };
 
   const removePendingImage = (pendingImageId: string) => {
@@ -124,7 +173,7 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
     });
   };
 
-  const uploadPendingImages = async () => {
+  const uploadPendingImages = async (): Promise<string[]> => {
     if (pendingImages.length === 0) return [];
 
     setImageUploading(true);
@@ -147,7 +196,13 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
         setUploadFolderKey(data.folderKey);
       }
 
-      return Array.isArray(data.urls) ? (data.urls as string[]) : [];
+      const uploadedUrls = Array.isArray(data.urls)
+        ? (data.urls as unknown[]).filter(
+            (url): url is string => typeof url === "string" && url.length > 0
+          )
+        : [];
+
+      return Array.from(new Set(uploadedUrls));
     } finally {
       setImageUploading(false);
     }
@@ -163,18 +218,19 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
         mode === "create" ? "/api/products" : `/api/products/${product?.id}`;
       const method = mode === "create" ? "POST" : "PUT";
 
-      const images = [...form.images];
+      const images = [...new Set(form.images)];
       if (pendingImages.length > 0) {
         const uploadedImages = await uploadPendingImages();
         images.push(...uploadedImages);
       }
+      const uniqueImages = [...new Set(images)];
 
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
-          images,
+          images: uniqueImages,
           price: Number(form.price),
           weight: Number(form.weight),
           infillPercentage: Number(form.infillPercentage),
@@ -559,9 +615,7 @@ export default function ProductForm({ product, mode }: ProductFormProps) {
             className="mt-3 block w-full text-xs text-gray-500 file:mr-3 file:rounded-full file:border-0 file:bg-primary-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-primary-600 hover:file:bg-primary-100 dark:file:bg-primary-500/10 dark:file:text-primary-400"
           />
           {imageUploading && (
-            <p className="mt-1 text-xs text-primary-500">
-              {mode === "edit" ? "Uploading images..." : "Uploading..."}
-            </p>
+            <p className="mt-1 text-xs text-primary-500">Processing images...</p>
           )}
         </section>
 
