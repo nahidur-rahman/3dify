@@ -96,7 +96,7 @@ export default function ProductImageGallery({
       </div>
 
       {hasMultipleImages && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex w-full justify-center gap-2 overflow-x-auto pb-1">
           {images.map((image, index) => {
             const isActive = index === activeIndex;
 
