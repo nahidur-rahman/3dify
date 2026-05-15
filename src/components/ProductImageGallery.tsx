@@ -19,15 +19,15 @@ export default function ProductImageGallery({
   const activeImage = images[activeIndex] ?? images[0];
 
   const goToPrevious = () => {
-    if (!hasMultipleImages) return;
+    if (!hasMultipleImages || activeIndex === 0) return;
 
-    setActiveIndex((current) => (current - 1 + images.length) % images.length);
+    setActiveIndex((current) => Math.max(0, current - 1));
   };
 
   const goToNext = () => {
-    if (!hasMultipleImages) return;
+    if (!hasMultipleImages || activeIndex === images.length - 1) return;
 
-    setActiveIndex((current) => (current + 1) % images.length);
+    setActiveIndex((current) => Math.min(images.length - 1, current + 1));
   };
 
   if (!activeImage) {
@@ -73,8 +73,9 @@ export default function ProductImageGallery({
             <button
               type="button"
               onClick={goToPrevious}
+              disabled={activeIndex === 0}
               aria-label="Previous image"
-              className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-white/90 text-gray-900 shadow-lg shadow-black/10 backdrop-blur transition hover:scale-105 hover:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/40 dark:border-dark-200 dark:bg-black/40 dark:text-white dark:hover:bg-black/60"
+              className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-white/90 text-gray-900 shadow-lg shadow-black/10 backdrop-blur transition hover:scale-105 hover:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/40 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 dark:border-dark-200 dark:bg-black/40 dark:text-white dark:hover:bg-black/60"
             >
               <HiChevronLeft className="h-5 w-5" />
             </button>
@@ -82,8 +83,9 @@ export default function ProductImageGallery({
             <button
               type="button"
               onClick={goToNext}
+              disabled={activeIndex === images.length - 1}
               aria-label="Next image"
-              className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-white/90 text-gray-900 shadow-lg shadow-black/10 backdrop-blur transition hover:scale-105 hover:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/40 dark:border-dark-200 dark:bg-black/40 dark:text-white dark:hover:bg-black/60"
+              className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-white/90 text-gray-900 shadow-lg shadow-black/10 backdrop-blur transition hover:scale-105 hover:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/40 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 dark:border-dark-200 dark:bg-black/40 dark:text-white dark:hover:bg-black/60"
             >
               <HiChevronRight className="h-5 w-5" />
             </button>
