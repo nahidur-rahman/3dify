@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense, cache } from "react";
 import { prisma } from "@/lib/db";
@@ -13,6 +12,7 @@ import ProductGrid from "@/components/ProductGrid";
 import { Product } from "@/lib/types";
 import { hydrateProductImages } from "@/lib/productImages";
 import { HiCube, HiColorSwatch, HiScale, HiTemplate } from "react-icons/hi";
+import ProductImageGallery from "../../../../components/ProductImageGallery";
 
 interface ProductDetailPageProps {
   params: { id: string };
@@ -106,34 +106,12 @@ export default async function ProductDetailPage({
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-10">
-        {/* Image */}
-        <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100 dark:bg-dark-100 lg:sticky lg:top-24">
-          {product.images[0] ? (
-            <Image
-              src={product.images[0]}
-              alt={product.name}
-              fill
-              className="object-cover"
-              priority
-              sizes="(max-width: 1024px) 100vw, 50vw"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400">
-              <svg
-                className="w-24 h-24"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-            </div>
-          )}
+        <div className="lg:sticky lg:top-24 lg:self-start">
+          <ProductImageGallery
+            key={product.id}
+            images={product.images}
+            productName={product.name}
+          />
         </div>
 
         {/* Details */}
