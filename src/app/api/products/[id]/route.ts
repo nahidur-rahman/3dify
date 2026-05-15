@@ -6,6 +6,7 @@ import { productUpdateSchema } from "@/lib/validation";
 import {
   deleteProductImages,
   hydrateProductImages,
+  getProductImageLimit,
   moveDraftImagesToProductFolder,
   normalizeProductImages,
 } from "@/lib/productImages";
@@ -63,9 +64,24 @@ export async function PUT(
 
     const updateData = { ...parsed.data, updatedBy: admin.username };
     if (updateData.images) {
-      updateData.images = normalizeProductImages(updateData.images);
+      const normalizedImages = normalizeProductImages(updateData.images);
+      const imageLimit = getProductImageLimit();
+
+      if (imageLimit !== null && normalizedImages.length > imageLimit) {
+        const removedImages = normalizedImages.filter(
+          (url) => !existing.images.includes(url)
+        );
+        await deleteProductImages(removedImages);
+        return NextResponse.json(
+          {
+            error: `Image limit reached. Maximum ${imageLimit} images per product.`,
+          },
+          { status: 400 }
+        );
+      }
+
       updateData.images = await moveDraftImagesToProductFolder(
-        updateData.images,
+        normalizedImages,
         params.id
       );
     }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import {
   createDraftFolderKey,
+  getProductImageLimit,
   uploadProductImage,
 } from "@/lib/productImages";
 
@@ -29,6 +30,16 @@ export async function POST(request: NextRequest) {
 
     if (!files || files.length === 0) {
       return NextResponse.json({ error: "No files provided" }, { status: 400 });
+    }
+
+    const imageLimit = getProductImageLimit();
+    if (imageLimit !== null && files.length > imageLimit) {
+      return NextResponse.json(
+        {
+          error: `Image limit reached. Maximum ${imageLimit} images per upload.`,
+        },
+        { status: 400 }
+      );
     }
 
     const folderKey =

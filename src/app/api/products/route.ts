@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/adminSession";
 import { productSchema } from "@/lib/validation";
 import {
+  deleteProductImages,
+  getProductImageLimit,
   hydrateProductImages,
   moveDraftImagesToProductFolder,
   normalizeProductImages,
@@ -88,6 +90,17 @@ export async function POST(request: NextRequest) {
     }
 
     const normalizedImages = normalizeProductImages(parsed.data.images);
+    const imageLimit = getProductImageLimit();
+
+    if (imageLimit !== null && normalizedImages.length > imageLimit) {
+      await deleteProductImages(normalizedImages);
+      return NextResponse.json(
+        {
+          error: `Image limit reached. Maximum ${imageLimit} images per product.`,
+        },
+        { status: 400 }
+      );
+    }
 
     const created = await prisma.product.create({
       data: {
