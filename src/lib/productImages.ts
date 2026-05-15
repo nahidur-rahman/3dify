@@ -25,6 +25,14 @@ function buildPublicUrl(path: string) {
   return data.publicUrl;
 }
 
+export function getProductImageLimit() {
+  const rawLimit = process.env.PRODUCT_IMAGE_LIMIT?.trim();
+  if (!rawLimit) return null;
+
+  const parsedLimit = Number.parseInt(rawLimit, 10);
+  return Number.isInteger(parsedLimit) && parsedLimit > 0 ? parsedLimit : null;
+}
+
 function hashBuffer(buffer: ArrayBuffer) {
   return createHash("sha256").update(new Uint8Array(buffer)).digest("hex");
 }
