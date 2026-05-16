@@ -63,3 +63,33 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: message, code }, { status });
   }
 }
+
+// DELETE /api/upload — remove uploaded product images (admin only)
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = (await request.json().catch(() => null)) as
+      | { imageUrls?: unknown }
+      | null;
+
+    const imageUrls = Array.isArray(body?.imageUrls)
+      ? body.imageUrls.filter(
+          (value): value is string => typeof value === "string" && value.length > 0
+        )
+      : [];
+
+    await cleanupUploadedImages(imageUrls);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Cleanup upload error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
