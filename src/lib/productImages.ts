@@ -249,8 +249,24 @@ export async function moveDraftImagesToProductFolder(
     copiedPaths.push(sourcePath);
     nextPaths[i] = destinationPath;
   }
+  } catch (error) {
+    const cleanupPaths = uniqueStrings([...draftSourcePaths, ...copiedPaths]);
 
-  if (copiedPaths.length > 0) {
+    if (cleanupPaths.length > 0) {
+      try {
+        await deleteProductImages(cleanupPaths);
+      } catch (cleanupError) {
+        console.error(
+          "Failed to clean up draft images after move failure:",
+          cleanupError
+        );
+      }
+    }
+
+    throw error;
+  }
+
+  if (draftSourcePaths.length > 0) {
     const { error: removeError } = await supabase
       .storage.from(productImageBucket)
       .remove(copiedPaths);
