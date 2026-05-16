@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import {
+  deleteProductImages,
   createDraftFolderKey,
   getProductImageLimit,
   uploadProductImage,
@@ -28,6 +29,8 @@ async function cleanupUploadedImages(imageUrls: string[]) {
 
 // POST /api/upload — upload product images (admin only)
 export async function POST(request: NextRequest) {
+  const urls: string[] = [];
+
   try {
     const session = await getSession();
     if (!session) {
@@ -56,7 +59,6 @@ export async function POST(request: NextRequest) {
       typeof providedFolderKey === "string" && providedFolderKey.trim().length > 0
         ? providedFolderKey.trim()
         : createDraftFolderKey();
-    const urls: string[] = [];
 
     for (const file of files) {
       urls.push(await uploadProductImage(file, folderKey));
@@ -64,6 +66,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ urls, folderKey });
   } catch (error) {
+    await cleanupUploadedImages(urls);
+
     const message =
       error instanceof Error ? error.message : "Internal server error";
     const status = message.startsWith("Invalid") || message.includes("Max size") ? 400 : 500;
