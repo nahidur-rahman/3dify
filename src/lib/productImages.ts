@@ -220,35 +220,35 @@ export async function moveDraftImagesToProductFolder(
     imageUrls.map((imageRef) => normalizeStoragePath(imageRef))
   );
   const nextPaths = [...sourcePaths];
+  const draftSourcePaths = sourcePaths.filter(isDraftStoragePath);
   const copiedPaths: string[] = [];
 
-  for (let i = 0; i < sourcePaths.length; i += 1) {
-    const sourcePath = sourcePaths[i];
+  try {
+    for (let i = 0; i < sourcePaths.length; i += 1) {
+      const sourcePath = sourcePaths[i];
 
-    if (
-      !sourcePath.startsWith(`${PRODUCT_FOLDER_PREFIX}/${DRAFT_FOLDER_PREFIX}-`)
-    ) {
-      continue;
+      if (!isDraftStoragePath(sourcePath)) {
+        continue;
+      }
+
+      const fileName = sourcePath.split("/").pop();
+      if (!fileName) {
+        throw new Error("Invalid image path");
+      }
+
+      const destinationPath = `${targetFolder}/${fileName}`;
+
+      const { error: copyError } = await supabase
+        .storage.from(productImageBucket)
+        .copy(sourcePath, destinationPath);
+
+      if (copyError) {
+        throw new Error(`Failed to move image: ${copyError.message}`);
+      }
+
+      copiedPaths.push(destinationPath);
+      nextPaths[i] = destinationPath;
     }
-
-    const fileName = sourcePath.split("/").pop();
-    if (!fileName) {
-      throw new Error("Invalid image path");
-    }
-
-    const destinationPath = `${targetFolder}/${fileName}`;
-
-    const { error: copyError } = await supabase
-      .storage.from(productImageBucket)
-      .copy(sourcePath, destinationPath);
-
-    if (copyError) {
-      throw new Error(`Failed to move image: ${copyError.message}`);
-    }
-
-    copiedPaths.push(sourcePath);
-    nextPaths[i] = destinationPath;
-  }
   } catch (error) {
     const cleanupPaths = uniqueStrings([...draftSourcePaths, ...copiedPaths]);
 
@@ -269,7 +269,7 @@ export async function moveDraftImagesToProductFolder(
   if (draftSourcePaths.length > 0) {
     const { error: removeError } = await supabase
       .storage.from(productImageBucket)
-      .remove(copiedPaths);
+      .remove(draftSourcePaths);
 
     if (removeError) {
       throw new Error(`Failed to clean up old images: ${removeError.message}`);
