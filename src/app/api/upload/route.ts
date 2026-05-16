@@ -16,6 +16,16 @@ function getUploadErrorCode(message: string) {
   return "UPLOAD_FAILED";
 }
 
+async function cleanupUploadedImages(imageUrls: string[]) {
+  if (imageUrls.length === 0) return;
+
+  try {
+    await deleteProductImages(imageUrls);
+  } catch (cleanupError) {
+    console.error("Cleanup upload error:", cleanupError);
+  }
+}
+
 // POST /api/upload — upload product images (admin only)
 export async function POST(request: NextRequest) {
   try {
