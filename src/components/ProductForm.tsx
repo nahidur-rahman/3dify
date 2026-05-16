@@ -55,6 +55,20 @@ export default function ProductForm({
     product?.id || `draft-${crypto.randomUUID()}`
   );
 
+  const cleanupUploadedImages = async (imageUrls: string[]) => {
+    if (mode !== "create" || imageUrls.length === 0) return;
+
+    try {
+      await fetch("/api/upload", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageUrls }),
+      });
+    } catch {
+      // Ignore cleanup failures so the original submit error stays visible.
+    }
+  };
+
   const initialSizeOptions: ProductSizeOption[] =
     product?.sizeOptions && product.sizeOptions.length > 0
       ? product.sizeOptions
