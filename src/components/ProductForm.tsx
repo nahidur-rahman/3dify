@@ -264,6 +264,7 @@ export default function ProductForm({
     e.preventDefault();
     setError("");
     setLoading(true);
+    let uploadedImages: string[] = [];
 
     try {
       const url =
@@ -278,7 +279,7 @@ export default function ProductForm({
         return;
       }
       if (pendingImages.length > 0) {
-        const uploadedImages = await uploadPendingImages();
+        uploadedImages = await uploadPendingImages();
         images.push(...uploadedImages);
       }
       const uniqueImages = [...new Set(images)];
@@ -303,9 +304,19 @@ export default function ProductForm({
         }),
       });
 
-      const data = await res.json();
+      const responseText = await res.text();
+      let data: { error?: string } = {};
+
+      if (responseText) {
+        try {
+          data = JSON.parse(responseText) as { error?: string };
+        } catch {
+          data = {};
+        }
+      }
 
       if (!res.ok) {
+        await cleanupUploadedImages(uploadedImages);
         setError(data.error || "Something went wrong");
         return;
       }
@@ -317,6 +328,7 @@ export default function ProductForm({
       router.push("/admin/products");
       router.refresh();
     } catch {
+      await cleanupUploadedImages(uploadedImages);
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
