@@ -137,6 +137,12 @@ export function createDraftFolderKey() {
   return `${DRAFT_FOLDER_PREFIX}-${crypto.randomUUID()}`;
 }
 
+function isDraftStoragePath(storagePath: string) {
+  return storagePath.startsWith(
+    `${PRODUCT_FOLDER_PREFIX}/${DRAFT_FOLDER_PREFIX}-`
+  );
+}
+
 function isUrlInBucket(url: string) {
   try {
     const parsed = new URL(url);
