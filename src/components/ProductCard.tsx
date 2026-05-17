@@ -22,9 +22,17 @@ export default function ProductCard({ product }: ProductCardProps) {
     <Link href={`/products/${product.id}`} className="group">
       <div className="overflow-hidden rounded-[1.5rem] border border-gray-200/80 bg-white/90 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary-500/40 hover:shadow-xl hover:shadow-primary-500/10 dark:border-dark-200 dark:bg-dark-100/90">
         {/* Image */}
-        <div className="relative aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-dark-200">
-          <div className="absolute inset-x-0 top-0 z-10 h-12 bg-gradient-to-b from-black/20 to-transparent" />
-          {product.images[0] ? (
+        <div className="relative aspect-[4/3] overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(243,244,246,0.95)_48%,_rgba(229,231,235,0.9)_100%)] dark:bg-[radial-gradient(circle_at_top,_rgba(38,38,42,0.98),_rgba(24,24,28,0.96)_48%,_rgba(17,17,20,0.94)_100%)]">
+          {imageSrc ? (
+            <>
+              <Image
+                src={imageSrc}
+                alt=""
+                aria-hidden="true"
+                fill
+                className="scale-125 object-cover blur-2xl opacity-25 saturate-150"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              />
             <Image
               src={product.images[0]}
               alt={product.name}
