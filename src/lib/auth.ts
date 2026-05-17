@@ -1,12 +1,18 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { ADMIN_TOKEN_COOKIE, AdminPayload, JWT_SECRET } from "@/lib/authConfig";
+import {
+  ADMIN_TOKEN_COOKIE,
+  ADMIN_TOKEN_MAX_AGE_SECONDS,
+  ADMIN_TOKEN_VALIDITY,
+  AdminPayload,
+  JWT_SECRET,
+} from "@/lib/authConfig";
 
 export async function signToken(payload: AdminPayload): Promise<string> {
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("7d")
+    .setExpirationTime(ADMIN_TOKEN_VALIDITY)
     .sign(JWT_SECRET);
 }
 
@@ -32,7 +38,7 @@ export function setSessionCookie(token: string) {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: ADMIN_TOKEN_MAX_AGE_SECONDS,
     path: "/",
   });
 }
