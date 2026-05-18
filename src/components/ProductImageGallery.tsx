@@ -78,6 +78,7 @@ export default function ProductImageGallery({
           alt={productName}
           fill
           className="object-contain transition-transform duration-500 transform-gpu"
+          style={softBlendMaskStyle}
           priority
           sizes="(max-width: 1024px) 100vw, 50vw"
         />
