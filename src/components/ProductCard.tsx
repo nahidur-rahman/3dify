@@ -11,6 +11,13 @@ interface ProductCardProps {
   product: Product;
 }
 
+const softBlendMaskStyle = {
+  WebkitMaskImage:
+    "radial-gradient(ellipse at center, black 82%, rgba(0, 0, 0, 0.92) 92%, transparent 100%)",
+  maskImage:
+    "radial-gradient(ellipse at center, black 82%, rgba(0, 0, 0, 0.92) 92%, transparent 100%)",
+};
+
 export default function ProductCard({ product }: ProductCardProps) {
   const sizeOptionPrices = product.sizeOptions?.map((option) => option.price) ?? [];
   const startingPrice =
