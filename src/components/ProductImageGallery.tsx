@@ -10,6 +10,13 @@ interface ProductImageGalleryProps {
   productName: string;
 }
 
+const softBlendMaskStyle = {
+  WebkitMaskImage:
+    "radial-gradient(ellipse at center, black 82%, rgba(0, 0, 0, 0.92) 92%, transparent 100%)",
+  maskImage:
+    "radial-gradient(ellipse at center, black 82%, rgba(0, 0, 0, 0.92) 92%, transparent 100%)",
+};
+
 export default function ProductImageGallery({
   images,
   productName,
