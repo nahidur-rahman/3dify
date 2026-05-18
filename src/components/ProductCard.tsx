@@ -46,6 +46,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 alt={product.name}
                 fill
                 className="object-contain transition-transform duration-500 transform-gpu group-hover:scale-[1.02]"
+                style={softBlendMaskStyle}
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
             </>
