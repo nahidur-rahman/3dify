@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { HiMenu, HiX, HiMoon, HiSun } from "react-icons/hi";
-import { BsPrinter } from "react-icons/bs";
 import { cn } from "@/lib/utils";
+import BrandLogo from "./BrandLogo";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,18 +39,10 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-primary-400 via-primary-500 to-primary-700 shadow-lg shadow-primary-500/20 transition-transform group-hover:scale-105">
-              <BsPrinter className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <span className="block bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-xl font-bold text-transparent">
-                3Dify BD
-              </span>
-              <span className="hidden text-[11px] uppercase tracking-[0.24em] text-gray-500 dark:text-gray-400 sm:block">
-                Custom Printed Goods
-              </span>
-            </div>
+          <Link href="/" className="group inline-flex">
+            <BrandLogo
+              className="transition-transform group-hover:scale-[1.04]"
+            />
           </Link>
 
           {/* Desktop Nav */}
