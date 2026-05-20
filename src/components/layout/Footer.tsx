@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { BsPrinter } from "react-icons/bs";
 import { FaFacebookMessenger, FaWhatsapp } from "react-icons/fa";
+import BrandLogo from "./BrandLogo";
 import { getMessengerLink, getWhatsAppLink } from "@/lib/utils";
 
 export default function Footer() {
@@ -13,18 +13,10 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="md:col-span-2">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600">
-                <BsPrinter className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <span className="block bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-xl font-bold text-transparent">
-                  3Dify BD
-                </span>
-                <span className="text-[11px] uppercase tracking-[0.24em] text-gray-400">
-                  Modern 3D craftsmanship
-                </span>
-              </div>
+            <Link href="/" className="group inline-flex mb-4">
+              <BrandLogo
+                className="transition-transform group-hover:scale-[1.04]"
+              />
             </Link>
             <p className="text-gray-500 dark:text-gray-400 max-w-md">
               Premium 3D printed products made to order in Bangladesh. From figurines
