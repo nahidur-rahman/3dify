@@ -9,6 +9,9 @@ export const metadata: Metadata = {
     default: "3Dify BD — Premium 3D Printed Products",
     template: "%s | 3Dify BD",
   },
+  icons: {
+    icon: "/3Dify-fav-icon.png",
+  },
   description:
     "Premium 3D printed products made to order in Bangladesh. Figurines, phone cases, home decor, and custom models.",
   keywords: [
