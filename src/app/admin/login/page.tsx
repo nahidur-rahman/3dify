@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { BsPrinter } from "react-icons/bs";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { Card, CardContent } from "@/components/ui/Card";
+import BrandLogo from "@/components/layout/BrandLogo";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -46,11 +46,7 @@ export default function AdminLoginPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-lg flex items-center justify-center">
-              <BsPrinter className="w-6 h-6 text-white" />
-            </div>
-          </div>
+          <BrandLogo size="lg" className="mb-4 mx-auto" />
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Admin Login
           </h1>
