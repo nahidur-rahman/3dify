@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BsPrinter } from "react-icons/bs";
 import {
   HiOutlineHome,
   HiOutlineCube,
@@ -11,6 +10,7 @@ import {
   HiOutlineUsers,
 } from "react-icons/hi";
 import type { AdminRole } from "@/lib/types";
+import BrandLogo from "./BrandLogo";
 
 interface AdminSidebarProps {
   adminUsername: string;
@@ -39,9 +39,7 @@ export default function AdminSidebar({ adminUsername, adminRole }: AdminSidebarP
       {/* Admin header */}
       <div className="p-6 border-b border-gray-200 dark:border-dark-200">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-primary-400 to-primary-600 rounded-lg flex items-center justify-center">
-            <BsPrinter className="w-4 h-4 text-white" />
-          </div>
+          <BrandLogo size="sm" />
           <div>
             <p className="font-semibold text-sm text-gray-900 dark:text-white">
               Admin Panel
