@@ -103,7 +103,6 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <div className="text-[9px] text-gray-400 line-through dark:text-gray-500">
                   {formatPrice(startingPrice)}
                 </div>
-              )}
               <div className="text-sm font-bold text-primary-500">
                 {sizeOptionPrices.length > 0 ? "From " : ""}
                 {formatPrice(displayPrice)}
