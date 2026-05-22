@@ -10,7 +10,12 @@ export const metadata: Metadata = {
     template: "%s | 3Dify BD",
   },
   icons: {
-    icon: "/3Dify-fav-icon.png",
+    icon: [
+      {
+        url: "/3Dify-fav-icon.png",
+        type: "image/png",
+      },
+    ],
   },
   description:
     "Premium 3D printed products made to order in Bangladesh. Figurines, phone cases, home decor, and custom models.",
