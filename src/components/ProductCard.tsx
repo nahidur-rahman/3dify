@@ -98,11 +98,15 @@ export default function ProductCard({ product }: ProductCardProps) {
             {product.description}
           </p>
           <div className="mt-2.5 flex items-end justify-between gap-2">
-            <div>
-              {discountPercent > 0 && (
-                <div className="text-[9px] text-gray-400 line-through dark:text-gray-500">
-                  {formatPrice(startingPrice)}
-                </div>
+            <div className="min-h-[2.25rem]">
+              <div
+                className={`h-4 text-[9px] leading-4 text-gray-400 line-through dark:text-gray-500 ${
+                  discountPercent > 0 ? "visible" : "invisible"
+                }`}
+                aria-hidden={discountPercent <= 0}
+              >
+                {discountPercent > 0 ? formatPrice(startingPrice) : ""}
+              </div>
               <div className="text-sm font-bold text-primary-500">
                 {sizeOptionPrices.length > 0 ? "From " : ""}
                 {formatPrice(displayPrice)}
