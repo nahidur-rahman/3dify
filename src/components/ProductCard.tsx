@@ -94,7 +94,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <h3 className="line-clamp-1 text-[0.95rem] font-semibold text-gray-900 transition-colors group-hover:text-primary-500 dark:text-white">
             {product.name}
           </h3>
-          <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-gray-500 dark:text-gray-400">
+          <p className="mt-1 min-h-[2rem] line-clamp-2 text-[11px] leading-4 text-gray-500 dark:text-gray-400">
             {product.description}
           </p>
           <div className="mt-2.5 flex items-end justify-between gap-2">
