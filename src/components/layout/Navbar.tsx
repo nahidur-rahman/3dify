@@ -9,7 +9,7 @@ import BrandLogo from "./BrandLogo";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [theme, setTheme] = useState<"dark" | "light">("light");
   const pathname = usePathname();
 
   useEffect(() => {
