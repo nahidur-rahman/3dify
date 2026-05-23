@@ -40,7 +40,7 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var stored=localStorage.getItem('theme');var theme=stored==='light'?'light':'dark';var root=document.documentElement;if(theme==='dark'){root.classList.add('dark');}else{root.classList.remove('dark');}}catch(e){document.documentElement.classList.add('dark');}})();`,
+            __html: `(function(){try{var stored=localStorage.getItem('theme');var theme=stored==='dark'?'dark':'light';var root=document.documentElement;if(theme==='dark'){root.classList.add('dark');}else{root.classList.remove('dark');}}catch(e){document.documentElement.classList.remove('dark');}})();`,
           }}
         />
       </head>
