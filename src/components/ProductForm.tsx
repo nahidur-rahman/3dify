@@ -271,7 +271,7 @@ export default function ProductForm({
         mode === "create" ? "/api/products" : `/api/products/${product?.id}`;
       const method = mode === "create" ? "POST" : "PUT";
 
-      const images = [...new Set(form.images)];
+      const images = Array.from(new Set(form.images));
       if (hasImageLimit && images.length + pendingImages.length > imageLimit) {
         setImageLimitWarning(
           `Image limit reached. Maximum ${imageLimit} images per product.`
@@ -282,7 +282,7 @@ export default function ProductForm({
         uploadedImages = await uploadPendingImages();
         images.push(...uploadedImages);
       }
-      const uniqueImages = [...new Set(images)];
+      const uniqueImages = Array.from(new Set(images));
 
       const res = await fetch(url, {
         method,
