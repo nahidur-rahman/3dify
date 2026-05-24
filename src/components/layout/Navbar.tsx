@@ -129,6 +129,11 @@ export default function Navbar() {
           </div>
         )}
       </div>
+
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary-500/70 to-transparent dark:hidden"
+      />
     </nav>
   );
 }
