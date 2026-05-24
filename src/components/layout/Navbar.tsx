@@ -35,7 +35,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-white/10 bg-white/75 backdrop-blur-xl dark:bg-dark/75 dark:shadow-[0_10px_40px_rgba(2,8,23,0.35)]">
+    <nav className="sticky top-0 z-50 relative border-b border-transparent bg-white/75 backdrop-blur-xl dark:border-white/10 dark:bg-dark/75 dark:shadow-[0_10px_40px_rgba(2,8,23,0.35)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Logo */}
