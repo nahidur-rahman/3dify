@@ -49,7 +49,7 @@ export default function AdminSidebar({ adminUsername, adminRole }: AdminSidebarP
             <span
               className={`inline-flex shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-[0.16em] ${roleClasses}`}
             >
-              {adminRole === "SUPER" ? "SUPER ADMIN" : "ADMIN"}
+              {roleLabel}
             </span>
           </div>
         </div>
