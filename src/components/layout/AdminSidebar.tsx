@@ -47,11 +47,7 @@ export default function AdminSidebar({ adminUsername, adminRole }: AdminSidebarP
           <div className="flex items-center justify-between gap-3">
             <BrandLogo size="sm" className="shrink-0" />
             <span
-              className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-[0.18em] ${
-                adminRole === "SUPER"
-                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-300"
-                  : "bg-slate-500/10 text-slate-600 dark:text-slate-300"
-              }`}
+              className={`inline-flex shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-[0.16em] ${roleClasses}`}
             >
               {adminRole === "SUPER" ? "SUPER ADMIN" : "ADMIN"}
             </span>
