@@ -20,6 +20,11 @@ interface AdminSidebarProps {
 export default function AdminSidebar({ adminUsername, adminRole }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const roleLabel = adminRole === "SUPER" ? "SUPER ADMIN" : "ADMIN";
+  const roleClasses =
+    adminRole === "SUPER"
+      ? "bg-amber-500/10 text-amber-600 dark:text-amber-300"
+      : "bg-slate-500/10 text-slate-600 dark:text-slate-300";
 
   const links = [
     { href: "/admin", label: "Dashboard", icon: HiOutlineHome },
