@@ -52,6 +52,14 @@ export default function AdminSidebar({ adminUsername, adminRole }: AdminSidebarP
               {roleLabel}
             </span>
           </div>
+          <div className="space-y-1">
+            <p className="text-sm font-semibold leading-none text-gray-900 dark:text-white">
+              Admin Panel
+            </p>
+            <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+              {adminUsername}
+            </p>
+          </div>
         </div>
       </div>
 
