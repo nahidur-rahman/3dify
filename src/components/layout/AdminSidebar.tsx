@@ -42,14 +42,10 @@ export default function AdminSidebar({ adminUsername, adminRole }: AdminSidebarP
   return (
     <aside className="hidden h-screen w-64 flex-col border-r border-gray-200 bg-white dark:border-dark-200 dark:bg-dark-100 md:flex">
       {/* Admin header */}
-      <div className="p-6 border-b border-gray-200 dark:border-dark-200">
-        <div className="flex items-center gap-2">
-          <BrandLogo size="sm" />
-          <div>
-            <p className="font-semibold text-sm text-gray-900 dark:text-white">
-              Admin Panel
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{adminUsername}</p>
+      <div className="border-b border-gray-200 px-5 py-5 dark:border-dark-200">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <BrandLogo size="sm" className="shrink-0" />
             <span
               className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-[0.18em] ${
                 adminRole === "SUPER"
