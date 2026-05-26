@@ -187,12 +187,23 @@ export default function PublicLoading() {
             <Skeleton className="h-9 w-72 mx-auto bg-white/12" />
             <Skeleton className="h-5 w-full max-w-2xl mx-auto bg-white/10" />
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <CTAButtonSkeleton />
-            <CTAButtonSkeleton />
+        </div>
+      </section>
+
+      <section className="py-10">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="overflow-hidden rounded-[2rem] bg-gradient-to-r from-primary-600 to-primary-800 px-5 py-6 text-center shadow-2xl shadow-primary-900/20 sm:px-8">
+            <div className="mx-auto max-w-3xl space-y-3">
+              <Skeleton className="mx-auto h-9 w-72 bg-white/12" />
+              <Skeleton className="mx-auto h-5 w-full max-w-2xl bg-white/10" />
+            </div>
+            <div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <CTAButtonSkeleton />
+              <CTAButtonSkeleton />
+            </div>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }
