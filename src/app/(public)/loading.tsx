@@ -39,7 +39,48 @@ function HeroSkeleton() {
                 </div>
               ))}
             </div>
-          ))}
+          </div>
+
+          <div className="relative hidden lg:block">
+            <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-primary-500/20 to-transparent blur-3xl" />
+            <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/8 p-4 shadow-2xl shadow-slate-950/40 backdrop-blur-sm">
+              <div className="grid gap-3">
+                <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-4">
+                  <div className="mb-2.5 flex items-center justify-between gap-3">
+                    <Skeleton className="h-3 w-24 bg-white/10" />
+                    <Skeleton className="h-6 w-24 rounded-full bg-emerald-400/15" />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2.5">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <Skeleton key={index} className="h-12 rounded-2xl bg-white/8" />
+                    ))}
+                  </div>
+                </div>
+                <div className="grid grid-cols-[1.1fr_0.9fr] gap-3">
+                  <div className="rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-primary-500/15 to-primary-900/20 p-4">
+                    <Skeleton className="h-3 w-24 bg-white/10" />
+                    <div className="mt-3 space-y-2">
+                      <Skeleton className="h-8 w-full bg-white/12" />
+                      <Skeleton className="h-8 w-4/5 bg-white/12" />
+                    </div>
+                    <div className="mt-3 space-y-2">
+                      <Skeleton className="h-4 w-full bg-white/8" />
+                      <Skeleton className="h-4 w-5/6 bg-white/8" />
+                    </div>
+                  </div>
+                  <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                    <Skeleton className="h-3 w-20 bg-white/10" />
+                    <Skeleton className="mt-3 h-10 w-32 bg-white/12" />
+                    <div className="mt-3 space-y-2">
+                      <Skeleton className="h-4 w-full bg-white/8" />
+                      <Skeleton className="h-4 w-5/6 bg-white/8" />
+                      <Skeleton className="h-4 w-4/6 bg-white/8" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
