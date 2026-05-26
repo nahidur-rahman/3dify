@@ -87,6 +87,19 @@ function HeroSkeleton() {
   );
 }
 
+function SectionHeaderSkeleton() {
+  return (
+    <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+      <div className="max-w-2xl">
+        <Skeleton className="mb-2 h-6 w-40 rounded-full" />
+        <Skeleton className="h-8 w-56 sm:h-9 sm:w-64" />
+        <Skeleton className="mt-2 h-5 w-full max-w-xl" />
+      </div>
+      <Skeleton className="h-14 w-full rounded-2xl lg:w-80" />
+    </div>
+  );
+}
+
 function CardSkeleton() {
   return (
     <div className="rounded-2xl border border-gray-200 dark:border-dark-200 bg-white dark:bg-dark-100 overflow-hidden p-6 space-y-4">
