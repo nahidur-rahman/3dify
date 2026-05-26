@@ -143,49 +143,39 @@ function CTAButtonSkeleton() {
 export default function PublicLoading() {
   return (
     <div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-20">
-        <HeroSkeleton />
+      <HeroSkeleton />
 
-        <section className="space-y-8">
-          <div className="space-y-2 text-center">
-            <Skeleton className="h-9 w-64 mx-auto" />
-            <Skeleton className="h-5 w-80 mx-auto" />
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <section className="py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SectionHeaderSkeleton />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 4 }).map((_, index) => (
               <CardSkeleton key={index} />
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="space-y-8">
-          <div className="space-y-2 text-center">
-            <Skeleton className="h-9 w-56 mx-auto" />
-            <Skeleton className="h-5 w-72 mx-auto" />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <section className="py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SectionHeaderSkeleton />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, index) => (
               <FeatureCardSkeleton key={index} />
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="rounded-3xl bg-gray-50 dark:bg-dark-100 px-8 py-12 sm:px-12 sm:py-16 space-y-8">
-          <div className="space-y-2 text-center">
-            <Skeleton className="h-9 w-48 mx-auto" />
-            <Skeleton className="h-5 w-72 mx-auto" />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <StepSkeleton key={index} />
-            ))}
-          </div>
-        </section>
-
-        <section className="rounded-3xl bg-gradient-to-r from-primary-600 to-primary-800 px-8 py-12 sm:px-12 sm:py-16 text-center space-y-6">
-          <div className="space-y-3 max-w-3xl mx-auto">
-            <Skeleton className="h-9 w-72 mx-auto bg-white/12" />
-            <Skeleton className="h-5 w-full max-w-2xl mx-auto bg-white/10" />
+      <section className="py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="overflow-hidden rounded-[2rem] border border-gray-200/70 bg-gray-50/80 p-6 shadow-sm dark:border-dark-200 dark:bg-dark-100/80 sm:p-8">
+            <SectionHeaderSkeleton />
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <StepSkeleton key={index} />
+              ))}
+            </div>
           </div>
         </div>
       </section>
