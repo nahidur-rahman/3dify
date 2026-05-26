@@ -2,25 +2,42 @@ import Skeleton from "@/components/ui/Skeleton";
 
 function HeroSkeleton() {
   return (
-    <section className="relative overflow-hidden rounded-[2rem] border border-gray-800/40 bg-gradient-to-br from-dark via-dark-100 to-primary-950 px-6 py-20 sm:px-10 sm:py-24 lg:px-16">
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMyMjIiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djJIMnYtMmgzNHptMC0zMFYwSDJ2NGgzNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-50" />
-      <div className="relative text-center">
-        <Skeleton className="mx-auto h-7 w-56 rounded-full bg-white/10" />
-        <div className="mx-auto mt-8 space-y-4 max-w-4xl">
-          <Skeleton className="h-14 w-4/5 mx-auto bg-white/12" />
-          <Skeleton className="h-14 w-3/4 mx-auto bg-white/12" />
-          <Skeleton className="h-6 w-full max-w-2xl mx-auto bg-white/10" />
-          <Skeleton className="h-6 w-5/6 max-w-xl mx-auto bg-white/10" />
-        </div>
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Skeleton className="h-14 w-full sm:w-44 rounded-full bg-white/12" />
-          <Skeleton className="h-14 w-full sm:w-40 rounded-full bg-white/8 border border-white/10" />
-        </div>
-        <div className="mt-16 grid grid-cols-3 gap-8 max-w-md mx-auto">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="space-y-2">
-              <Skeleton className="h-8 w-16 mx-auto bg-white/12" />
-              <Skeleton className="h-4 w-20 mx-auto bg-white/8" />
+    <section className="relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-dark to-primary-950" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.2),_transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(6,182,212,0.18),_transparent_22%)]" />
+
+      <div className="relative max-w-7xl mx-auto px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
+        <div className="grid items-center gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="max-w-3xl">
+            <Skeleton className="mb-3 h-7 w-56 rounded-full bg-white/10" />
+            <div className="space-y-3">
+              <Skeleton className="h-12 w-full max-w-[34rem] bg-white/12 sm:h-14" />
+              <Skeleton className="h-12 w-full max-w-[28rem] bg-white/12 sm:h-14" />
+              <Skeleton className="h-12 w-full max-w-[22rem] bg-white/12 sm:h-14" />
+            </div>
+            <div className="mt-3 space-y-2.5 max-w-2xl">
+              <Skeleton className="h-5 w-full bg-white/10" />
+              <Skeleton className="h-5 w-11/12 bg-white/10" />
+            </div>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Skeleton className="h-8 w-36 rounded-full bg-white/10" />
+              <Skeleton className="h-8 w-36 rounded-full bg-white/10" />
+              <Skeleton className="h-8 w-52 rounded-full bg-white/10" />
+            </div>
+            <div className="mt-6 flex flex-col items-stretch gap-2.5 sm:flex-row sm:items-center">
+              <Skeleton className="h-11 w-full rounded-full bg-white/12 sm:w-40" />
+              <Skeleton className="h-11 w-full rounded-full border border-white/10 bg-white/8 sm:w-36" />
+            </div>
+            <div className="mt-10 grid max-w-xl grid-cols-3 gap-3">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="rounded-2xl border border-white/10 bg-white/5 px-3 py-4 text-center backdrop-blur-sm"
+                >
+                  <Skeleton className="mx-auto h-8 w-16 bg-white/12" />
+                  <Skeleton className="mx-auto mt-2 h-3 w-20 bg-white/8" />
+                </div>
+              ))}
             </div>
           ))}
         </div>
