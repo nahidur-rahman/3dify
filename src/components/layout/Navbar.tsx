@@ -54,8 +54,8 @@ export default function Navbar() {
                 className={cn(
                   "rounded-full px-4 py-2 text-sm font-medium transition-all",
                   pathname === link.href
-                    ? "bg-primary-500/12 text-primary-600 shadow-sm shadow-primary-500/10 dark:text-primary-300"
-                    : "text-gray-600 hover:bg-white/70 hover:text-primary-500 dark:text-gray-300 dark:hover:bg-dark-100 dark:hover:text-primary-300"
+                    ? "bg-primary-500/18 text-primary-700 shadow-sm shadow-primary-500/15 ring-1 ring-primary-500/15 dark:text-primary-300 dark:ring-0"
+                    : "text-gray-700 hover:bg-primary-500/10 hover:text-primary-700 hover:shadow-sm hover:shadow-primary-500/10 dark:text-gray-300 dark:hover:bg-dark-100 dark:hover:text-primary-300 dark:hover:shadow-none"
                 )}
               >
                 {link.label}
