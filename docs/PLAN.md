@@ -218,3 +218,79 @@ Acceptance criteria:
 2. Public route group refactor without URL changes.
 3. UI primitives baseline (Button, Input, Card, Modal).
 4. Dark/light toggle with localStorage persistence and first-paint mitigation.
+5. Contact env fallback: disabled CTA state when links are not configured.
+6. Seed strategy update for idempotent mixed behavior.
+7. Lint and smoke verification.
+
+### 8.2 Later (Hardening/Scale)
+
+1. Central auth middleware for API and role expansion.
+2. Rate limiting and optional CSRF protections.
+3. Stronger upload verification (magic bytes, limits by count/dimensions).
+4. Structured API error codes and logging improvements.
+5. Storage migration from local uploads to cloud storage.
+
+## 9) Security and Reliability Baseline
+
+MVP must include:
+- JWT secret must be explicitly configured in production.
+- Auth-only endpoints enforce session checks.
+- Upload endpoint enforces MIME and file-size limits.
+- Admin routes redirect unauthenticated users to /admin/login.
+
+## 10) Environment Variables
+
+```env
+# Database
+DATABASE_URL=
+
+# Auth
+JWT_SECRET=
+
+# Admin seed
+ADMIN_EMAIL=
+ADMIN_PASSWORD=
+
+# Contact (public)
+NEXT_PUBLIC_WHATSAPP=
+NEXT_PUBLIC_MESSENGER=
+NEXT_PUBLIC_SITE_URL=
+
+# App
+NEXT_PUBLIC_APP_NAME=3Dify BD
+
+# Seed behavior (new)
+SEED_SAMPLE_PRODUCTS=true
+```
+
+## 11) Deployment Checklist
+
+- Create Supabase project and set DATABASE_URL.
+- Set all environment variables in Vercel.
+- Run prisma migrate deploy in production.
+- Run seed script (admin always, sample products optional).
+- Verify contact env values.
+- Smoke test public pages and admin flows on mobile and desktop.
+
+## 12) Verification Matrix
+
+### 12.1 Automated
+
+- npm run lint passes.
+
+### 12.2 Manual smoke checks
+
+1. Public pages load: /, /products, /products/[id], /about.
+2. Product filters/search/sort/pagination behave as expected.
+3. Admin login/logout and protected route redirect work.
+4. Product create/edit/delete works from admin UI.
+5. Image upload works and rejects invalid file types/sizes.
+6. Contact buttons are active when configured and disabled when not configured.
+
+## 13) Inputs Still Needed
+
+- WhatsApp number with country code.
+- Messenger page ID/username.
+- Production database credentials.
+- Final admin email/password.
+- Real product image set.
