@@ -101,8 +101,8 @@ export default function Navbar() {
                 className={cn(
                   "block rounded-xl px-3 py-3 font-medium transition-colors",
                   pathname === link.href
-                    ? "bg-primary-500/10 text-primary-600 dark:text-primary-300"
-                    : "text-gray-600 hover:bg-white hover:text-primary-500 dark:text-gray-300 dark:hover:bg-dark-100"
+                    ? "bg-primary-500/15 text-primary-700 dark:text-primary-300"
+                    : "text-gray-700 hover:bg-primary-500/10 hover:text-primary-700 dark:text-gray-300 dark:hover:bg-dark-100"
                 )}
               >
                 {link.label}
