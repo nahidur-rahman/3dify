@@ -20,7 +20,6 @@ interface AdminSidebarProps {
 export default function AdminSidebar({ adminUsername, adminRole }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const roleLabel = adminRole === "SUPER" ? "SUPER ADMIN" : "ADMIN";
   const roleClasses =
     adminRole === "SUPER"
       ? "bg-amber-500/10 text-amber-600 dark:text-amber-300"
@@ -47,7 +46,9 @@ export default function AdminSidebar({ adminUsername, adminRole }: AdminSidebarP
           <div className="flex items-center justify-between gap-3">
             <BrandLogo size="sm" className="shrink-0" />
             <span
-              className={`inline-flex shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-[0.16em] ${roleClasses}`}
+              className={`inline-flex shrink-0 flex-col items-center rounded-full px-2.5 py-1 text-center text-[10px] font-semibold leading-tight tracking-[0.16em] ${
+                adminRole === "SUPER" ? "w-[4.75rem]" : ""
+              } ${roleClasses}`}
             >
               {adminRole === "SUPER" ? (
                 <>
