@@ -1,6 +1,6 @@
 # 3Dify BD Category Refactor TODO
 
-Updated on May 27, 2026.
+Updated on May 28, 2026.
 
 This document is the source of truth for the category refactor. It captures the locked taxonomy, the approved data shape, the migration notes, and the implementation checklist with clear done vs not-done status.
 
@@ -129,11 +129,11 @@ Manual review required:
 
 ### Phase 1: Schema and Migration
 
-- [ ] Update `Category` enum in `prisma/schema.prisma` to the 10 new top-level keys
-- [ ] Add optional `subcategory String?` to `Product` in `prisma/schema.prisma`
-- [ ] Create a Prisma migration for the category enum change and new subcategory field
-- [ ] Generate Prisma client after schema changes
-- [ ] Prepare a migration script or SQL plan for existing product category remapping
+- [x] Update `Category` enum in `prisma/schema.prisma` to the 10 new top-level keys
+- [x] Add optional `subcategory String?` to `Product` in `prisma/schema.prisma`
+- [x] Create a Prisma migration for the category enum change and new subcategory field
+- [x] Generate Prisma client after schema changes
+- [x] Prepare a migration script or SQL plan for existing product category remapping
 - [ ] Apply automatic remapping for `FIGURINE`, `HOME_DECOR`, and `CUSTOM`
 - [ ] Manually review and remap every `PHONE_CASE` product
 - [ ] Verify migrated data in the database before updating the UI
@@ -232,8 +232,8 @@ Manual review required:
 - [x] Planning is complete
 - [x] Final taxonomy is approved
 - [x] Data shape is approved
-- [ ] Prisma schema changes not started
-- [ ] Migration not started
+- [x] Prisma schema changes completed
+- [ ] Migration prepared but not applied
 - [ ] Shared category config not started
 - [ ] Admin refactor not started
 - [ ] Public storefront refactor not started
