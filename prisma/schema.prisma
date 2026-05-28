@@ -9,10 +9,16 @@ datasource db {
 }
 
 enum Category {
-  FIGURINE
-  PHONE_CASE
   HOME_DECOR
-  CUSTOM
+  DESK_ACCESSORIES
+  LAMPS
+  VASES_AND_PLANTERS
+  TOYS_AND_FIDGETS
+  COLLECTIBLES_AND_FIGURES
+  GAMING_AND_POP_CULTURE
+  COSPLAY_PROPS_AND_MODEL_KITS
+  CUSTOM_AND_PERSONALIZED
+  PET_ACCESSORIES
 }
 
 enum SizeMode {
@@ -32,6 +38,7 @@ model Product {
   price            Float
   images           String[]
   category         Category
+  subcategory      String?
   color            String
   size             String
   sizeMode         SizeMode @default(FIXED)
