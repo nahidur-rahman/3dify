@@ -1,7 +1,9 @@
 // Shared types that mirror Prisma models
 // This avoids TS import issues with @prisma/client in some environments
 
-export type Category = "FIGURINE" | "PHONE_CASE" | "HOME_DECOR" | "CUSTOM";
+import type { Category } from "@/lib/categories";
+
+export type { Category } from "@/lib/categories";
 export type SizeMode = "FIXED" | "OPTIONS";
 export type AdminRole = "SUPER" | "ADMIN";
 
@@ -17,6 +19,7 @@ export interface Product {
   price: number;
   images: string[];
   category: Category;
+  subcategory?: string | null;
   color: string;
   size: string;
   sizeMode?: SizeMode;
