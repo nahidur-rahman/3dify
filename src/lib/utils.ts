@@ -51,20 +51,17 @@ export function calculateDiscountedPrice(
   return Math.round(discountedPrice * 100) / 100;
 }
 
-// Category display names
-export const categoryLabels: Record<string, string> = {
-  FIGURINE: "Figurines",
-  PHONE_CASE: "Phone Cases",
-  HOME_DECOR: "Home Decor",
-  CUSTOM: "Custom Models",
-};
-
-// Category descriptions for homepage
-export const categoryDescriptions: Record<string, string> = {
-  FIGURINE: "Detailed figurines and character models brought to life with 3D printing",
-  PHONE_CASE: "Custom designed phone cases with unique patterns and perfect fit",
-  HOME_DECOR: "Beautiful decorative pieces to enhance your living space",
-  CUSTOM: "Got an idea? We can bring any custom design to reality",
+export {
+  categoryConfig,
+  categoryDescriptions,
+  categoryLabels,
+  categorySeoNames,
+  categorySlugs,
+  categorySubcategories,
+  categoryValues,
+  defaultCategory,
+  isCategoryValue,
+  isValidSubcategoryForCategory,
 };
 
 export function hasWhatsAppConfigured(): boolean {
