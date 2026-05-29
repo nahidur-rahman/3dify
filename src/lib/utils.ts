@@ -1,3 +1,16 @@
+import {
+  categoryConfig,
+  categoryDescriptions,
+  categoryLabels,
+  categorySeoNames,
+  categorySlugs,
+  categorySubcategories,
+  categoryValues,
+  defaultCategory,
+  isCategoryValue,
+  isValidSubcategoryForCategory,
+} from "@/lib/categories";
+
 // Simple class name merger utility
 type ClassValue = string | number | boolean | undefined | null | ClassValue[] | Record<string, boolean | undefined | null>;
 
