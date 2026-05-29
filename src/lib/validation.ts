@@ -1,9 +1,32 @@
+import {
+  categoryValues,
+  isValidSubcategoryForCategory,
+} from "@/lib/categories";
 import { z } from "zod";
 
 const sizeOptionSchema = z.object({
   label: z.string().min(1, "Size option label is required").max(100),
   price: z.number().positive("Size option price must be positive"),
 });
+
+const subcategorySchema = z.preprocess(
+  (value) => {
+    if (value === null || value === undefined) {
+      return undefined;
+    }
+
+    if (typeof value === "string") {
+      const trimmedValue = value.trim();
+      return trimmedValue.length > 0 ? trimmedValue : undefined;
+    }
+
+    return value;
+  },
+  z
+    .string()
+    .max(100, "Subcategory must be 100 characters or fewer")
+    .optional()
+);
 
 export const PASSWORD_MIN_LENGTH = 8;
 export const STRONG_PASSWORD_MESSAGE =
@@ -111,12 +134,13 @@ export const adminCreateSchema = z
     path: ["confirmPassword"],
   });
 
-export const productSchema = z.object({
+const productSchemaBase = z.object({
   name: z.string().min(1, "Product name is required").max(200),
   description: z.string().min(1, "Description is required"),
   price: z.number().positive("Price must be positive"),
   images: z.array(z.string().url()).default([]),
-  category: z.enum(["FIGURINE", "PHONE_CASE", "HOME_DECOR", "CUSTOM"]),
+  category: z.enum(categoryValues),
+  subcategory: subcategorySchema,
   color: z.string().min(1, "Color is required"),
   size: z.string().min(1, "Size is required"),
   sizeMode: z.enum(["FIXED", "OPTIONS"]).default("FIXED"),
@@ -129,7 +153,28 @@ export const productSchema = z.object({
   featured: z.boolean().default(false),
 });
 
-export const productUpdateSchema = productSchema.partial();
+function addSubcategoryValidation(
+  data: { category?: (typeof categoryValues)[number]; subcategory?: string },
+  ctx: z.RefinementCtx
+) {
+  if (!data.subcategory || !data.category) {
+    return;
+  }
+
+  if (!isValidSubcategoryForCategory(data.category, data.subcategory)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Subcategory must match the selected category",
+      path: ["subcategory"],
+    });
+  }
+}
+
+export const productSchema = productSchemaBase.superRefine(addSubcategoryValidation);
+
+export const productUpdateSchema = productSchemaBase
+  .partial()
+  .superRefine(addSubcategoryValidation);
 
 export type LoginInput = z.infer<typeof loginSchema>;
 export type AdminCreateInput = z.infer<typeof adminCreateSchema>;
