@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Category, Product, ProductSizeOption, SizeMode } from "@/lib/types";
-import { categoryLabels } from "@/lib/utils";
+import { categoryLabels, defaultCategory } from "@/lib/utils";
 
 interface ProductFormProps {
   product?: Product;
@@ -79,7 +79,7 @@ export default function ProductForm({
     description: product?.description || "",
     price: product?.price || 0,
     images: product?.images || [] as string[],
-    category: product?.category || "FIGURINE",
+    category: product?.category || defaultCategory,
     color: product?.color || "",
     size: product?.size || "",
     sizeMode: (product?.sizeMode || "FIXED") as SizeMode,
