@@ -140,23 +140,23 @@ Manual review required:
 
 ### Phase 2: Shared Category Config
 
-- [ ] Replace hardcoded category label maps in `src/lib/utils.ts`
-- [ ] Create one central category config with:
-- [ ] Internal key
-- [ ] Public label
-- [ ] SEO name
-- [ ] Slug
-- [ ] Description
-- [ ] Allowed subcategories
-- [ ] Export helper lookups for labels, slugs, descriptions, and subcategory lists
+- [x] Replace hardcoded category label maps in `src/lib/utils.ts`
+- [x] Create one central category config with:
+- [x] Internal key
+- [x] Public label
+- [x] SEO name
+- [x] Slug
+- [x] Description
+- [x] Allowed subcategories
+- [x] Export helper lookups for labels, slugs, descriptions, and subcategory lists
 
 ### Phase 3: Shared Types and Validation
 
-- [ ] Update `Category` type in `src/lib/types.ts`
-- [ ] Add `subcategory?: string` to the shared `Product` interface in `src/lib/types.ts`
-- [ ] Update `productSchema` in `src/lib/validation.ts` for the new category enum values
-- [ ] Add subcategory validation in `src/lib/validation.ts`
-- [ ] Ensure invalid category and subcategory combinations return a 400 response
+- [x] Update `Category` type in `src/lib/types.ts`
+- [x] Add `subcategory?: string` to the shared `Product` interface in `src/lib/types.ts`
+- [x] Update `productSchema` in `src/lib/validation.ts` for the new category enum values
+- [x] Add subcategory validation in `src/lib/validation.ts`
+- [x] Ensure invalid category and subcategory combinations return a 400 response
 
 ### Phase 4: API Updates
 
@@ -234,8 +234,8 @@ Manual review required:
 - [x] Data shape is approved
 - [x] Prisma schema changes completed
 - [ ] Migration prepared but not applied
-- [ ] Shared category config not started
+- [x] Shared category config completed
 - [ ] Admin refactor not started
 - [ ] Public storefront refactor not started
 - [ ] SEO copy refresh not started
-- [ ] Validation and lint pass not started
+- [ ] Validation updates completed; full refactor lint pass still pending
