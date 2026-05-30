@@ -571,6 +571,32 @@ export default function ProductForm({
 
             <div>
               <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                Subcategory
+              </label>
+              <select
+                value={form.subcategory}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    subcategory: e.target.value,
+                  }))
+                }
+                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+              >
+                <option value="">No subcategory</option>
+                {availableSubcategories.map((subcategory) => (
+                  <option key={subcategory} value={subcategory}>
+                    {subcategory}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                Updates automatically when the category changes and clears mismatched selections.
+              </p>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
                 Discount Percentage
               </label>
               <input
