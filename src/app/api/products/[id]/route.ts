@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/adminSession";
 import { getSession } from "@/lib/auth";
+import { isValidSubcategoryForCategory } from "@/lib/categories";
 import { productUpdateSchema } from "@/lib/validation";
 import {
   deleteProductImages,
@@ -60,6 +61,24 @@ export async function PUT(
 
     if (!existing) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    const nextCategory = parsed.data.category ?? existing.category;
+    const nextSubcategory = Object.prototype.hasOwnProperty.call(
+      parsed.data,
+      "subcategory"
+    )
+      ? parsed.data.subcategory ?? null
+      : existing.subcategory;
+
+    if (
+      nextSubcategory &&
+      !isValidSubcategoryForCategory(nextCategory, nextSubcategory)
+    ) {
+      return NextResponse.json(
+        { error: "Invalid subcategory for the selected category" },
+        { status: 400 }
+      );
     }
 
     const updateData = { ...parsed.data, updatedBy: admin.username };
