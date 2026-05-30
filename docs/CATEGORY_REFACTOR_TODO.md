@@ -160,19 +160,19 @@ Manual review required:
 
 ### Phase 4: API Updates
 
-- [ ] Update `src/app/api/products/route.ts` to accept and store `subcategory`
-- [ ] Update `src/app/api/products/[id]/route.ts` to accept and store `subcategory`
-- [ ] Update filtering logic in product APIs if subcategory filtering is supported
-- [ ] Update `src/app/api/categories/route.ts` to return category metadata from the central config
-- [ ] Ensure the categories API returns `value`, `label`, `slug`, `description`, and allowed subcategories
+- [x] Update `src/app/api/products/route.ts` to accept and store `subcategory`
+- [x] Update `src/app/api/products/[id]/route.ts` to accept and store `subcategory`
+- [x] Update filtering logic in product APIs if subcategory filtering is supported
+- [x] Update `src/app/api/categories/route.ts` to return category metadata from the central config
+- [x] Ensure the categories API returns `value`, `label`, `slug`, `description`, and allowed subcategories
 
 ### Phase 5: Admin Product Form
 
-- [ ] Update `src/components/ProductForm.tsx` to use the new category keys
-- [ ] Change the default category from the legacy value to one of the new top-level categories
-- [ ] Add a dependent subcategory field that updates based on the selected category
-- [ ] Preserve valid subcategory values when editing an existing product
-- [ ] Clear subcategory automatically when the chosen category changes to a mismatched group
+- [x] Update `src/components/ProductForm.tsx` to use the new category keys
+- [x] Change the default category from the legacy value to one of the new top-level categories
+- [x] Add a dependent subcategory field that updates based on the selected category
+- [x] Preserve valid subcategory values when editing an existing product
+- [x] Clear subcategory automatically when the chosen category changes to a mismatched group
 - [ ] Verify create flow in admin works with category and subcategory
 - [ ] Verify edit flow in admin works with category and subcategory
 
@@ -221,7 +221,7 @@ Manual review required:
 - [x] Lock taxonomy and data shape
 - [ ] Schema and migration
 - [ ] Shared category config
-- [ ] Validation and API updates
+- [x] Validation and API updates
 - [ ] Admin form and admin filters
 - [ ] Public filters and category showcase
 - [ ] Footer, hero, about, and SEO copy
@@ -235,7 +235,8 @@ Manual review required:
 - [x] Prisma schema changes completed
 - [ ] Migration prepared but not applied
 - [x] Shared category config completed
-- [ ] Admin refactor not started
+- [x] API updates completed
+- [ ] Admin form slice partially implemented; filters and smoke tests still pending
 - [ ] Public storefront refactor not started
 - [ ] SEO copy refresh not started
 - [ ] Validation updates completed; full refactor lint pass still pending
