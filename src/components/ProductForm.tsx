@@ -4,7 +4,11 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Category, Product, ProductSizeOption, SizeMode } from "@/lib/types";
-import { categoryLabels, defaultCategory } from "@/lib/utils";
+import {
+  categoryLabels,
+  categorySubcategories,
+  defaultCategory,
+} from "@/lib/utils";
 
 interface ProductFormProps {
   product?: Product;
@@ -80,6 +84,7 @@ export default function ProductForm({
     price: product?.price || 0,
     images: product?.images || [] as string[],
     category: product?.category || defaultCategory,
+    subcategory: product?.subcategory || "",
     color: product?.color || "",
     size: product?.size || "",
     sizeMode: (product?.sizeMode || "FIXED") as SizeMode,
@@ -99,6 +104,19 @@ export default function ProductForm({
     ? Math.max(0, imageLimit - totalImageCount)
     : null;
   const imageLimitReached = hasImageLimit && totalImageCount >= imageLimit;
+  const availableSubcategories = categorySubcategories[form.category] || [];
+
+  const handleCategoryChange = (nextCategory: Category) => {
+    setForm((prev) => ({
+      ...prev,
+      category: nextCategory,
+      subcategory:
+        prev.subcategory &&
+        categorySubcategories[nextCategory].includes(prev.subcategory)
+          ? prev.subcategory
+          : "",
+    }));
+  };
 
   useEffect(() => {
     return () => {
@@ -290,6 +308,7 @@ export default function ProductForm({
         body: JSON.stringify({
           ...form,
           images: uniqueImages,
+          subcategory: form.subcategory.trim() || null,
           price: Number(form.price),
           weight: Number(form.weight),
           infillPercentage: Number(form.infillPercentage),
@@ -556,9 +575,7 @@ export default function ProductForm({
               </label>
               <select
                 value={form.category}
-                onChange={(e) =>
-                  setForm({ ...form, category: e.target.value as Category })
-                }
+                onChange={(e) => handleCategoryChange(e.target.value as Category)}
                 className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
               >
                 {Object.entries(categoryLabels).map(([value, label]) => (
