@@ -12,12 +12,12 @@ const sizeOptionSchema = z.object({
 const subcategorySchema = z.preprocess(
   (value) => {
     if (value === null || value === undefined) {
-      return undefined;
+      return null;
     }
 
     if (typeof value === "string") {
       const trimmedValue = value.trim();
-      return trimmedValue.length > 0 ? trimmedValue : undefined;
+      return trimmedValue.length > 0 ? trimmedValue : null;
     }
 
     return value;
@@ -25,7 +25,7 @@ const subcategorySchema = z.preprocess(
   z
     .string()
     .max(100, "Subcategory must be 100 characters or fewer")
-    .optional()
+    .nullable()
 );
 
 export const PASSWORD_MIN_LENGTH = 8;
@@ -154,7 +154,10 @@ const productSchemaBase = z.object({
 });
 
 function addSubcategoryValidation(
-  data: { category?: (typeof categoryValues)[number]; subcategory?: string },
+  data: {
+    category?: (typeof categoryValues)[number];
+    subcategory?: string | null;
+  },
   ctx: z.RefinementCtx
 ) {
   if (!data.subcategory || !data.category) {
