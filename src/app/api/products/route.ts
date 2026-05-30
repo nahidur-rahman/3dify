@@ -21,6 +21,24 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "12");
 
+    if (categoryParam && !isCategoryValue(categoryParam)) {
+      return NextResponse.json(
+        { error: "Invalid category" },
+        { status: 400 }
+      );
+    }
+
+    if (
+      categoryParam &&
+      subcategory &&
+      !isValidSubcategoryForCategory(categoryParam, subcategory)
+    ) {
+      return NextResponse.json(
+        { error: "Invalid subcategory for the selected category" },
+        { status: 400 }
+      );
+    }
+
     // Build where clause
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {};
