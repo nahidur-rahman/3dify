@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/adminSession";
+import {
+  isCategoryValue,
+  isValidSubcategoryForCategory,
+} from "@/lib/categories";
 import { productSchema } from "@/lib/validation";
 import {
   deleteProductImages,
@@ -14,7 +18,8 @@ import {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const category = searchParams.get("category");
+    const categoryParam = searchParams.get("category")?.trim();
+    const subcategory = searchParams.get("subcategory")?.trim();
     const search = searchParams.get("search");
     const sort = searchParams.get("sort");
     const featured = searchParams.get("featured");
@@ -42,8 +47,11 @@ export async function GET(request: NextRequest) {
     // Build where clause
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {};
-    if (category) {
-      where.category = category;
+    if (categoryParam) {
+      where.category = categoryParam;
+    }
+    if (subcategory) {
+      where.subcategory = subcategory;
     }
     if (search) {
       where.OR = [
