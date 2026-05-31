@@ -189,6 +189,59 @@ export function isCategoryValue(value: string): value is Category {
   return categoryValueSet.has(value);
 }
 
+export function isCategorySlug(value: string): value is CategorySlug {
+  return categorySlugSet.has(value);
+}
+
+export function getCategoryPath(category: Category | CategoryDetails) {
+  const categoryDetails =
+    typeof category === "string" ? categoryByValue[category] : category;
+
+  return `/products/${categoryDetails.slug}`;
+}
+
+interface CatalogUrlOptions {
+  category?: Category | null;
+  search?: string | null;
+  sort?: string | null;
+  page?: string | number | null;
+  subcategory?: string | null;
+}
+
+export function buildCatalogUrl({
+  category = null,
+  search,
+  sort,
+  page,
+  subcategory,
+}: CatalogUrlOptions) {
+  const params = new URLSearchParams();
+
+  if (search?.trim()) {
+    params.set("search", search.trim());
+  }
+
+  if (sort?.trim() && sort.trim() !== "newest") {
+    params.set("sort", sort.trim());
+  }
+
+  if (subcategory?.trim()) {
+    params.set("subcategory", subcategory.trim());
+  }
+
+  if (page !== null && page !== undefined) {
+    const normalizedPage = String(page).trim();
+    if (normalizedPage && normalizedPage !== "1") {
+      params.set("page", normalizedPage);
+    }
+  }
+
+  const query = params.toString();
+  const basePath = category ? getCategoryPath(category) : "/products";
+
+  return query ? `${basePath}?${query}` : basePath;
+}
+
 export function isValidSubcategoryForCategory(
   category: Category,
   subcategory: string
