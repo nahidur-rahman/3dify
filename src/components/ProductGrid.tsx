@@ -4,9 +4,13 @@ import { Product } from "@/lib/types";
 
 interface ProductGridProps {
   products: Product[];
+  resetHref?: string;
 }
 
-export default function ProductGrid({ products }: ProductGridProps) {
+export default function ProductGrid({
+  products,
+  resetHref = "/products",
+}: ProductGridProps) {
   if (products.length === 0) {
     return (
       <div className="rounded-[2rem] border border-dashed border-gray-300/80 bg-white/70 px-5 py-12 text-center dark:border-dark-200 dark:bg-dark-100/70">
@@ -18,7 +22,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
           Try adjusting your filters or search terms.
         </p>
         <Link
-          href="/products"
+          href={resetHref}
           className="mt-6 inline-flex rounded-full border border-primary-500/20 bg-primary-500/10 px-5 py-2.5 font-medium text-primary-600 transition-colors hover:bg-primary-500/15 dark:text-primary-300"
         >
           Reset filters
