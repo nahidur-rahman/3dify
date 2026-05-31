@@ -78,6 +78,22 @@ export default function SearchFilter() {
           <option value="price-desc">Price: High to Low</option>
         </select>
       </div>
+
+      {selectedCategory && (
+        <div className="mt-3 rounded-2xl border border-primary-500/15 bg-primary-500/5 px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-white/80 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary-500 dark:bg-dark dark:text-primary-300">
+              {selectedCategory.seoName}
+            </span>
+            {currentSubcategory ? (
+              <span className="rounded-full border border-gray-200 px-2.5 py-0.5 text-[10px] uppercase tracking-[0.2em] text-gray-500 dark:border-dark-200 dark:text-gray-400">
+                {currentSubcategory}
+              </span>
+            ) : null}
+          </div>
+          <p className="mt-2 leading-6">{selectedCategory.description}</p>
+        </div>
+      )}
     </div>
   );
 }
