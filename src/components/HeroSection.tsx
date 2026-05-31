@@ -11,84 +11,84 @@ export default function HeroSection() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-16">
         <div className="grid items-center gap-8 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="max-w-3xl">
-          {/* Badge */}
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary-400/20 bg-white/5 px-3 py-0.5 backdrop-blur-sm">
-            <BsPrinter className="w-3.5 h-3.5 text-primary-400" />
-            <span className="text-[11px] font-medium text-primary-400">
-              Made to Order in Bangladesh
-            </span>
-          </div>
+            {/* Badge */}
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary-400/20 bg-white/5 px-3 py-0.5 backdrop-blur-sm">
+              <BsPrinter className="w-3.5 h-3.5 text-primary-400" />
+              <span className="text-[11px] font-medium text-primary-400">
+                Made to Order in Bangladesh
+              </span>
+            </div>
 
-          {/* Title */}
-          <h1 className="text-balance text-3xl font-extrabold leading-tight text-white sm:text-4xl lg:text-5xl">
-            Precision-built{" "}
-            <span className="bg-gradient-to-r from-primary-400 to-primary-300 bg-clip-text text-transparent">
-              3D printed
-            </span>
-            <br />
-            pieces with character
-          </h1>
+            {/* Title */}
+            <h1 className="text-balance text-3xl font-extrabold leading-tight text-white sm:text-4xl lg:text-5xl">
+              Precision-built{" "}
+              <span className="bg-gradient-to-r from-primary-400 to-primary-300 bg-clip-text text-transparent">
+                3D printed
+              </span>
+              <br />
+              pieces with character
+            </h1>
 
-          {/* Subtitle */}
-          <p className="mt-3 max-w-2xl text-balance text-sm leading-6 text-gray-300 sm:text-base">
-            From collectible figurines to practical custom prints, 3Dify BD turns
-            sketches and concepts into durable, made-to-order products with a clean,
-            premium finish.
-          </p>
+            {/* Subtitle */}
+            <p className="mt-3 max-w-2xl text-balance text-sm leading-6 text-gray-300 sm:text-base">
+              From desk accessories and collectibles to lamps, planters, pet pieces,
+              and one-off commissions, 3Dify BD turns sketches and concepts into
+              durable, made-to-order products with a clean, premium finish.
+            </p>
 
-          <div className="mt-5 flex flex-wrap gap-2 text-[12px] text-gray-200">
-            {[
-              { icon: HiSparkles, label: "Custom detailing" },
-              { icon: HiLightningBolt, label: "Fast order response" },
-              { icon: HiShieldCheck, label: "Transparent chat-based ordering" },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/6 px-2.5 py-1 backdrop-blur-sm"
-              >
-                <item.icon className="h-3.5 w-3.5 text-primary-300" />
-                <span>{item.label}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* CTAs */}
-          <div className="mt-6 flex flex-col items-stretch gap-2.5 sm:flex-row sm:items-center">
-            <Link
-              href="/products"
-              className="inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-primary-500 via-primary-500 to-primary-700 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary-500/25 sm:w-auto"
-            >
-              Browse Products
-            </Link>
-            <Link
-              href="/about"
-              className="inline-flex w-full items-center justify-center rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-gray-100 transition-all hover:border-white/30 hover:bg-white/10 sm:w-auto"
-            >
-              Learn More
-            </Link>
-          </div>
-
-          {/* Stats */}
-          <div className="mt-10 grid max-w-xl grid-cols-3 gap-3">
-            {[
-              { value: "50+", label: "Products" },
-              { value: "100%", label: "Custom Made" },
-              { value: "24h", label: "Response Time" },
-            ].map((stat) => (
-              <div
-                key={stat.label}
-                className="rounded-2xl border border-white/10 bg-white/5 px-3 py-4 text-center backdrop-blur-sm"
-              >
-                <div className="text-xl font-bold text-primary-300 sm:text-2xl">
-                  {stat.value}
+            <div className="mt-5 flex flex-wrap gap-2 text-[12px] text-gray-200">
+              {[
+                { icon: HiSparkles, label: "Custom detailing" },
+                { icon: HiLightningBolt, label: "Fast order response" },
+                { icon: HiShieldCheck, label: "Transparent chat-based ordering" },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/6 px-2.5 py-1 backdrop-blur-sm"
+                >
+                  <item.icon className="h-3.5 w-3.5 text-primary-300" />
+                  <span>{item.label}</span>
                 </div>
-                <div className="mt-1 text-[10px] uppercase tracking-[0.18em] text-gray-400 sm:text-xs">
-                  {stat.label}
+              ))}
+            </div>
+
+            {/* CTAs */}
+            <div className="mt-6 flex flex-col items-stretch gap-2.5 sm:flex-row sm:items-center">
+              <Link
+                href="/products"
+                className="inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-primary-500 via-primary-500 to-primary-700 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary-500/25 sm:w-auto"
+              >
+                Browse Products
+              </Link>
+              <Link
+                href="/about"
+                className="inline-flex w-full items-center justify-center rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-gray-100 transition-all hover:border-white/30 hover:bg-white/10 sm:w-auto"
+              >
+                Learn More
+              </Link>
+            </div>
+
+            {/* Stats */}
+            <div className="mt-10 grid max-w-xl grid-cols-3 gap-3">
+              {[
+                { value: "50+", label: "Products" },
+                { value: "100%", label: "Custom Made" },
+                { value: "24h", label: "Response Time" },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="rounded-2xl border border-white/10 bg-white/5 px-3 py-4 text-center backdrop-blur-sm"
+                >
+                  <div className="text-xl font-bold text-primary-300 sm:text-2xl">
+                    {stat.value}
+                  </div>
+                  <div className="mt-1 text-[10px] uppercase tracking-[0.18em] text-gray-400 sm:text-xs">
+                    {stat.label}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
           <div className="relative hidden lg:block">
             <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-primary-500/20 to-transparent blur-3xl" />
