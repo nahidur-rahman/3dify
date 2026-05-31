@@ -1,6 +1,6 @@
 # 3Dify BD Category Refactor TODO
 
-Updated on May 28, 2026.
+Updated on May 31, 2026.
 
 This document is the source of truth for the category refactor. It captures the locked taxonomy, the approved data shape, the migration notes, and the implementation checklist with clear done vs not-done status.
 
@@ -134,9 +134,9 @@ Manual review required:
 - [x] Create a Prisma migration for the category enum change and new subcategory field
 - [x] Generate Prisma client after schema changes
 - [x] Prepare a migration script or SQL plan for existing product category remapping
-- [ ] Apply automatic remapping for `FIGURINE`, `HOME_DECOR`, and `CUSTOM`
-- [ ] Manually review and remap every `PHONE_CASE` product
-- [ ] Verify migrated data in the database before updating the UI
+- [x] Apply automatic remapping for `FIGURINE`, `HOME_DECOR`, and `CUSTOM`
+- [x] Manually review and remap every `PHONE_CASE` product
+- [x] Verify migrated data in the database before updating the UI
 
 ### Phase 2: Shared Category Config
 
@@ -173,59 +173,59 @@ Manual review required:
 - [x] Add a dependent subcategory field that updates based on the selected category
 - [x] Preserve valid subcategory values when editing an existing product
 - [x] Clear subcategory automatically when the chosen category changes to a mismatched group
-- [ ] Verify create flow in admin works with category and subcategory
-- [ ] Verify edit flow in admin works with category and subcategory
+- [x] Verify create flow in admin works with category and subcategory
+- [x] Verify edit flow in admin works with category and subcategory
 
 ### Phase 6: Admin Listing and Filters
 
-- [ ] Update `src/app/admin/(dashboard)/products/page.tsx` category filters to the new taxonomy
-- [ ] Add optional subcategory filtering to the admin product list
-- [ ] Confirm product rows display the correct new category labels
+- [x] Update `src/app/admin/(dashboard)/products/page.tsx` category filters to the new taxonomy
+- [x] Add optional subcategory filtering to the admin product list
+- [x] Confirm product rows display the correct new category labels
 
 ### Phase 7: Public Filters and Catalog
 
-- [ ] Update `src/components/SearchFilter.tsx` to use the new category list
-- [ ] Decide whether to expose subcategory filtering on the public storefront now or later
-- [ ] Update `src/app/(public)/products/page.tsx` filtering to support the new taxonomy
-- [ ] Add category-based SEO metadata for public category views or filtered pages
-- [ ] Confirm query params still work for category filters after the refactor
+- [x] Update `src/components/SearchFilter.tsx` to use the new category list
+- [x] Decide whether to expose subcategory filtering on the public storefront now or later
+- [x] Update `src/app/(public)/products/page.tsx` filtering to support the new taxonomy
+- [x] Add category-based SEO metadata for public category views or filtered pages
+- [x] Confirm query params still work for category filters after the refactor
 
 ### Phase 8: Category Showcase and Navigation
 
-- [ ] Redesign `src/components/CategoryShowcase.tsx` for 10 categories instead of 4
-- [ ] Replace hardcoded icons and colors with mappings that cover all new categories
-- [ ] Update `src/components/layout/Footer.tsx` category links and labels
-- [ ] Confirm homepage and footer links point to the correct category filters
+- [x] Redesign `src/components/CategoryShowcase.tsx` for 10 categories instead of 4
+- [x] Replace hardcoded icons and colors with mappings that cover all new categories
+- [x] Update `src/components/layout/Footer.tsx` category links and labels
+- [x] Confirm homepage and footer links point to the correct category filters
 
 ### Phase 9: Marketing and SEO Copy Refresh
 
-- [ ] Update root metadata in `src/app/layout.tsx`
-- [ ] Remove old category mentions such as figurines and phone cases from global SEO copy
-- [ ] Update messaging in `src/components/HeroSection.tsx`
-- [ ] Update category-related copy in `src/app/(public)/about/page.tsx`
-- [ ] Make sure the site language reflects the new broader catalog structure
+- [x] Update root metadata in `src/app/layout.tsx`
+- [x] Remove old category mentions such as figurines and phone cases from global SEO copy
+- [x] Update messaging in `src/components/HeroSection.tsx`
+- [x] Update category-related copy in `src/app/(public)/about/page.tsx`
+- [x] Make sure the site language reflects the new broader catalog structure
 
 ### Phase 10: Validation and Final Checks
 
-- [ ] Run `npx prisma generate`
-- [ ] Run the new Prisma migration
-- [ ] Smoke test admin create product flow
-- [ ] Smoke test admin edit product flow
-- [ ] Smoke test public category filter flow
-- [ ] Smoke test `GET /api/categories`
-- [ ] Run `npm run lint`
-- [ ] Mark completed items in this document as implementation progresses
+- [x] Run `npx prisma generate`
+- [x] Run the new Prisma migration
+- [x] Smoke test admin create product flow
+- [x] Smoke test admin edit product flow
+- [x] Smoke test public category filter flow
+- [x] Smoke test `GET /api/categories`
+- [x] Run `npm run lint`
+- [x] Mark completed items in this document as implementation progresses
 
 ## 7) Recommended Execution Order
 
 - [x] Lock taxonomy and data shape
-- [ ] Schema and migration
-- [ ] Shared category config
+- [x] Schema and migration
+- [x] Shared category config
 - [x] Validation and API updates
-- [ ] Admin form and admin filters
-- [ ] Public filters and category showcase
-- [ ] Footer, hero, about, and SEO copy
-- [ ] Data cleanup and final lint pass
+- [x] Admin form and admin filters
+- [x] Public filters and category showcase
+- [x] Footer, hero, about, and SEO copy
+- [x] Data cleanup and final lint pass
 
 ## 8) Current Status Snapshot
 
@@ -233,10 +233,10 @@ Manual review required:
 - [x] Final taxonomy is approved
 - [x] Data shape is approved
 - [x] Prisma schema changes completed
-- [ ] Migration prepared but not applied
+- [x] Migration applied and verified in the database
 - [x] Shared category config completed
 - [x] API updates completed
-- [ ] Admin form slice partially implemented; filters and smoke tests still pending
-- [ ] Public storefront refactor not started
-- [ ] SEO copy refresh not started
-- [ ] Validation updates completed; full refactor lint pass still pending
+- [x] Admin form and admin filters completed and smoke tested
+- [x] Public storefront refactor completed and smoke tested
+- [x] SEO copy refresh completed
+- [x] Validation updates, smoke tests, and lint completed for implemented slices
