@@ -29,7 +29,24 @@ export default function SearchFilter() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    updateParams("search", search);
+    updateParams({ search: search || null });
+  };
+
+  const handleCategoryChange = (value: string) => {
+    if (!value) {
+      updateParams({ subcategory: null }, null, "reload");
+      return;
+    }
+
+    const nextCategory = value as Category;
+
+    const nextSubcategory =
+      currentSubcategory &&
+      isValidSubcategoryForCategory(nextCategory, currentSubcategory)
+        ? currentSubcategory
+        : null;
+
+    updateParams({ subcategory: nextSubcategory }, nextCategory, "reload");
   };
 
   return (
