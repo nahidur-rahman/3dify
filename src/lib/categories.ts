@@ -151,6 +151,7 @@ export const categoryConfig = [
 ] as const satisfies readonly CategoryDefinition[];
 
 export type Category = (typeof categoryConfig)[number]["value"];
+export type CategorySlug = (typeof categoryConfig)[number]["slug"];
 export type CategoryDetails = (typeof categoryConfig)[number];
 
 export const categoryValues = categoryConfig.map(
@@ -162,6 +163,10 @@ export const defaultCategory = categoryValues[0];
 export const categoryByValue = Object.fromEntries(
   categoryConfig.map((category) => [category.value, category])
 ) as Record<Category, CategoryDetails>;
+
+export const categoryBySlug = Object.fromEntries(
+  categoryConfig.map((category) => [category.slug, category])
+) as Record<CategorySlug, CategoryDetails>;
 
 export const categoryLabels = Object.fromEntries(
   categoryConfig.map((category) => [category.value, category.label])
@@ -184,6 +189,7 @@ export const categorySubcategories = Object.fromEntries(
 ) as Record<Category, string[]>;
 
 const categoryValueSet = new Set<string>(categoryValues);
+const categorySlugSet = new Set<string>(categoryConfig.map((category) => category.slug));
 
 export function isCategoryValue(value: string): value is Category {
   return categoryValueSet.has(value);
