@@ -1,7 +1,15 @@
 import Link from "next/link";
 import { FaFacebookMessenger, FaWhatsapp } from "react-icons/fa";
+import { categoryByValue, getCategoryPath, type Category } from "@/lib/categories";
 import BrandLogo from "./BrandLogo";
 import { getMessengerLink, getWhatsAppLink } from "@/lib/utils";
+
+const footerCategoryValues: Category[] = [
+  "HOME_DECOR",
+  "DESK_ACCESSORIES",
+  "COLLECTIBLES_AND_FIGURES",
+  "CUSTOM_AND_PERSONALIZED",
+];
 
 export default function Footer() {
   const whatsappReady = Boolean((process.env.NEXT_PUBLIC_WHATSAPP || "").trim());
@@ -19,8 +27,8 @@ export default function Footer() {
               />
             </Link>
             <p className="text-gray-500 dark:text-gray-400 max-w-md">
-              Premium 3D printed products made to order in Bangladesh. From figurines
-              to phone cases, we bring your ideas to life layer by layer.
+              Premium 3D printed products made to order in Bangladesh, spanning
+              decor, workspace pieces, collectibles, gifts, and custom commissions.
             </p>
             <div className="flex gap-3 mt-4">
               {whatsappReady ? (
@@ -91,21 +99,20 @@ export default function Footer() {
               Categories
             </h3>
             <ul className="space-y-2">
-              {[
-                { href: "/products?category=FIGURINE", label: "Figurines" },
-                { href: "/products?category=PHONE_CASE", label: "Phone Cases" },
-                { href: "/products?category=HOME_DECOR", label: "Home Decor" },
-                { href: "/products?category=CUSTOM", label: "Custom Models" },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-500 dark:text-gray-400 hover:text-primary-500 transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+              {footerCategoryValues.map((categoryValue) => {
+                const category = categoryByValue[categoryValue];
+
+                return (
+                  <li key={category.value}>
+                    <Link
+                      href={getCategoryPath(category)}
+                      className="text-gray-500 dark:text-gray-400 hover:text-primary-500 transition-colors"
+                    >
+                      {category.label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>
