@@ -1,19 +1,91 @@
 import Link from "next/link";
-import { categoryLabels, categoryDescriptions } from "@/lib/utils";
-import { HiOutlineCube, HiOutlineDeviceMobile, HiOutlineHome, HiOutlineSparkles } from "react-icons/hi";
+import type { IconType } from "react-icons";
+import {
+  HiOutlineCollection,
+  HiOutlineCube,
+  HiOutlineDesktopComputer,
+  HiOutlineFilm,
+  HiOutlineGift,
+  HiOutlineHeart,
+  HiOutlineHome,
+  HiOutlineLightBulb,
+  HiOutlinePuzzle,
+  HiOutlineSparkles,
+} from "react-icons/hi";
+import {
+  categoryByValue,
+  categoryConfig,
+  getCategoryPath,
+  type Category,
+} from "@/lib/categories";
 
-const categoryIcons: Record<string, React.ReactNode> = {
-  FIGURINE: <HiOutlineCube className="w-6 h-6" />,
-  PHONE_CASE: <HiOutlineDeviceMobile className="w-6 h-6" />,
-  HOME_DECOR: <HiOutlineHome className="w-6 h-6" />,
-  CUSTOM: <HiOutlineSparkles className="w-6 h-6" />,
+const categoryIcons: Record<Category, IconType> = {
+  HOME_DECOR: HiOutlineHome,
+  DESK_ACCESSORIES: HiOutlineDesktopComputer,
+  LAMPS: HiOutlineLightBulb,
+  VASES_AND_PLANTERS: HiOutlineCollection,
+  TOYS_AND_FIDGETS: HiOutlinePuzzle,
+  COLLECTIBLES_AND_FIGURES: HiOutlineCube,
+  GAMING_AND_POP_CULTURE: HiOutlineFilm,
+  COSPLAY_PROPS_AND_MODEL_KITS: HiOutlineSparkles,
+  CUSTOM_AND_PERSONALIZED: HiOutlineGift,
+  PET_ACCESSORIES: HiOutlineHeart,
 };
 
-const categoryColors: Record<string, string> = {
-  FIGURINE: "from-blue-500 to-blue-600",
-  PHONE_CASE: "from-pink-500 to-pink-600",
-  HOME_DECOR: "from-amber-500 to-amber-600",
-  CUSTOM: "from-purple-500 to-purple-600",
+const categoryThemes: Record<
+  Category,
+  { gradient: string; accent: string; ring: string }
+> = {
+  HOME_DECOR: {
+    gradient: "from-amber-500 via-orange-500 to-rose-500",
+    accent: "text-amber-600 dark:text-amber-300",
+    ring: "hover:shadow-amber-500/10",
+  },
+  DESK_ACCESSORIES: {
+    gradient: "from-sky-500 via-cyan-500 to-blue-600",
+    accent: "text-sky-600 dark:text-sky-300",
+    ring: "hover:shadow-sky-500/10",
+  },
+  LAMPS: {
+    gradient: "from-yellow-400 via-amber-500 to-orange-500",
+    accent: "text-yellow-600 dark:text-yellow-300",
+    ring: "hover:shadow-yellow-500/10",
+  },
+  VASES_AND_PLANTERS: {
+    gradient: "from-emerald-500 via-teal-500 to-cyan-600",
+    accent: "text-emerald-600 dark:text-emerald-300",
+    ring: "hover:shadow-emerald-500/10",
+  },
+  TOYS_AND_FIDGETS: {
+    gradient: "from-fuchsia-500 via-pink-500 to-rose-500",
+    accent: "text-fuchsia-600 dark:text-fuchsia-300",
+    ring: "hover:shadow-fuchsia-500/10",
+  },
+  COLLECTIBLES_AND_FIGURES: {
+    gradient: "from-indigo-500 via-violet-500 to-purple-600",
+    accent: "text-indigo-600 dark:text-indigo-300",
+    ring: "hover:shadow-indigo-500/10",
+  },
+  GAMING_AND_POP_CULTURE: {
+    gradient: "from-slate-700 via-slate-800 to-black",
+    accent: "text-slate-700 dark:text-slate-200",
+    ring: "hover:shadow-slate-500/20",
+  },
+  COSPLAY_PROPS_AND_MODEL_KITS: {
+    gradient: "from-red-500 via-orange-500 to-amber-500",
+    accent: "text-red-600 dark:text-red-300",
+    ring: "hover:shadow-red-500/10",
+  },
+  CUSTOM_AND_PERSONALIZED: {
+    gradient: "from-rose-500 via-pink-500 to-fuchsia-500",
+    accent: "text-rose-600 dark:text-rose-300",
+    ring: "hover:shadow-rose-500/10",
+  },
+  PET_ACCESSORIES: {
+    gradient: "from-lime-500 via-green-500 to-emerald-600",
+    accent: "text-lime-600 dark:text-lime-300",
+    ring: "hover:shadow-lime-500/10",
+  },
 };
 
 export default function CategoryShowcase() {
