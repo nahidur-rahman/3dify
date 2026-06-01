@@ -89,7 +89,7 @@ const categoryThemes: Record<
 };
 
 export default function CategoryShowcase() {
-  const categories = Object.entries(categoryLabels);
+  const customCategory = categoryByValue.CUSTOM_AND_PERSONALIZED;
 
   return (
     <section className="py-10">
@@ -106,43 +106,60 @@ export default function CategoryShowcase() {
               </span>
             </h2>
             <p className="mt-2 text-base text-gray-500 dark:text-gray-400 sm:text-lg">
-              Explore signature product groups designed for gifting, collecting, and everyday use.
+              Explore ten curated product lanes spanning decor, gifting, fandom, workspace tools, and custom commissions.
             </p>
           </div>
           <div className="rounded-2xl border border-gray-200/70 bg-white/80 px-3 py-2.5 text-sm text-gray-600 shadow-sm dark:border-dark-200 dark:bg-dark-100/80 dark:text-gray-300">
-            Need something unique? Start with <span className="font-semibold text-primary-500 dark:text-primary-300">Custom Models</span> and message us directly.
+            Need something unique? Start with <span className="font-semibold text-primary-500 dark:text-primary-300">{customCategory.label}</span> and message us directly.
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {categories.map(([value, label]) => (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          {categoryConfig.map((category) => {
+            const Icon = categoryIcons[category.value];
+            const theme = categoryThemes[category.value];
+
+            return (
             <Link
-              key={value}
-              href={`/products?category=${value}`}
-              className="group relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary-500/40 hover:shadow-xl hover:shadow-primary-500/10 dark:border-dark-200 dark:bg-dark-100/85"
+              key={category.value}
+              href={getCategoryPath(category)}
+              className={`group relative overflow-hidden rounded-[1.75rem] border border-gray-200/80 bg-white/90 p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary-500/30 hover:shadow-xl ${theme.ring} dark:border-dark-200 dark:bg-dark-100/85`}
             >
-              <div className="absolute inset-x-4 top-0 h-12 rounded-b-[1.5rem] bg-gradient-to-b from-white/20 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
-              <div
-                className={`mb-3 flex h-10 w-10 items-center justify-center rounded-[0.9rem] bg-gradient-to-br ${categoryColors[value]} text-white shadow-lg shadow-black/10 transition-transform duration-200 group-hover:scale-105`}
-              >
-                {categoryIcons[value]}
+              <div className={`absolute inset-x-0 top-0 h-24 bg-gradient-to-r ${theme.gradient} opacity-90`} />
+              <div className="absolute inset-x-4 top-4 h-12 rounded-full bg-white/15 blur-2xl" />
+              <div className="relative">
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${theme.gradient} text-white shadow-lg shadow-black/10 transition-transform duration-200 group-hover:scale-105`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <span className="rounded-full border border-gray-200/80 bg-white/85 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.2em] text-gray-500 dark:border-dark-200 dark:bg-dark-100 dark:text-gray-400">
+                    {category.slug}
+                  </span>
+                </div>
+                <p className={`text-[11px] font-semibold uppercase tracking-[0.2em] ${theme.accent}`}>
+                  {category.seoName}
+                </p>
+                <h3 className="mt-1 text-base font-semibold text-gray-900 transition-colors group-hover:text-primary-500 dark:text-white">
+                  {category.label}
+                </h3>
+                <p className="mt-1.5 min-h-[3.75rem] text-sm leading-5 text-gray-500 dark:text-gray-400">
+                  {category.description}
+                </p>
+                <p className="mt-3 text-xs leading-5 text-gray-400 dark:text-gray-500">
+                  {category.subcategories.slice(0, 3).join(" · ")}
+                </p>
               </div>
-              <h3 className="text-base font-semibold text-gray-900 transition-colors group-hover:text-primary-500 dark:text-white">
-                {label}
-              </h3>
-              <p className="mt-1.5 min-h-[2.5rem] text-sm leading-5 text-gray-500 dark:text-gray-400">
-                {categoryDescriptions[value]}
-              </p>
-              <div className="mt-4 flex items-center justify-between">
+              <div className="relative mt-4 flex items-center justify-between">
                 <span className="text-sm font-medium text-primary-500 transition-transform group-hover:translate-x-1">
                   Browse →
                 </span>
                 <span className="rounded-full border border-gray-200 px-2.5 py-0.5 text-[10px] uppercase tracking-[0.2em] text-gray-400 dark:border-dark-200">
-                  Shop now
+                  {category.subcategories.length} picks
                 </span>
               </div>
             </Link>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
