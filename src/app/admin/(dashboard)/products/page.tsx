@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { formatPrice, categoryLabels } from "@/lib/utils";
+import {
+  categoryConfig,
+  categoryLabels,
+  categorySubcategories,
+  isCategoryValue,
+} from "@/lib/categories";
+import { formatPrice } from "@/lib/utils";
 import DeleteProductButton from "./DeleteProductButton";
 import {
   HiOutlinePlusCircle,
@@ -9,7 +15,6 @@ import {
 } from "react-icons/hi";
 import { hydrateProductImages } from "@/lib/productImages";
 
-const validCategories = new Set(Object.keys(categoryLabels));
 const statusOptions = [
   { value: "", label: "All statuses" },
   { value: "in-stock", label: "In stock" },
@@ -19,6 +24,7 @@ const statusOptions = [
 interface ProductsPageSearchParams {
   name?: string;
   category?: string;
+  subcategory?: string;
   status?: string;
   createdBy?: string;
 }
@@ -29,9 +35,17 @@ function normalizeSearchParam(value?: string) {
 
 async function getProducts(searchParams: ProductsPageSearchParams) {
   const name = normalizeSearchParam(searchParams.name);
-  const category = normalizeSearchParam(searchParams.category);
+  const categoryParam = normalizeSearchParam(searchParams.category);
+  const category = isCategoryValue(categoryParam) ? categoryParam : "";
+  const subcategoryParam = normalizeSearchParam(searchParams.subcategory);
   const status = normalizeSearchParam(searchParams.status);
   const createdBy = normalizeSearchParam(searchParams.createdBy);
+  const availableSubcategories = category
+    ? categorySubcategories[category]
+    : categoryConfig.flatMap((categoryItem) => categoryItem.subcategories);
+  const subcategory = availableSubcategories.includes(subcategoryParam)
+    ? subcategoryParam
+    : "";
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = {};
