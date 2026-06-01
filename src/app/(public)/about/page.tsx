@@ -6,7 +6,7 @@ import { HiLightningBolt, HiHeart, HiCube, HiChat } from "react-icons/hi";
 export const metadata: Metadata = {
   title: "About Us",
   description:
-    "Learn about 3Dify BD - premium 3D printed products made to order in Bangladesh.",
+    "Learn about 3Dify BD and our made-to-order 3D printed home decor, desk accessories, collectibles, personalized gifts, and custom commissions in Bangladesh.",
 };
 
 const features = [
@@ -55,9 +55,10 @@ export default function AboutPage() {
         </h1>
         <p className="mt-4 text-base leading-relaxed text-gray-600 dark:text-gray-400 sm:text-lg">
           3Dify BD is a startup born out of passion for 3D printing technology. Based
-          in Bangladesh, we create premium 3D printed products - from detailed
-          figurines and custom phone cases to stunning home decor pieces. Every
-          product is printed to order with care and precision.
+          in Bangladesh, we create premium 3D printed products across home decor,
+          desk accessories, collectibles, cosplay props, personalized gifts, pet
+          accessories, and custom commissions. Every product is printed to order
+          with care and precision.
         </p>
       </div>
 
@@ -112,7 +113,8 @@ export default function AboutPage() {
         </h2>
         <p className="mx-auto mb-5 max-w-xl text-sm text-primary-100 sm:text-base">
           Browse our products or reach out to us directly. We&apos;d love to help you
-          find or create the perfect 3D printed item.
+          find or create the perfect 3D printed piece for your home, desk, fandom,
+          gift list, or custom brief.
         </p>
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
           {whatsappReady ? (
