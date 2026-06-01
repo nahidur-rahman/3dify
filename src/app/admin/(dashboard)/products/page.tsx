@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import {
@@ -158,7 +159,7 @@ export default async function AdminProductsPage({
             Search and refine
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
-            Search by product name, category, stock status, or creator.
+            Search by product name, category, subcategory, stock status, or creator.
           </p>
         </div>
 
@@ -191,6 +192,26 @@ export default async function AdminProductsPage({
                 <option key={value} value={value}>
                   {label}
                 </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="min-w-[160px] flex-[1_1_190px]">
+            <span className="sr-only">Filter by subcategory</span>
+            <select
+              name="subcategory"
+              defaultValue={filters.subcategory}
+              className="w-full cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-dark-200 dark:bg-dark-200 dark:text-white"
+            >
+              <option value="">All subcategories</option>
+              {subcategoryGroups.map((group) => (
+                <optgroup key={group.label} label={group.label}>
+                  {group.values.map((subcategory: string) => (
+                    <option key={`${group.label}-${subcategory}`} value={subcategory}>
+                      {subcategory}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </label>
@@ -307,12 +328,14 @@ export default async function AdminProductsPage({
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-dark-200 flex items-center justify-center text-gray-400 overflow-hidden">
+                        <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-gray-100 text-gray-400 dark:bg-dark-200">
                           {product.images[0] ? (
-                            <img
+                            <Image
                               src={product.images[0]}
                               alt=""
-                              className="w-full h-full object-cover"
+                              fill
+                              sizes="40px"
+                              className="object-cover"
                             />
                           ) : (
                             <span className="text-lg">📦</span>
@@ -326,9 +349,16 @@ export default async function AdminProductsPage({
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {categoryLabels[product.category] || product.category}
-                      </span>
+                      <div className="space-y-0.5">
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {categoryLabels[product.category] || product.category}
+                        </p>
+                        {product.subcategory ? (
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {product.subcategory}
+                          </p>
+                        ) : null}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-sm font-medium text-gray-900 dark:text-white">
