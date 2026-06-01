@@ -54,8 +54,12 @@ async function getProducts(searchParams: ProductsPageSearchParams) {
     where.name = { contains: name, mode: "insensitive" };
   }
 
-  if (category && validCategories.has(category)) {
+  if (category) {
     where.category = category;
+  }
+
+  if (subcategory) {
+    where.subcategory = subcategory;
   }
 
   if (status === "in-stock") {
@@ -78,13 +82,21 @@ async function getProducts(searchParams: ProductsPageSearchParams) {
 
     return {
       products: products.map((product) => hydrateProductImages(product)),
-      filters: { name, category, status, createdBy },
-      hasActiveFilters: Boolean(name || category || status || createdBy),
+      filters: { name, category, subcategory, status, createdBy },
+      hasActiveFilters: Boolean(
+        name || category || subcategory || status || createdBy
+      ),
     };
   } catch {
     return {
       products: [],
-      filters: { name: "", category: "", status: "", createdBy: "" },
+      filters: {
+        name: "",
+        category: "",
+        subcategory: "",
+        status: "",
+        createdBy: "",
+      },
       hasActiveFilters: false,
     };
   }
@@ -96,9 +108,25 @@ export default async function AdminProductsPage({
   searchParams: ProductsPageSearchParams;
 }) {
   const { products, filters, hasActiveFilters } = await getProducts(searchParams);
+  const selectedCategory =
+    filters.category && isCategoryValue(filters.category)
+      ? filters.category
+      : null;
+  const subcategoryGroups = selectedCategory
+    ? [
+        {
+          label: categoryLabels[selectedCategory],
+          values: categorySubcategories[selectedCategory],
+        },
+      ]
+    : categoryConfig.map((category) => ({
+        label: category.label,
+        values: [...category.subcategories],
+      }));
   const filterSignature = [
     filters.name,
     filters.category,
+    filters.subcategory,
     filters.status,
     filters.createdBy,
   ].join("|");
