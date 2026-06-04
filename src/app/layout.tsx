@@ -14,6 +14,7 @@ const metadataBase = (() => {
 })();
 
 export const metadata: Metadata = {
+  metadataBase,
   title: {
     default: "3Dify BD — Premium 3D Printed Products",
     template: "%s | 3Dify BD",
@@ -27,14 +28,17 @@ export const metadata: Metadata = {
     ],
   },
   description:
-    "Premium 3D printed products made to order in Bangladesh. Figurines, phone cases, home decor, and custom models.",
+    "Premium 3D printed products made to order in Bangladesh, including home decor, desk accessories, collectibles, cosplay props, pet accessories, and custom commissions.",
   keywords: [
     "3D printing",
     "3D printed products",
     "Bangladesh",
-    "figurines",
-    "phone cases",
     "home decor",
+    "desk accessories",
+    "collectibles",
+    "cosplay props",
+    "custom gifts",
+    "pet accessories",
     "custom 3D models",
   ],
 };
