@@ -40,7 +40,29 @@ function redirectTo(request: NextRequest, pathname: string) {
 }
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
+
+  if (pathname === "/products") {
+    const category = searchParams.get("category")?.trim() || "";
+
+    if (isCategoryValue(category)) {
+      const redirectUrl = new URL(
+        buildCatalogUrl({
+          category,
+          search: searchParams.get("search"),
+          sort: searchParams.get("sort"),
+          subcategory: searchParams.get("subcategory"),
+          page: searchParams.get("page"),
+        }),
+        request.url
+      );
+
+      return NextResponse.redirect(redirectUrl, 308);
+    }
+
+    return NextResponse.next();
+  }
+
   const token = request.cookies.get(ADMIN_TOKEN_COOKIE)?.value;
   const isLoginPage = pathname === "/admin/login";
 
