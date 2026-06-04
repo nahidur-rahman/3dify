@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
+import { buildCatalogUrl, isCategoryValue } from "@/lib/categories";
 import {
   ADMIN_TOKEN_COOKIE,
   AdminPayload,
@@ -96,5 +97,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin", "/admin/:path*"],
+  matcher: ["/products", "/products/:path*", "/admin", "/admin/:path*"],
 };
