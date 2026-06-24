@@ -3,20 +3,12 @@ import Image from "next/image";
 import {
   calculateDiscountedPrice,
   formatPrice,
-  categoryLabels,
 } from "@/lib/utils";
 import { Product } from "@/lib/types";
 
 interface ProductCardProps {
   product: Product;
 }
-
-const softBlendMaskStyle = {
-  WebkitMaskImage:
-    "radial-gradient(ellipse at center, black 82%, rgba(0, 0, 0, 0.92) 92%, transparent 100%)",
-  maskImage:
-    "radial-gradient(ellipse at center, black 82%, rgba(0, 0, 0, 0.92) 92%, transparent 100%)",
-};
 
 export default function ProductCard({ product }: ProductCardProps) {
   const sizeOptionPrices = product.sizeOptions?.map((option) => option.price) ?? [];
@@ -28,93 +20,55 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/products/${product.id}`} className="group">
-      <div className="overflow-hidden rounded-[1.5rem] border border-gray-200/80 bg-white/90 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary-500/40 hover:shadow-xl hover:shadow-primary-500/10 dark:border-dark-200 dark:bg-dark-100/90">
+      <div className="overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:border-dark-200 dark:bg-dark-100">
         {/* Image */}
-        <div className="relative aspect-[4/3] overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(243,244,246,0.95)_48%,_rgba(229,231,235,0.9)_100%)] dark:bg-[radial-gradient(circle_at_top,_rgba(38,38,42,0.98),_rgba(24,24,28,0.96)_48%,_rgba(17,17,20,0.94)_100%)]">
+        <div className="relative aspect-square overflow-hidden bg-gray-50 dark:bg-dark/60">
           {imageSrc ? (
-            <>
-              <Image
-                src={imageSrc}
-                alt=""
-                aria-hidden="true"
-                fill
-                className="scale-125 object-cover blur-2xl opacity-25 saturate-150"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              />
-              <Image
-                src={imageSrc}
-                alt={product.name}
-                fill
-                className="object-contain transition-transform duration-500 transform-gpu group-hover:scale-[1.02]"
-                style={softBlendMaskStyle}
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              />
-            </>
+            <Image
+              src={imageSrc}
+              alt={product.name}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-gray-400 dark:text-dark-300">
-              <svg className="h-14 w-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex h-full w-full items-center justify-center text-gray-300 dark:text-dark-300">
+              <svg className="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
           )}
 
-          <div className="absolute inset-x-0 top-0 z-10 h-12 bg-gradient-to-b from-black/20 to-transparent" />
-
-          {/* Badges */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
-            <span className="rounded-full bg-primary-500/90 px-2 py-0.5 text-[9px] font-medium text-white backdrop-blur-sm">
-              {categoryLabels[product.category] || product.category}
+          {/* Discount badge */}
+          {discountPercent > 0 && (
+            <span className="absolute top-2 left-2 rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+              -{discountPercent}%
             </span>
-            {product.customizable && (
-              <span className="rounded-full bg-purple-500/90 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
-                Customizable
-              </span>
-            )}
-            {discountPercent > 0 && (
-              <span className="rounded-full bg-rose-500/90 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
-                {discountPercent}% Off
-              </span>
-            )}
-          </div>
+          )}
 
-          {/* Stock status */}
+          {/* Out of stock overlay */}
           {!product.inStock && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-              <span className="text-base font-bold text-white">Out of Stock</span>
+              <span className="text-sm font-bold text-white">Out of Stock</span>
             </div>
           )}
         </div>
 
         {/* Content */}
         <div className="p-3">
-          <div className="mb-1.5 flex items-center justify-between gap-1 text-[9px] uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">
-            <span>{product.inStock ? "Ready to order" : "Currently unavailable"}</span>
-            <span>{product.color}</span>
-          </div>
-          <h3 className="line-clamp-1 text-[0.95rem] font-semibold text-gray-900 transition-colors group-hover:text-primary-500 dark:text-white">
+          <h3 className="line-clamp-1 text-sm font-medium text-gray-900 group-hover:text-primary-600 dark:text-white dark:group-hover:text-primary-400 transition-colors">
             {product.name}
           </h3>
-          <p className="mt-1 min-h-[2rem] line-clamp-2 text-[11px] leading-4 text-gray-500 dark:text-gray-400">
-            {product.description}
-          </p>
-          <div className="mt-2.5 flex items-end justify-between gap-2">
-            <div className="min-h-[2.25rem]">
-              <div
-                className={`h-4 text-[9px] leading-4 text-gray-400 line-through dark:text-gray-500 ${
-                  discountPercent > 0 ? "visible" : "invisible"
-                }`}
-                aria-hidden={discountPercent <= 0}
-              >
-                {discountPercent > 0 ? formatPrice(startingPrice) : ""}
-              </div>
-              <div className="text-sm font-bold text-primary-500">
-                {sizeOptionPrices.length > 0 ? "From " : ""}
-                {formatPrice(displayPrice)}
-              </div>
-            </div>
-            <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:bg-dark dark:text-gray-400">
-              Details
+          <div className="mt-1.5 flex items-center gap-2">
+            <span className="text-sm font-bold text-gray-900 dark:text-white">
+              {sizeOptionPrices.length > 0 ? "From " : ""}
+              {formatPrice(displayPrice)}
             </span>
+            {discountPercent > 0 && (
+              <span className="text-xs text-gray-400 line-through dark:text-gray-500">
+                {formatPrice(startingPrice)}
+              </span>
+            )}
           </div>
         </div>
       </div>
