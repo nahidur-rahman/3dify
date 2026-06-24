@@ -120,7 +120,6 @@ export default function Footer() {
         {/* Bottom */}
         <div className="mt-8 pt-8 border-t border-gray-200 dark:border-dark-200 text-center text-sm text-gray-400">
           <p>© {new Date().getFullYear()} 3Dify BD. All rights reserved.</p>
-          <p className="mt-1">Made with 🖨️ and ❤️ in Bangladesh</p>
         </div>
       </div>
     </footer>
