@@ -98,12 +98,6 @@ export default function SearchFilter({
 
   return (
     <div className="mb-6 rounded-[1.5rem] border border-gray-200/70 bg-white/85 p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100/85 sm:p-4">
-      <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm font-semibold text-gray-900 dark:text-white">Find the right print</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 sm:text-sm">Search by name, narrow by category and subcategory, or sort by price.</p>
-        </div>
-      </div>
 
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.9fr)]">
         <form onSubmit={handleSearch} className="relative">
