@@ -1,111 +1,59 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
+import { HiArrowRight } from "react-icons/hi";
 
-const slides = [
-  {
-    gradient: "from-slate-900 via-cyan-950 to-slate-900",
-    tagline: "Premium 3D Printed Products",
-    cta: "Shop Now",
-    href: "/products",
-  },
-  {
-    gradient: "from-slate-900 via-indigo-950 to-slate-900",
-    tagline: "Custom & Personalized Pieces",
-    cta: "Explore",
-    href: "/products/custom-personalized",
-  },
-  {
-    gradient: "from-slate-900 via-emerald-950 to-slate-900",
-    tagline: "Desk Accessories & Home Decor",
-    cta: "Browse",
-    href: "/products/desk-accessories",
-  },
+const heroCategories = [
+  { id: 1, title: "Home Decor", href: "/products?category=HOME_DECOR" },
+  { id: 2, title: "Desk Accessories", href: "/products?category=DESK_ACCESSORIES" },
+  { id: 3, title: "Cosplay & Props", href: "/products?category=COSPLAY_PROPS_AND_MODEL_KITS" },
+  { id: 4, title: "Toys & Fidgets", href: "/products?category=TOYS_AND_FIDGETS" },
 ];
 
 export default function HeroSection() {
-  const [current, setCurrent] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-
-  const next = useCallback(() => {
-    setCurrent((prev) => (prev + 1) % slides.length);
-  }, []);
-
-  const prev = useCallback(() => {
-    setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
-  }, []);
-
-  useEffect(() => {
-    if (isPaused) return;
-    const timer = setInterval(next, 5000);
-    return () => clearInterval(timer);
-  }, [isPaused, next]);
-
   return (
-    <section
-      className="relative overflow-hidden"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-    >
-      {/* Slides */}
-      <div className="relative h-[280px] sm:h-[360px] lg:h-[440px]">
-        {slides.map((slide, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 flex items-center justify-center transition-opacity duration-700 ease-in-out bg-gradient-to-r ${slide.gradient} ${
-              index === current ? "opacity-100 z-10" : "opacity-0 z-0"
-            }`}
+    <section className="py-6 sm:py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white dark:bg-dark">
+      <div className="relative rounded-3xl overflow-hidden bg-gray-50 dark:bg-dark-100 flex flex-col lg:flex-row min-h-[500px] border border-gray-200 dark:border-white/10">
+        
+        {/* Left Content Area (Text & Button) */}
+        <div className="lg:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-center relative z-20">
+          <span className="text-sm font-bold tracking-wider text-primary-600 dark:text-primary-400 uppercase mb-3 block">
+            Premium 3D Printed
+          </span>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-[1.1] mb-6 tracking-tight">
+            Bring Your Imagination to Life
+          </h1>
+          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 font-medium">
+            Explore our collection of custom decor, intricate collectibles, and functional desk accessories.
+          </p>
+          <Link
+            href="/products"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary-800 px-8 py-4 text-base font-bold text-white transition-all hover:bg-primary-900 hover:shadow-xl hover:-translate-y-1 w-max dark:bg-primary-600 dark:hover:bg-primary-500"
           >
-            {/* Subtle texture overlay */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.04),_transparent_70%)]" />
+            Shop Collection <HiArrowRight className="w-5 h-5" />
+          </Link>
+        </div>
 
-            <div className="relative z-10 text-center px-6">
-              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
-                {slide.tagline}
-              </h2>
-              <Link
-                href={slide.href}
-                className="mt-5 inline-flex items-center rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-gray-900 transition-all hover:bg-gray-100 hover:shadow-lg hover:shadow-white/10 hover:-translate-y-0.5"
-              >
-                {slide.cta}
-              </Link>
-            </div>
+        {/* Right Content Area (4 Category Slides/Figures) */}
+        <div className="lg:w-1/2 bg-gray-100 dark:bg-dark-200 p-8 flex items-center justify-center border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-white/10">
+          <div className="grid grid-cols-2 gap-4 w-full h-full max-h-[500px]">
+             {heroCategories.map((cat) => (
+                <Link key={cat.id} href={cat.href} className="group relative rounded-2xl overflow-hidden bg-gray-200 dark:bg-dark-300 flex items-end justify-center aspect-square md:aspect-auto hover:shadow-lg transition-all">
+                   {/* Image Placeholder */}
+                   <div className="absolute inset-0 bg-gray-300 dark:bg-gray-700 w-full h-full flex items-center justify-center border border-black/5">
+                      <span className="text-gray-400 dark:text-gray-500 font-medium text-xs md:text-sm">Placeholder Image</span>
+                   </div>
+                   {/* Gradient overlay for text */}
+                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
+                   
+                   <div className="relative z-10 p-4 w-full text-center transform translate-y-2 group-hover:translate-y-0 transition-transform">
+                      <h3 className="text-white font-bold text-sm md:text-base">{cat.title}</h3>
+                   </div>
+                </Link>
+             ))}
           </div>
-        ))}
-      </div>
+        </div>
 
-      {/* Navigation arrows */}
-      <button
-        onClick={prev}
-        aria-label="Previous slide"
-        className="absolute left-3 top-1/2 z-20 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-black/30 text-white/80 backdrop-blur-sm transition-all hover:bg-black/50 hover:text-white"
-      >
-        <HiChevronLeft className="h-5 w-5" />
-      </button>
-      <button
-        onClick={next}
-        aria-label="Next slide"
-        className="absolute right-3 top-1/2 z-20 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-black/30 text-white/80 backdrop-blur-sm transition-all hover:bg-black/50 hover:text-white"
-      >
-        <HiChevronRight className="h-5 w-5" />
-      </button>
-
-      {/* Dots */}
-      <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-2">
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrent(index)}
-            aria-label={`Go to slide ${index + 1}`}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              index === current
-                ? "w-6 bg-white"
-                : "w-2 bg-white/40 hover:bg-white/60"
-            }`}
-          />
-        ))}
       </div>
     </section>
   );
