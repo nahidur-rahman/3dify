@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const outfit = Outfit({ subsets: ["latin"] });
 const metadataBase = (() => {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -58,7 +58,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.className} antialiased bg-white dark:bg-dark text-gray-900 dark:text-gray-100 min-h-screen`}
+        className={`${outfit.className} antialiased bg-surface-base dark:bg-dark text-gray-900 dark:text-gray-100 min-h-screen`}
       >
         {children}
       </body>
