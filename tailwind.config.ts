@@ -13,17 +13,25 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         primary: {
-          50: "#ecfeff",
-          100: "#cffafe",
-          200: "#a5f3fc",
-          300: "#67e8f9",
-          400: "#22d3ee",
-          500: "#06b6d4",
-          600: "#0891b2",
-          700: "#0e7490",
-          800: "#155e75",
-          900: "#164e63",
-          950: "#083344",
+          50: "#eaf5f5",
+          100: "#c8e2e1",
+          200: "#a6cecb",
+          300: "#84bab6",
+          400: "#62a6a0",
+          500: "#40928b",
+          600: "#33756f",
+          700: "#265753",
+          800: "#0C4E4B", // Brand color
+          900: "#093a38",
+          950: "#062725",
+        },
+        accent: {
+          DEFAULT: "#EF9B24", // Gold/Orange for deals
+          hover: "#d9881d",
+        },
+        surface: {
+          DEFAULT: "#FAF6F0",
+          base: "#F5EFEB",
         },
         dark: {
           DEFAULT: "#0f172a",
@@ -33,7 +41,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
+        sans: ["Outfit", "system-ui", "sans-serif"],
       },
     },
   },
