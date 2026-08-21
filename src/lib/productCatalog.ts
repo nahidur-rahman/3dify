@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { hydrateProductImages } from "@/lib/productImages";
 import { Product } from "@/lib/types";
 import {
@@ -7,6 +8,18 @@ import {
   isValidSubcategoryForCategory,
 } from "@/lib/categories";
 import { prisma } from "@/lib/db";
+
+export const getCachedProductById = cache(async (id: string): Promise<Product | null> => {
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id },
+    });
+    if (!product) return null;
+    return hydrateProductImages(product);
+  } catch {
+    return null;
+  }
+});
 
 export interface ProductCatalogSearchParams {
   category?: string;
