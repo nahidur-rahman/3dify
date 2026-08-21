@@ -8,6 +8,8 @@ import {
   HiOutlinePlusCircle,
   HiOutlineLogout,
   HiOutlineUsers,
+  HiOutlineShoppingBag,
+  HiOutlineTruck,
 } from "react-icons/hi";
 import type { AdminRole } from "@/lib/types";
 import BrandLogo from "./BrandLogo";
@@ -27,7 +29,9 @@ export default function AdminSidebar({ adminUsername, adminRole }: AdminSidebarP
 
   const links = [
     { href: "/admin", label: "Dashboard", icon: HiOutlineHome },
+    { href: "/admin/orders", label: "Orders", icon: HiOutlineShoppingBag },
     { href: "/admin/products", label: "Products", icon: HiOutlineCube },
+    { href: "/admin/shipping", label: "Shipping Rates", icon: HiOutlineTruck },
     { href: "/admin/admins", label: "Admins", icon: HiOutlineUsers },
     { href: "/admin/products/new", label: "Add Product", icon: HiOutlinePlusCircle },
   ];
