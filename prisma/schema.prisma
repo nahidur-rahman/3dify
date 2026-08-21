@@ -54,6 +54,12 @@ model Product {
   createdBy        String?
   updatedBy        String?
 
+  @@index([category])
+  @@index([featured, inStock])
+  @@index([inStock, updatedAt])
+  @@index([createdAt])
+  @@index([price])
+
   @@map("products")
 }
 
