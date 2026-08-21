@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/adminSession";
 import {
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
     if (
       categoryParam &&
       subcategory &&
-      !isValidSubcategoryForCategory(categoryParam, subcategory)
+      !isValidSubcategoryForCategory(categoryParam as any, subcategory)
     ) {
       return NextResponse.json(
         { error: "Invalid subcategory for the selected category" },
@@ -151,6 +152,9 @@ export async function POST(request: NextRequest) {
           updatedBy: admin.username,
         },
       });
+
+      revalidatePath("/");
+      revalidatePath("/products");
 
       return NextResponse.json(hydrateProductImages(product), { status: 201 });
     } catch (error) {

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/adminSession";
 import { getSession } from "@/lib/auth";
@@ -117,6 +118,10 @@ export async function PUT(
       await deleteProductImages(removedImages);
     }
 
+    revalidatePath("/");
+    revalidatePath("/products");
+    revalidatePath(`/products/${params.id}`);
+
     return NextResponse.json(hydrateProductImages(product));
   } catch (error) {
     console.error("Update product error:", error);
@@ -148,6 +153,11 @@ export async function DELETE(
 
     await deleteProductImages(existing.images);
     await prisma.product.delete({ where: { id: params.id } });
+
+    revalidatePath("/");
+    revalidatePath("/products");
+    revalidatePath(`/products/${params.id}`);
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Delete product error:", error);
