@@ -68,3 +68,67 @@ model Admin {
 
   @@map("admins")
 }
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum ShippingMethod {
+  INSIDE_DHAKA
+  OUTSIDE_DHAKA
+}
+
+model ShippingRate {
+  id       String         @id @default(cuid())
+  method   ShippingMethod @unique
+  label    String
+  price    Float
+  isActive Boolean        @default(true)
+
+  @@map("shipping_rates")
+}
+
+model Order {
+  id             String         @id @default(cuid())
+  orderNumber    String         @unique
+  customerName   String
+  customerPhone  String
+  customerEmail  String?
+  address        String
+  apartment      String?
+  city           String
+  postalCode     String?
+  shippingMethod ShippingMethod
+  shippingCost   Float
+  subtotal       Float
+  total          Float
+  paymentMethod  String         @default("COD")
+  status         OrderStatus    @default(PENDING)
+  notes          String?
+  items          OrderItem[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id           String  @id @default(cuid())
+  orderId      String
+  order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String
+  productName  String
+  productImage String?
+  selectedSize String?
+  color        String?
+  quantity     Int
+  unitPrice    Float
+  totalPrice   Float
+
+  @@map("order_items")
+}
