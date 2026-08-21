@@ -31,7 +31,14 @@ function validateServiceRoleKey(serviceRoleKey: string) {
   }
 }
 
+// Cache the Supabase client instance to avoid recreating it on every image URL hydration
+let cachedSupabaseAdmin: ReturnType<typeof createClient> | null = null;
+
 export function getSupabaseAdmin() {
+  if (cachedSupabaseAdmin) {
+    return cachedSupabaseAdmin;
+  }
+
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -46,9 +53,11 @@ export function getSupabaseAdmin() {
   validateSupabaseUrl(supabaseUrl);
   validateServiceRoleKey(supabaseServiceRoleKey);
 
-  return createClient(supabaseUrl, supabaseServiceRoleKey, {
+  cachedSupabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+
+  return cachedSupabaseAdmin;
 }
 
 export const productImageBucket = supabaseStorageBucket;
