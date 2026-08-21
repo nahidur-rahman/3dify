@@ -18,6 +18,8 @@ export const metadata: Metadata = {
   },
 };
 
+export const revalidate = 60;
+
 interface ProductsPageProps {
   searchParams: ProductCatalogSearchParams;
 }
