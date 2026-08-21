@@ -6,27 +6,28 @@ import { prisma } from "@/lib/db";
 import { Product } from "@/lib/types";
 import { hydrateProductImages } from "@/lib/productImages";
 
+export const revalidate = 60;
+
 export default async function HomePage() {
-  // Fetch featured products and top selling products
+  // Fetch featured products and top selling products concurrently
   let featuredProducts: Product[] = [];
   let topSellingProducts: Product[] = [];
   try {
-    featuredProducts = await prisma.product
-      .findMany({
-      where: { featured: true, inStock: true },
-      take: 8,
-      orderBy: { createdAt: "desc" },
-      })
-      .then((products) => products.map((product) => hydrateProductImages(product)));
-      
-    // TODO: Implement actual top selling logic from DB later
-    topSellingProducts = await prisma.product
-      .findMany({
-      where: { inStock: true },
-      take: 4,
-      orderBy: { updatedAt: "desc" },
-      })
-      .then((products) => products.map((product) => hydrateProductImages(product)));
+    const [featuredRaw, topSellingRaw] = await Promise.all([
+      prisma.product.findMany({
+        where: { featured: true, inStock: true },
+        take: 8,
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.product.findMany({
+        where: { inStock: true },
+        take: 4,
+        orderBy: { updatedAt: "desc" },
+      }),
+    ]);
+
+    featuredProducts = featuredRaw.map((product) => hydrateProductImages(product));
+    topSellingProducts = topSellingRaw.map((product) => hydrateProductImages(product));
   } catch {
     // DB might not be connected yet - show empty state
   }
