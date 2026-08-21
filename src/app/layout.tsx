@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
+import { CartProvider } from "@/contexts/CartContext";
 
 const outfit = Outfit({ subsets: ["latin"] });
 const metadataBase = (() => {
@@ -60,7 +61,9 @@ export default function RootLayout({
       <body
         className={`${outfit.className} antialiased bg-surface-base dark:bg-dark text-gray-900 dark:text-gray-100 min-h-screen`}
       >
-        {children}
+        <CartProvider>
+          {children}
+        </CartProvider>
       </body>
     </html>
   );
