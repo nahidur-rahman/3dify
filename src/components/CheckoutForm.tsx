@@ -72,6 +72,7 @@ export default function CheckoutForm() {
     notes: "",
   });
 
+  const [clearedForOutsideDhaka, setClearedForOutsideDhaka] = useState(false);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [globalError, setGlobalError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -93,7 +94,12 @@ export default function CheckoutForm() {
   const total = cartTotal + shippingCost;
 
   function updateField(field: string, value: string) {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    if (field === "shippingMethod" && value === "OUTSIDE_DHAKA" && !clearedForOutsideDhaka) {
+      setClearedForOutsideDhaka(true);
+      setForm((prev) => ({ ...prev, [field]: value, city: "" }));
+    } else {
+      setForm((prev) => ({ ...prev, [field]: value }));
+    }
     // Clear field error on change
     if (errors[field]) {
       setErrors((prev) => {
@@ -130,7 +136,14 @@ export default function CheckoutForm() {
     if (emailErr) clientErrors.customerEmail = [emailErr];
     if (!form.customerName.trim()) clientErrors.customerName = ["Name is required"];
     if (!form.address.trim()) clientErrors.address = ["Address is required"];
-    if (!form.city.trim()) clientErrors.city = ["City is required"];
+    if (!form.city.trim()) {
+      clientErrors.city = ["City is required"];
+    } else if (
+      form.shippingMethod === "INSIDE_DHAKA" &&
+      form.city.trim().toLowerCase() !== "dhaka"
+    ) {
+      clientErrors.city = ["City must be 'Dhaka' for Inside Dhaka delivery"];
+    }
 
     if (Object.keys(clientErrors).length > 0) {
       setErrors(clientErrors);
@@ -241,6 +254,44 @@ export default function CheckoutForm() {
           </div>
         </section>
 
+        {/* Shipping Method */}
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <HiOutlineTruck className="h-5 w-5 text-primary-500" />
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              Shipping Method
+            </h2>
+          </div>
+          <div className="space-y-2">
+            {shippingRates.map((rate) => (
+              <label
+                key={rate.method}
+                className={`flex cursor-pointer items-center justify-between rounded-xl border p-4 transition-all ${form.shippingMethod === rate.method
+                    ? "border-primary-500 bg-primary-50/50 ring-1 ring-primary-500 dark:bg-primary-900/10 dark:border-primary-400"
+                    : "border-gray-200 hover:border-gray-300 dark:border-dark-200 dark:hover:border-dark-300"
+                  }`}
+              >
+                <div className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    name="shippingMethod"
+                    value={rate.method}
+                    checked={form.shippingMethod === rate.method}
+                    onChange={(e) => updateField("shippingMethod", e.target.value)}
+                    className="h-4 w-4 text-primary-500 focus:ring-primary-500"
+                  />
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    {rate.label}
+                  </span>
+                </div>
+                <span className="text-sm font-bold text-gray-900 dark:text-white">
+                  {formatPrice(rate.price)}
+                </span>
+              </label>
+            ))}
+          </div>
+        </section>
+
         {/* Delivery */}
         <section>
           <div className="flex items-center gap-2 mb-4">
@@ -299,44 +350,7 @@ export default function CheckoutForm() {
           </div>
         </section>
 
-        {/* Shipping Method */}
-        <section>
-          <div className="flex items-center gap-2 mb-4">
-            <HiOutlineTruck className="h-5 w-5 text-primary-500" />
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-              Shipping Method
-            </h2>
-          </div>
-          <div className="space-y-2">
-            {shippingRates.map((rate) => (
-              <label
-                key={rate.method}
-                className={`flex cursor-pointer items-center justify-between rounded-xl border p-4 transition-all ${
-                  form.shippingMethod === rate.method
-                    ? "border-primary-500 bg-primary-50/50 ring-1 ring-primary-500 dark:bg-primary-900/10 dark:border-primary-400"
-                    : "border-gray-200 hover:border-gray-300 dark:border-dark-200 dark:hover:border-dark-300"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <input
-                    type="radio"
-                    name="shippingMethod"
-                    value={rate.method}
-                    checked={form.shippingMethod === rate.method}
-                    onChange={(e) => updateField("shippingMethod", e.target.value)}
-                    className="h-4 w-4 text-primary-500 focus:ring-primary-500"
-                  />
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    {rate.label}
-                  </span>
-                </div>
-                <span className="text-sm font-bold text-gray-900 dark:text-white">
-                  {formatPrice(rate.price)}
-                </span>
-              </label>
-            ))}
-          </div>
-        </section>
+        
 
         {/* Payment */}
         <section>
