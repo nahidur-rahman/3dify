@@ -6,6 +6,31 @@ import { getShippingCost } from "@/lib/shipping";
 
 // --- Validation schema ---
 
+// Allowed popular email domains — rejects random/disposable email providers
+const ALLOWED_EMAIL_DOMAINS = [
+  "gmail.com",
+  "yahoo.com",
+  "yahoo.co.uk",
+  "outlook.com",
+  "hotmail.com",
+  "live.com",
+  "icloud.com",
+  "me.com",
+  "mac.com",
+  "protonmail.com",
+  "proton.me",
+  "aol.com",
+  "zoho.com",
+  "yandex.com",
+  "mail.com",
+  "gmx.com",
+  "fastmail.com",
+];
+
+// Valid Bangladeshi mobile operator prefixes (after leading 0)
+// Grameenphone: 013, 017 | Banglalink: 014, 019 | Robi: 016, 018 | Teletalk: 015
+const BD_PHONE_REGEX = /^01[3-9]\d{8}$/;
+
 const OrderItemSchema = z.object({
   productId: z.string().min(1),
   productName: z.string().min(1),
@@ -21,8 +46,22 @@ const CreateOrderSchema = z.object({
   customerPhone: z
     .string()
     .min(1, "Phone number is required")
-    .regex(/^[\d+\-() ]{7,20}$/, "Invalid phone number"),
-  customerEmail: z.string().email("Invalid email").optional().or(z.literal("")),
+    .transform((val) => val.replace(/[\s\-()]/g, "")) // strip spaces/dashes
+    .refine(
+      (val) => BD_PHONE_REGEX.test(val),
+      "Enter a valid Bangladeshi phone number (e.g. 01712345678)"
+    ),
+  customerEmail: z
+    .string()
+    .min(1, "Email is required")
+    .email("Enter a valid email address")
+    .refine(
+      (val) => {
+        const domain = val.split("@")[1]?.toLowerCase();
+        return domain ? ALLOWED_EMAIL_DOMAINS.includes(domain) : false;
+      },
+      "Please use a popular email provider (Gmail, Yahoo, Outlook, etc.)"
+    ),
   address: z.string().min(1, "Address is required"),
   apartment: z.string().optional(),
   city: z.string().min(1, "City is required"),
