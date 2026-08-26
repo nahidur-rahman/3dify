@@ -48,6 +48,7 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
       selectedSize,
       color: product.color || undefined,
     });
+    setQuantity(1);
     openDrawer();
   }
 
@@ -61,6 +62,7 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
       selectedSize,
       color: product.color || undefined,
     });
+    setQuantity(1);
     router.push("/checkout");
   }
 
