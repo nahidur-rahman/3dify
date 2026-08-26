@@ -324,14 +324,17 @@ export default function CheckoutForm() {
             type="tel"
             placeholder="Phone number * (e.g. 01712345678)"
             value={form.customerPhone}
-            onChange={(e) => updateField("customerPhone", e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value.replace(/[^0-9+]/g, "");
+              updateField("customerPhone", value);
+            }}
             onBlur={() => handleBlur("customerPhone")}
             className={`${inputClasses} ${errors.customerPhone ? errorInputClasses : ""}`}
           />
           <FieldError field="customerPhone" />
-          <p className="mt-1.5 text-xs text-gray-400 dark:text-gray-500">
+          {/* <p className="mt-1.5 text-xs text-gray-400 dark:text-gray-500">
             Bangladeshi mobile number (01X-XXXXXXXX)
-          </p>
+          </p> */}
           <div className="mt-3">
             <div className="flex items-center gap-1.5 mb-1.5">
               <HiOutlineMail className="h-4 w-4 text-primary-500" />
@@ -348,9 +351,9 @@ export default function CheckoutForm() {
               className={`${inputClasses} ${errors.customerEmail ? errorInputClasses : ""}`}
             />
             <FieldError field="customerEmail" />
-            <p className="mt-1.5 text-xs text-gray-400 dark:text-gray-500">
+            {/* <p className="mt-1.5 text-xs text-gray-400 dark:text-gray-500">
               Gmail, Yahoo, Outlook, Hotmail, iCloud, etc.
-            </p>
+            </p> */}
           </div>
         </section>
 
