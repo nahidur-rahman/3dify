@@ -69,6 +69,14 @@ const CreateOrderSchema = z.object({
   shippingMethod: z.enum(["INSIDE_DHAKA", "OUTSIDE_DHAKA"]),
   notes: z.string().optional(),
   items: z.array(OrderItemSchema).min(1, "Cart is empty"),
+}).superRefine((data, ctx) => {
+  if (data.shippingMethod === "INSIDE_DHAKA" && data.city.trim().toLowerCase() !== "dhaka") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "City must be 'Dhaka' for Inside Dhaka delivery",
+      path: ["city"],
+    });
+  }
 });
 
 export type CreateOrderInput = z.infer<typeof CreateOrderSchema>;
