@@ -12,7 +12,7 @@ const heroCategories = [
 
 export default function HeroSection() {
   return (
-    <section className="py-6 sm:py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white dark:bg-dark">
+    <section className="py-6 sm:py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white dark:bg-dark rounded-b-3xl">
       <div className="relative rounded-3xl overflow-hidden bg-gray-50 dark:bg-dark-100 flex flex-col lg:flex-row min-h-[500px] border border-gray-200 dark:border-white/10">
         
         {/* Left Content Area (Text & Button) */}
