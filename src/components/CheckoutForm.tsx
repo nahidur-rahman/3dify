@@ -426,12 +426,12 @@ export default function CheckoutForm() {
           </h2>
 
           {/* Items */}
-          <div className="space-y-3 max-h-72 overflow-y-auto mb-4">
+          <div className="space-y-3 max-h-72 overflow-y-auto mb-4 px-1 pt-4 pb-2">
             {items.map((item: CartItem) => {
               const itemKey = `${item.productId}__${item.selectedSize || "default"}`;
               return (
                 <div key={itemKey} className="flex items-center gap-3">
-                  <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-dark-200">
+                  <div className="relative h-14 w-14 flex-shrink-0 overflow-visible rounded-lg bg-gray-100 dark:bg-dark-200">
                     {item.image ? (
                       <Image
                         src={item.image}
@@ -445,7 +445,7 @@ export default function CheckoutForm() {
                         <HiOutlineShoppingCart className="h-5 w-5" />
                       </div>
                     )}
-                    <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gray-700 text-[10px] font-bold text-white">
+                    <span className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full bg-gray-700 text-xs font-bold text-white shadow-lg z-50">
                       {item.quantity}
                     </span>
                   </div>
