@@ -13,7 +13,37 @@ import {
   HiOutlinePhone,
   HiOutlineUser,
   HiOutlineLocationMarker,
+  HiOutlineMail,
 } from "react-icons/hi";
+
+// --- Client-side validation constants (mirrors server-side) ---
+
+const ALLOWED_EMAIL_DOMAINS = [
+  "gmail.com", "yahoo.com", "yahoo.co.uk", "outlook.com", "hotmail.com",
+  "live.com", "icloud.com", "me.com", "mac.com", "protonmail.com",
+  "proton.me", "aol.com", "zoho.com", "yandex.com", "mail.com",
+  "gmx.com", "fastmail.com",
+];
+
+const BD_PHONE_REGEX = /^01[3-9]\d{8}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validatePhone(phone: string): string | null {
+  const cleaned = phone.replace(/[\s\-()]/g, "");
+  if (!cleaned) return "Phone number is required";
+  if (!BD_PHONE_REGEX.test(cleaned)) return "Enter a valid Bangladeshi phone number (e.g. 01712345678)";
+  return null;
+}
+
+function validateEmail(email: string): string | null {
+  if (!email.trim()) return "Email is required";
+  if (!EMAIL_REGEX.test(email)) return "Enter a valid email address";
+  const domain = email.split("@")[1]?.toLowerCase();
+  if (!domain || !ALLOWED_EMAIL_DOMAINS.includes(domain)) {
+    return "Please use a popular email provider (Gmail, Yahoo, Outlook, etc.)";
+  }
+  return null;
+}
 
 interface ShippingOption {
   method: "INSIDE_DHAKA" | "OUTSIDE_DHAKA";
@@ -74,9 +104,39 @@ export default function CheckoutForm() {
     }
   }
 
+  function handleBlur(field: "customerPhone" | "customerEmail") {
+    const validator = field === "customerPhone" ? validatePhone : validateEmail;
+    const errorMsg = validator(form[field]);
+    if (errorMsg) {
+      setErrors((prev) => ({ ...prev, [field]: [errorMsg] }));
+    } else {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (items.length === 0) return;
+
+    // Client-side validation before submitting
+    const clientErrors: Record<string, string[]> = {};
+    const phoneErr = validatePhone(form.customerPhone);
+    if (phoneErr) clientErrors.customerPhone = [phoneErr];
+    const emailErr = validateEmail(form.customerEmail);
+    if (emailErr) clientErrors.customerEmail = [emailErr];
+    if (!form.customerName.trim()) clientErrors.customerName = ["Name is required"];
+    if (!form.address.trim()) clientErrors.address = ["Address is required"];
+    if (!form.city.trim()) clientErrors.city = ["City is required"];
+
+    if (Object.keys(clientErrors).length > 0) {
+      setErrors(clientErrors);
+      setGlobalError("Please fix the errors below.");
+      return;
+    }
 
     setIsSubmitting(true);
     setErrors({});
@@ -84,7 +144,6 @@ export default function CheckoutForm() {
 
     const orderInput: CreateOrderInput = {
       ...form,
-      customerEmail: form.customerEmail || undefined,
       apartment: form.apartment || undefined,
       postalCode: form.postalCode || undefined,
       notes: form.notes || undefined,
@@ -150,20 +209,36 @@ export default function CheckoutForm() {
           </div>
           <input
             type="tel"
-            placeholder="Phone number *"
+            placeholder="Phone number * (e.g. 01712345678)"
             value={form.customerPhone}
             onChange={(e) => updateField("customerPhone", e.target.value)}
+            onBlur={() => handleBlur("customerPhone")}
             className={`${inputClasses} ${errors.customerPhone ? errorInputClasses : ""}`}
           />
           <FieldError field="customerPhone" />
-          <input
-            type="email"
-            placeholder="Email (optional)"
-            value={form.customerEmail}
-            onChange={(e) => updateField("customerEmail", e.target.value)}
-            className={`${inputClasses} ${errors.customerEmail ? errorInputClasses : ""} mt-3`}
-          />
-          <FieldError field="customerEmail" />
+          <p className="mt-1.5 text-xs text-gray-400 dark:text-gray-500">
+            Bangladeshi mobile number (01X-XXXXXXXX)
+          </p>
+          <div className="mt-3">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <HiOutlineMail className="h-4 w-4 text-primary-500" />
+              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                Order confirmation will be sent to this email
+              </span>
+            </div>
+            <input
+              type="email"
+              placeholder="Email address *"
+              value={form.customerEmail}
+              onChange={(e) => updateField("customerEmail", e.target.value)}
+              onBlur={() => handleBlur("customerEmail")}
+              className={`${inputClasses} ${errors.customerEmail ? errorInputClasses : ""}`}
+            />
+            <FieldError field="customerEmail" />
+            <p className="mt-1.5 text-xs text-gray-400 dark:text-gray-500">
+              Gmail, Yahoo, Outlook, Hotmail, iCloud, etc.
+            </p>
+          </div>
         </section>
 
         {/* Delivery */}
