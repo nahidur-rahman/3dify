@@ -203,9 +203,109 @@ export default function CheckoutForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-8 lg:grid-cols-5">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-8 lg:grid lg:grid-cols-5">
+      {/* Right column — Order Summary (appears first on mobile) */}
+      <div className="order-first lg:order-last lg:col-span-2">
+        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-dark-200 dark:bg-dark-100 lg:sticky lg:top-24">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <HiOutlineShoppingCart className="h-5 w-5 text-primary-500" />
+            Order Summary
+          </h2>
+
+          {/* Items */}
+          <div className="space-y-3 max-h-72 overflow-y-auto mb-4 px-1 pt-4 pb-2">
+            {items.map((item: CartItem) => {
+              const itemKey = `${item.productId}__${item.selectedSize || "default"}`;
+              return (
+                <div key={itemKey} className="flex items-center gap-3">
+                  <div className="relative h-14 w-14 flex-shrink-0 overflow-visible rounded-lg bg-gray-100 dark:bg-dark-200">
+                    {item.image ? (
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                        sizes="56px"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-gray-400">
+                        <HiOutlineShoppingCart className="h-5 w-5" />
+                      </div>
+                    )}
+                    <span className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full bg-gray-700 text-xs font-bold text-white shadow-lg z-50">
+                      {item.quantity}
+                    </span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      {item.name}
+                    </p>
+                    {item.selectedSize && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {item.selectedSize}
+                      </p>
+                    )}
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white flex-shrink-0">
+                    {formatPrice(item.price * item.quantity)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          <hr className="border-gray-200 dark:border-dark-200" />
+
+          {/* Totals */}
+          <div className="mt-4 space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-500 dark:text-gray-400">Subtotal</span>
+              <span className="font-semibold text-gray-900 dark:text-white">
+                {formatPrice(cartTotal)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-500 dark:text-gray-400">Shipping</span>
+              <span className="font-semibold text-gray-900 dark:text-white">
+                {formatPrice(shippingCost)}
+              </span>
+            </div>
+          </div>
+
+          <hr className="my-4 border-gray-200 dark:border-dark-200" />
+
+          <div className="flex justify-between">
+            <span className="text-base font-bold text-gray-900 dark:text-white">
+              Total
+            </span>
+            <span className="text-xl font-bold text-gray-900 dark:text-white">
+              {formatPrice(total)}
+            </span>
+          </div>
+
+          {/* Submit button (desktop) */}
+          <button
+            type="submit"
+            disabled={isSubmitting || items.length === 0}
+            className="mt-6 hidden w-full rounded-xl bg-primary-500 py-4 text-base font-bold text-white transition-all hover:bg-primary-600 hover:shadow-lg hover:shadow-primary-500/25 disabled:cursor-not-allowed disabled:opacity-50 lg:block"
+          >
+            {isSubmitting ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
+                  <path d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" fill="currentColor" className="opacity-75" />
+                </svg>
+                Processing...
+              </span>
+            ) : (
+              `Complete Order — ${formatPrice(total)}`
+            )}
+          </button>
+        </div>
+      </div>
+
       {/* Left column — Form */}
-      <div className="lg:col-span-3 space-y-6">
+      <div className="order-last lg:order-first lg:col-span-3 space-y-6">
         {globalError && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-900/20 dark:text-red-400">
             {globalError}
@@ -415,106 +515,6 @@ export default function CheckoutForm() {
             `Complete Order — ${formatPrice(total)}`
           )}
         </button>
-      </div>
-
-      {/* Right column — Order Summary */}
-      <div className="lg:col-span-2">
-        <div className="sticky top-24 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-dark-200 dark:bg-dark-100">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <HiOutlineShoppingCart className="h-5 w-5 text-primary-500" />
-            Order Summary
-          </h2>
-
-          {/* Items */}
-          <div className="space-y-3 max-h-72 overflow-y-auto mb-4 px-1 pt-4 pb-2">
-            {items.map((item: CartItem) => {
-              const itemKey = `${item.productId}__${item.selectedSize || "default"}`;
-              return (
-                <div key={itemKey} className="flex items-center gap-3">
-                  <div className="relative h-14 w-14 flex-shrink-0 overflow-visible rounded-lg bg-gray-100 dark:bg-dark-200">
-                    {item.image ? (
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        fill
-                        className="object-cover"
-                        sizes="56px"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-gray-400">
-                        <HiOutlineShoppingCart className="h-5 w-5" />
-                      </div>
-                    )}
-                    <span className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full bg-gray-700 text-xs font-bold text-white shadow-lg z-50">
-                      {item.quantity}
-                    </span>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                      {item.name}
-                    </p>
-                    {item.selectedSize && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {item.selectedSize}
-                      </p>
-                    )}
-                  </div>
-                  <span className="text-sm font-semibold text-gray-900 dark:text-white flex-shrink-0">
-                    {formatPrice(item.price * item.quantity)}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-
-          <hr className="border-gray-200 dark:border-dark-200" />
-
-          {/* Totals */}
-          <div className="mt-4 space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-500 dark:text-gray-400">Subtotal</span>
-              <span className="font-semibold text-gray-900 dark:text-white">
-                {formatPrice(cartTotal)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500 dark:text-gray-400">Shipping</span>
-              <span className="font-semibold text-gray-900 dark:text-white">
-                {formatPrice(shippingCost)}
-              </span>
-            </div>
-          </div>
-
-          <hr className="my-4 border-gray-200 dark:border-dark-200" />
-
-          <div className="flex justify-between">
-            <span className="text-base font-bold text-gray-900 dark:text-white">
-              Total
-            </span>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">
-              {formatPrice(total)}
-            </span>
-          </div>
-
-          {/* Submit button (desktop) */}
-          <button
-            type="submit"
-            disabled={isSubmitting || items.length === 0}
-            className="mt-6 hidden w-full rounded-xl bg-primary-500 py-4 text-base font-bold text-white transition-all hover:bg-primary-600 hover:shadow-lg hover:shadow-primary-500/25 disabled:cursor-not-allowed disabled:opacity-50 lg:block"
-          >
-            {isSubmitting ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
-                  <path d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" fill="currentColor" className="opacity-75" />
-                </svg>
-                Processing...
-              </span>
-            ) : (
-              `Complete Order — ${formatPrice(total)}`
-            )}
-          </button>
-        </div>
       </div>
     </form>
   );
