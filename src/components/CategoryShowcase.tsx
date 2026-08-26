@@ -105,7 +105,7 @@ export default function CategoryShowcase() {
             <button
               onClick={() => handleScroll("left")}
               aria-label="Scroll categories left"
-              className="absolute -left-3 sm:-left-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/95 dark:bg-dark-200/95 border border-gray-200 dark:border-white/10 shadow-lg text-gray-800 dark:text-gray-100 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-dark-300 hover:scale-110 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="hidden md:flex absolute -left-3 sm:-left-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/95 dark:bg-dark-200/95 border border-gray-200 dark:border-white/10 shadow-lg text-gray-800 dark:text-gray-100 items-center justify-center hover:bg-gray-50 dark:hover:bg-dark-300 hover:scale-110 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <HiChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
@@ -174,7 +174,7 @@ export default function CategoryShowcase() {
             <button
               onClick={() => handleScroll("right")}
               aria-label="Scroll categories right"
-              className="absolute -right-3 sm:-right-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/95 dark:bg-dark-200/95 border border-gray-200 dark:border-white/10 shadow-lg text-gray-800 dark:text-gray-100 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-dark-300 hover:scale-110 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="hidden md:flex absolute -right-3 sm:-right-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/95 dark:bg-dark-200/95 border border-gray-200 dark:border-white/10 shadow-lg text-gray-800 dark:text-gray-100 items-center justify-center hover:bg-gray-50 dark:hover:bg-dark-300 hover:scale-110 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <HiChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
