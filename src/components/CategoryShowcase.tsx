@@ -113,7 +113,7 @@ export default function CategoryShowcase() {
 
           {/* Gradient overlay left */}
           {showLeftArrow && (
-            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white dark:from-dark-100 to-transparent z-10 pointer-events-none rounded-l-2xl" />
+            <div className="hidden md:block absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white dark:from-dark-100 to-transparent z-10 pointer-events-none rounded-l-2xl" />
           )}
 
           {/* Scrollable / Flexible Row */}
@@ -166,7 +166,7 @@ export default function CategoryShowcase() {
 
           {/* Gradient overlay right */}
           {showRightArrow && (
-            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-dark-100 to-transparent z-10 pointer-events-none rounded-r-2xl" />
+            <div className="hidden md:block absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-dark-100 to-transparent z-10 pointer-events-none rounded-r-2xl" />
           )}
 
           {/* Right Arrow Button */}
