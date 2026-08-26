@@ -40,7 +40,7 @@ function validateEmail(email: string): string | null {
   if (!EMAIL_REGEX.test(email)) return "Enter a valid email address";
   const domain = email.split("@")[1]?.toLowerCase();
   if (!domain || !ALLOWED_EMAIL_DOMAINS.includes(domain)) {
-    return "Please use a popular email provider (Gmail, Yahoo, Outlook, etc.)";
+    return "Please use a valid email(Gmail, Yahoo, Outlook, etc.)";
   }
   return null;
 }
