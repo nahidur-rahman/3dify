@@ -1,6 +1,10 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import {
+  findBangladeshDistrict,
+  getShippingMethodForDistrict,
+} from "@/lib/bangladeshDistricts";
 import { z } from "zod";
 import { getShippingCost } from "@/lib/shipping";
 
@@ -42,7 +46,7 @@ const OrderItemSchema = z.object({
 });
 
 const CreateOrderSchema = z.object({
-  customerName: z.string().min(1, "Name is required"),
+  customerName: z.string().trim().min(1, "Name is required"),
   customerPhone: z
     .string()
     .min(1, "Phone number is required")
@@ -53,6 +57,7 @@ const CreateOrderSchema = z.object({
     ),
   customerEmail: z
     .string()
+    .trim()
     .min(1, "Email is required")
     .email("Enter a valid email address")
     .refine(
@@ -62,21 +67,20 @@ const CreateOrderSchema = z.object({
       },
       "Please use a popular email provider (Gmail, Yahoo, Outlook, etc.)"
     ),
-  address: z.string().min(1, "Address is required"),
-  apartment: z.string().optional(),
-  city: z.string().min(1, "City is required"),
-  postalCode: z.string().optional(),
-  shippingMethod: z.enum(["INSIDE_DHAKA", "OUTSIDE_DHAKA"]),
-  notes: z.string().optional(),
+  houseRoad: z.string().trim().optional(),
+  areaVillage: z.string().trim().min(1, "Area / Village is required"),
+  townCityThana: z.string().trim().min(1, "Town / City / Thana is required"),
+  district: z
+    .string()
+    .trim()
+    .min(1, "District is required")
+    .refine(
+      (value) => Boolean(findBangladeshDistrict(value)),
+      "Select a valid district"
+    ),
+  postalCode: z.string().trim().optional(),
+  notes: z.string().trim().optional(),
   items: z.array(OrderItemSchema).min(1, "Cart is empty"),
-}).superRefine((data, ctx) => {
-  if (data.shippingMethod === "INSIDE_DHAKA" && data.city.trim().toLowerCase() !== "dhaka") {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "City must be 'Dhaka' for Inside Dhaka delivery",
-      path: ["city"],
-    });
-  }
 });
 
 export type CreateOrderInput = z.infer<typeof CreateOrderSchema>;
@@ -97,6 +101,20 @@ function generateOrderNumber(): string {
   return `3D-${timestamp}${random}`;
 }
 
+function buildOrderAddress(data: {
+  houseRoad?: string;
+  areaVillage: string;
+  townCityThana: string;
+}): string {
+  const segments = [
+    data.houseRoad ? `House/Road: ${data.houseRoad}` : null,
+    `Area/Village: ${data.areaVillage}`,
+    `Town/City/Thana: ${data.townCityThana}`,
+  ];
+
+  return segments.filter((segment): segment is string => Boolean(segment)).join(", ");
+}
+
 // --- Server Action ---
 
 export async function createOrder(input: CreateOrderInput): Promise<OrderResult> {
@@ -114,10 +132,20 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderResult>
   }
 
   const data = parsed.data;
+  const district = findBangladeshDistrict(data.district);
+
+  if (!district) {
+    return {
+      success: false,
+      error: "Please fix the errors below.",
+      fieldErrors: { district: ["Select a valid district"] },
+    };
+  }
 
   try {
     // Calculate costs
-    const shippingCost = await getShippingCost(data.shippingMethod);
+    const shippingMethod = getShippingMethodForDistrict(district);
+    const shippingCost = await getShippingCost(shippingMethod);
     const subtotal = data.items.reduce(
       (sum, item) => sum + item.unitPrice * item.quantity,
       0
@@ -131,11 +159,11 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderResult>
         customerName: data.customerName,
         customerPhone: data.customerPhone,
         customerEmail: data.customerEmail || null,
-        address: data.address,
-        apartment: data.apartment || null,
-        city: data.city,
+        address: buildOrderAddress(data),
+        apartment: null,
+        city: district,
         postalCode: data.postalCode || null,
-        shippingMethod: data.shippingMethod,
+        shippingMethod,
         shippingCost,
         subtotal,
         total,
