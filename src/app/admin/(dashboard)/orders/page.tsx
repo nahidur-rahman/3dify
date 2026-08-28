@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
 import {
@@ -31,72 +31,136 @@ interface OrderItem {
   totalPrice: number;
 }
 
-interface Order {
+type OrderPreviewItem = Pick<OrderItem, "id" | "productName" | "productImage" | "quantity">;
+
+interface OrderSummary {
   id: string;
   orderNumber: string;
   customerName: string;
   customerPhone: string;
-  customerEmail: string | null;
-  address: string;
-  apartment: string | null;
   city: string;
-  postalCode: string | null;
   shippingMethod: string;
-  shippingCost: number;
-  subtotal: number;
   total: number;
   paymentMethod: string;
   status: "PENDING" | "CONFIRMED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
-  notes: string | null;
-  items: OrderItem[];
+  items: OrderPreviewItem[];
   createdAt: string;
   updatedAt: string;
 }
 
+interface Order extends OrderSummary {
+  customerEmail: string | null;
+  address: string;
+  apartment: string | null;
+  postalCode: string | null;
+  shippingCost: number;
+  subtotal: number;
+  notes: string | null;
+  items: OrderItem[];
+}
+
+type OrderFilter = Order["status"] | "ALL";
+
 const STATUS_LIST = [
-  "ALL",
   "PENDING",
   "CONFIRMED",
   "PROCESSING",
   "SHIPPED",
   "DELIVERED",
+  "ALL",
   "CANCELLED",
-] as const;
+] as const satisfies readonly OrderFilter[];
+
+function sortOrdersByNewest<T extends { createdAt: string }>(items: T[]) {
+  return [...items].sort(
+    (first, second) =>
+      new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime()
+  );
+}
 
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
-  const [activeStatus, setActiveStatus] = useState<string>("ALL");
+  const [activeStatus, setActiveStatus] = useState<OrderFilter>("PENDING");
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [detailsLoadingId, setDetailsLoadingId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchOrders();
-  }, [activeStatus, search]);
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 300);
 
-  async function fetchOrders() {
+    return () => window.clearTimeout(timeoutId);
+  }, [search]);
+
+  const fetchOrders = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       if (activeStatus !== "ALL") params.set("status", activeStatus);
-      if (search.trim()) params.set("search", search.trim());
+      if (debouncedSearch) params.set("search", debouncedSearch);
 
       const res = await fetch(`/api/admin/orders?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
-        setOrders(data.orders || []);
-        setStatusCounts(data.statusCounts || {});
+        setOrders(sortOrdersByNewest(data.orders || []));
       }
     } catch (err) {
       console.error("Failed to fetch orders:", err);
     } finally {
       setLoading(false);
     }
-  }
+  }, [activeStatus, debouncedSearch]);
+
+  const fetchStatusCounts = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/orders?countsOnly=true");
+      if (res.ok) {
+        const data = await res.json();
+        setStatusCounts(data.statusCounts || {});
+      }
+    } catch (err) {
+      console.error("Failed to fetch order counts:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchOrders();
+  }, [fetchOrders]);
+
+  useEffect(() => {
+    void fetchStatusCounts();
+  }, [fetchStatusCounts]);
+
+  const openOrderDetails = useCallback(async (orderId: string) => {
+    setDetailsLoadingId(orderId);
+
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}`);
+      if (res.ok) {
+        const data: Order = await res.json();
+        setSelectedOrder(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch order details:", err);
+    } finally {
+      setDetailsLoadingId(null);
+    }
+  }, []);
 
   async function updateOrderStatus(orderId: string, newStatus: string) {
+    const previousOrder =
+      orders.find((order) => order.id === orderId) ??
+      (selectedOrder?.id === orderId ? selectedOrder : null);
+
+    if (previousOrder?.status === newStatus) {
+      return;
+    }
+
     setUpdatingId(orderId);
     try {
       const res = await fetch(`/api/admin/orders/${orderId}`, {
@@ -106,19 +170,28 @@ export default function AdminOrdersPage() {
       });
 
       if (res.ok) {
-        const updated = await res.json();
+        const updated: Order = await res.json();
+        const previousStatus = previousOrder?.status;
 
-        // Update in local state
-        setOrders((prev) =>
-          prev.map((o) => (o.id === orderId ? { ...o, status: updated.status } : o))
-        );
+        setOrders((prev) => {
+          const nextOrders = prev
+            .map((order) => (order.id === orderId ? { ...order, ...updated } : order))
+            .filter((order) => activeStatus === "ALL" || order.status === activeStatus);
+
+          return sortOrdersByNewest(nextOrders);
+        });
 
         if (selectedOrder?.id === orderId) {
-          setSelectedOrder((prev) => (prev ? { ...prev, status: updated.status } : null));
+          setSelectedOrder((prev) => (prev ? { ...prev, ...updated } : null));
         }
 
-        // Re-fetch counts
-        fetchOrders();
+        if (previousStatus && previousStatus !== updated.status) {
+          setStatusCounts((prev) => ({
+            ...prev,
+            [previousStatus]: Math.max((prev[previousStatus] ?? 0) - 1, 0),
+            [updated.status]: (prev[updated.status] ?? 0) + 1,
+          }));
+        }
       }
     } catch (err) {
       console.error("Failed to update status:", err);
@@ -366,10 +439,11 @@ export default function AdminOrdersPage() {
                       {/* Actions */}
                       <td className="px-6 py-4 text-right">
                         <button
-                          onClick={() => setSelectedOrder(order)}
+                          onClick={() => void openOrderDetails(order.id)}
+                          disabled={detailsLoadingId === order.id}
                           className="px-3.5 py-1.5 rounded-xl bg-gray-100 dark:bg-dark-200 hover:bg-primary-50 hover:text-primary-600 dark:hover:bg-primary-900/20 dark:hover:text-primary-400 text-gray-700 dark:text-gray-300 font-semibold text-xs transition-colors"
                         >
-                          Details
+                          {detailsLoadingId === order.id ? "Loading..." : "Details"}
                         </button>
                       </td>
                     </tr>
