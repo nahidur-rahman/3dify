@@ -83,8 +83,8 @@ export default function CategoryShowcase() {
   };
 
   return (
-    <section className="mt-6 sm:mt-8 mb-6 sm:mb-8 mx-4 sm:mx-0 pb-10 pt-2 bg-white dark:bg-dark rounded-3xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative transition-all pt-2">
+    <section className="mt-6 sm:mt-8 mb-6 sm:mb-8 mx-4 sm:mx-auto max-w-7xl pb-10 pt-2 bg-white dark:bg-dark rounded-3xl">
+      <div className="px-4 sm:px-6 lg:px-8 relative transition-all pt-2">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
