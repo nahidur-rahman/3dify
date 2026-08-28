@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
@@ -13,7 +13,6 @@ import {
   HiOutlineClock,
   HiOutlineTruck,
   HiOutlineXCircle,
-  HiOutlineShoppingBag,
   HiArrowLeft,
 } from "react-icons/hi";
 
@@ -77,44 +76,47 @@ function TrackOrderContent() {
   const [error, setError] = useState("");
   const [order, setOrder] = useState<TrackedOrder | null>(null);
 
+  const handleTrack = useCallback(
+    async (ordNo = orderNumber, phNo = phone) => {
+      if (!ordNo.trim() || !phNo.trim()) {
+        setError("Please enter both Order Number and Phone Number.");
+        return;
+      }
+
+      setLoading(true);
+      setError("");
+      setOrder(null);
+
+      try {
+        const res = await fetch(
+          `/api/orders/track?order=${encodeURIComponent(ordNo.trim())}&phone=${encodeURIComponent(
+            phNo.trim()
+          )}`
+        );
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          setOrder(data.order);
+        } else {
+          setError(data.error || "Order not found. Please verify your details.");
+        }
+      } catch {
+        setError("Network error. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [orderNumber, phone]
+  );
+
   useEffect(() => {
     const initialOrder = searchParams.get("order");
     const initialPhone = searchParams.get("phone");
 
     if (initialOrder && initialPhone) {
-      handleTrack(initialOrder, initialPhone);
+      void handleTrack(initialOrder, initialPhone);
     }
-  }, []);
-
-  async function handleTrack(ordNo = orderNumber, phNo = phone) {
-    if (!ordNo.trim() || !phNo.trim()) {
-      setError("Please enter both Order Number and Phone Number.");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-    setOrder(null);
-
-    try {
-      const res = await fetch(
-        `/api/orders/track?order=${encodeURIComponent(ordNo.trim())}&phone=${encodeURIComponent(
-          phNo.trim()
-        )}`
-      );
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        setOrder(data.order);
-      } else {
-        setError(data.error || "Order not found. Please verify your details.");
-      }
-    } catch {
-      setError("Network error. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
+  }, [handleTrack, searchParams]);
 
   const currentStepIndex = order ? getStepIndex(order.status) : -1;
 
@@ -359,7 +361,7 @@ function TrackOrderContent() {
                   <span className="font-semibold text-gray-900 dark:text-white">Customer:</span> {order.customerName}
                 </p>
                 <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
-                  <span className="font-semibold text-gray-900 dark:text-white">City:</span> {order.city}
+                  <span className="font-semibold text-gray-900 dark:text-white">District:</span> {order.city}
                 </p>
                 <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
                   <span className="font-semibold text-gray-900 dark:text-white">Shipping Method:</span> {order.shippingMethod.replace(/_/g, " ")}
