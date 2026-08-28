@@ -429,6 +429,7 @@ export default function CheckoutForm() {
             </h2>
           </div>
           <div className="space-y-3">
+            {/* Full name */}
             <div>
               <input
                 type="text"
@@ -439,36 +440,42 @@ export default function CheckoutForm() {
               />
               <FieldError field="customerName" />
             </div>
-            <div>
-              <input
-                type="text"
-                placeholder="House No / Road No"
-                value={form.houseRoad}
-                onChange={(e) => updateField("houseRoad", e.target.value)}
-                className={inputClasses}
-              />
-            </div>
-            <div>
-              <input
-                type="text"
-                placeholder="Area / Village *"
-                value={form.areaVillage}
-                onChange={(e) => updateField("areaVillage", e.target.value)}
-                className={`${inputClasses} ${errors.areaVillage ? errorInputClasses : ""}`}
-              />
-              <FieldError field="areaVillage" />
-            </div>
-            <div>
-              <input
-                type="text"
-                placeholder="Town / City / Thana *"
-                value={form.townCityThana}
-                onChange={(e) => updateField("townCityThana", e.target.value)}
-                className={`${inputClasses} ${errors.townCityThana ? errorInputClasses : ""}`}
-              />
-              <FieldError field="townCityThana" />
-            </div>
+            
+            {/* House No & Area Village */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <input
+                  type="text"
+                  placeholder="House No / Road No"
+                  value={form.houseRoad}
+                  onChange={(e) => updateField("houseRoad", e.target.value)}
+                  className={inputClasses}
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  placeholder="Area / Village *"
+                  value={form.areaVillage}
+                  onChange={(e) => updateField("areaVillage", e.target.value)}
+                  className={`${inputClasses} ${errors.areaVillage ? errorInputClasses : ""}`}
+                />
+                <FieldError field="areaVillage" />
+              </div>
+            </div>
+            
+            {/* Town, District & Postal code */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div>
+                <input
+                  type="text"
+                  placeholder="Town / City / Thana *"
+                  value={form.townCityThana}
+                  onChange={(e) => updateField("townCityThana", e.target.value)}
+                  className={`${inputClasses} ${errors.townCityThana ? errorInputClasses : ""}`}
+                />
+                <FieldError field="townCityThana" />
+              </div>
               <div>
                 <div ref={districtPickerRef} className="relative">
                   <button
