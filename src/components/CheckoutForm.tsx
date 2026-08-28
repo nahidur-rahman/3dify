@@ -1,12 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart, type CartItem } from "@/contexts/CartContext";
 import { createOrder, type CreateOrderInput } from "@/lib/orders";
+import {
+  BANGLADESH_DISTRICTS,
+  findBangladeshDistrict,
+  getShippingMethodForDistrict,
+} from "@/lib/bangladeshDistricts";
 import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
 import {
+  HiChevronDown,
   HiOutlineShoppingCart,
   HiOutlineTruck,
   HiOutlineCash,
@@ -14,6 +20,7 @@ import {
   HiOutlineUser,
   HiOutlineLocationMarker,
   HiOutlineMail,
+  HiSearch,
 } from "react-icons/hi";
 
 // --- Client-side validation constants (mirrors server-side) ---
@@ -54,6 +61,7 @@ interface ShippingOption {
 export default function CheckoutForm() {
   const router = useRouter();
   const { items, cartTotal, clearCart } = useCart();
+  const districtPickerRef = useRef<HTMLDivElement>(null);
 
   const [shippingRates, setShippingRates] = useState<ShippingOption[]>([
     { method: "INSIDE_DHAKA", label: "Inside Dhaka", price: 70 },
@@ -64,15 +72,16 @@ export default function CheckoutForm() {
     customerName: "",
     customerPhone: "",
     customerEmail: "",
-    address: "",
-    apartment: "",
-    city: "Dhaka",
+    houseRoad: "",
+    areaVillage: "",
+    townCityThana: "",
+    district: "",
     postalCode: "",
-    shippingMethod: "INSIDE_DHAKA" as "INSIDE_DHAKA" | "OUTSIDE_DHAKA",
     notes: "",
   });
 
-  const [clearedForOutsideDhaka, setClearedForOutsideDhaka] = useState(false);
+  const [isDistrictOpen, setIsDistrictOpen] = useState(false);
+  const [districtQuery, setDistrictQuery] = useState("");
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [globalError, setGlobalError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -89,17 +98,40 @@ export default function CheckoutForm() {
       });
   }, []);
 
-  const shippingCost =
-    shippingRates.find((r) => r.method === form.shippingMethod)?.price ?? 70;
-  const total = cartTotal + shippingCost;
-
-  function updateField(field: string, value: string) {
-    if (field === "shippingMethod" && value === "OUTSIDE_DHAKA" && !clearedForOutsideDhaka) {
-      setClearedForOutsideDhaka(true);
-      setForm((prev) => ({ ...prev, [field]: value, city: "" }));
-    } else {
-      setForm((prev) => ({ ...prev, [field]: value }));
+  useEffect(() => {
+    function handlePointerDown(event: MouseEvent) {
+      if (!districtPickerRef.current?.contains(event.target as Node)) {
+        setIsDistrictOpen(false);
+      }
     }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, []);
+
+  useEffect(() => {
+    if (!isDistrictOpen) {
+      setDistrictQuery("");
+    }
+  }, [isDistrictOpen]);
+
+  const shippingMethod = form.district
+    ? getShippingMethodForDistrict(form.district)
+    : null;
+  const shippingCost = shippingMethod
+    ? shippingRates.find((rate) => rate.method === shippingMethod)?.price ??
+      (shippingMethod === "INSIDE_DHAKA" ? 70 : 130)
+    : null;
+  const total = shippingCost === null ? null : cartTotal + shippingCost;
+  const filteredDistricts = BANGLADESH_DISTRICTS.filter((district) =>
+    district.toLowerCase().includes(districtQuery.trim().toLowerCase())
+  );
+  const submitLabel =
+    total === null ? "Complete Order" : `Complete Order — ${formatPrice(total)}`;
+
+  function updateField(field: keyof typeof form, value: string) {
+    setForm((prev) => ({ ...prev, [field]: value }));
+
     // Clear field error on change
     if (errors[field]) {
       setErrors((prev) => {
@@ -108,6 +140,12 @@ export default function CheckoutForm() {
         return next;
       });
     }
+  }
+
+  function selectDistrict(district: string) {
+    updateField("district", district);
+    setDistrictQuery("");
+    setIsDistrictOpen(false);
   }
 
   function handleBlur(field: "customerPhone" | "customerEmail") {
@@ -135,14 +173,14 @@ export default function CheckoutForm() {
     const emailErr = validateEmail(form.customerEmail);
     if (emailErr) clientErrors.customerEmail = [emailErr];
     if (!form.customerName.trim()) clientErrors.customerName = ["Name is required"];
-    if (!form.address.trim()) clientErrors.address = ["Address is required"];
-    if (!form.city.trim()) {
-      clientErrors.city = ["City is required"];
-    } else if (
-      form.shippingMethod === "INSIDE_DHAKA" &&
-      form.city.trim().toLowerCase() !== "dhaka"
-    ) {
-      clientErrors.city = ["City must be 'Dhaka' for Inside Dhaka delivery"];
+    if (!form.areaVillage.trim()) clientErrors.areaVillage = ["Area / Village is required"];
+    if (!form.townCityThana.trim()) {
+      clientErrors.townCityThana = ["Town / City / Thana is required"];
+    }
+    if (!form.district.trim()) {
+      clientErrors.district = ["District is required"];
+    } else if (!findBangladeshDistrict(form.district)) {
+      clientErrors.district = ["Select a valid district"];
     }
 
     if (Object.keys(clientErrors).length > 0) {
@@ -155,9 +193,16 @@ export default function CheckoutForm() {
     setErrors({});
     setGlobalError("");
 
+    const normalizedDistrict = findBangladeshDistrict(form.district);
+
     const orderInput: CreateOrderInput = {
-      ...form,
-      apartment: form.apartment || undefined,
+      customerName: form.customerName,
+      customerPhone: form.customerPhone,
+      customerEmail: form.customerEmail,
+      houseRoad: form.houseRoad || undefined,
+      areaVillage: form.areaVillage,
+      townCityThana: form.townCityThana,
+      district: normalizedDistrict ?? form.district,
       postalCode: form.postalCode || undefined,
       notes: form.notes || undefined,
       items: items.map((item: CartItem) => ({
@@ -266,8 +311,13 @@ export default function CheckoutForm() {
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500 dark:text-gray-400">Shipping</span>
-              <span className="font-semibold text-gray-900 dark:text-white">
-                {formatPrice(shippingCost)}
+              <span
+                className={`font-semibold ${shippingCost === null
+                  ? "text-gray-400 dark:text-gray-500"
+                  : "text-gray-900 dark:text-white"
+                  }`}
+              >
+                {shippingCost === null ? "Select district" : formatPrice(shippingCost)}
               </span>
             </div>
           </div>
@@ -278,8 +328,13 @@ export default function CheckoutForm() {
             <span className="text-base font-bold text-gray-900 dark:text-white">
               Total
             </span>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">
-              {formatPrice(total)}
+            <span
+              className={`${total === null
+                ? "text-sm font-semibold text-gray-400 dark:text-gray-500"
+                : "text-xl font-bold text-gray-900 dark:text-white"
+                }`}
+            >
+              {total === null ? "Select district" : formatPrice(total)}
             </span>
           </div>
 
@@ -298,7 +353,7 @@ export default function CheckoutForm() {
                 Processing...
               </span>
             ) : (
-              `Complete Order — ${formatPrice(total)}`
+              submitLabel
             )}
           </button>
         </div>
@@ -357,43 +412,13 @@ export default function CheckoutForm() {
           </div>
         </section>
 
-        {/* Shipping Method */}
-        <section>
-          <div className="flex items-center gap-2 mb-4">
-            <HiOutlineTruck className="h-5 w-5 text-primary-500" />
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-              Shipping Method
-            </h2>
-          </div>
-          <div className="space-y-2">
-            {shippingRates.map((rate) => (
-              <label
-                key={rate.method}
-                className={`flex cursor-pointer items-center justify-between rounded-xl border p-4 transition-all ${form.shippingMethod === rate.method
-                    ? "border-primary-500 bg-primary-50/50 ring-1 ring-primary-500 dark:bg-primary-900/10 dark:border-primary-400"
-                    : "border-gray-200 hover:border-gray-300 dark:border-dark-200 dark:hover:border-dark-300"
-                  }`}
-              >
-                <div className="flex items-center gap-3">
-                  <input
-                    type="radio"
-                    name="shippingMethod"
-                    value={rate.method}
-                    checked={form.shippingMethod === rate.method}
-                    onChange={(e) => updateField("shippingMethod", e.target.value)}
-                    className="h-4 w-4 text-primary-500 focus:ring-primary-500"
-                  />
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">
-                    {rate.label}
-                  </span>
-                </div>
-                <span className="text-sm font-bold text-gray-900 dark:text-white">
-                  {formatPrice(rate.price)}
-                </span>
-              </label>
-            ))}
-          </div>
-        </section>
+        {/* Shipping Info */}
+        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+          <HiOutlineTruck className="h-4 w-4 text-primary-500 flex-shrink-0" />
+          <span>
+            Delivery charge: Inside Dhaka <span className="font-semibold text-gray-900 dark:text-white">৳70</span>, Outside Dhaka <span className="font-semibold text-gray-900 dark:text-white">৳130</span>
+          </span>
+        </div>
 
         {/* Delivery */}
         <section>
@@ -417,38 +442,101 @@ export default function CheckoutForm() {
             <div>
               <input
                 type="text"
-                placeholder="Address *"
-                value={form.address}
-                onChange={(e) => updateField("address", e.target.value)}
-                className={`${inputClasses} ${errors.address ? errorInputClasses : ""}`}
+                placeholder="House No / Road No"
+                value={form.houseRoad}
+                onChange={(e) => updateField("houseRoad", e.target.value)}
+                className={inputClasses}
               />
-              <FieldError field="address" />
             </div>
-            <input
-              type="text"
-              placeholder="Apartment, suite, etc. (optional)"
-              value={form.apartment}
-              onChange={(e) => updateField("apartment", e.target.value)}
-              className={inputClasses}
-            />
-            <div className="grid grid-cols-2 gap-3">
+            <div>
+              <input
+                type="text"
+                placeholder="Area / Village *"
+                value={form.areaVillage}
+                onChange={(e) => updateField("areaVillage", e.target.value)}
+                className={`${inputClasses} ${errors.areaVillage ? errorInputClasses : ""}`}
+              />
+              <FieldError field="areaVillage" />
+            </div>
+            <div>
+              <input
+                type="text"
+                placeholder="Town / City / Thana *"
+                value={form.townCityThana}
+                onChange={(e) => updateField("townCityThana", e.target.value)}
+                className={`${inputClasses} ${errors.townCityThana ? errorInputClasses : ""}`}
+              />
+              <FieldError field="townCityThana" />
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <div ref={districtPickerRef} className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsDistrictOpen((prev) => !prev)}
+                    className={`${inputClasses} flex items-center justify-between text-left ${errors.district ? errorInputClasses : ""} ${form.district
+                      ? ""
+                      : "text-gray-400 dark:text-gray-500"
+                      }`}
+                    aria-expanded={isDistrictOpen}
+                    aria-haspopup="listbox"
+                  >
+                    <span className="truncate">{form.district || "District *"}</span>
+                    <HiChevronDown
+                      className={`h-4 w-4 flex-shrink-0 transition-transform ${isDistrictOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+
+                  {isDistrictOpen && (
+                    <div className="absolute z-30 mt-2 w-full rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-dark-200 dark:bg-dark-100">
+                      <div className="border-b border-gray-100 p-3 dark:border-dark-200">
+                        <div className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 dark:border-dark-300">
+                          <HiSearch className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                          <input
+                            type="text"
+                            value={districtQuery}
+                            onChange={(e) => setDistrictQuery(e.target.value)}
+                            placeholder="Search district"
+                            className="w-full bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-gray-500"
+                            autoFocus
+                          />
+                        </div>
+                      </div>
+                      <div className="max-h-64 overflow-y-auto p-2">
+                        {filteredDistricts.length > 0 ? (
+                          filteredDistricts.map((district) => (
+                            <button
+                              key={district}
+                              type="button"
+                              onClick={() => selectDistrict(district)}
+                              className={`block w-full rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${form.district === district
+                                ? "bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300"
+                                : "text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-dark-200"
+                                }`}
+                            >
+                              {district}
+                            </button>
+                          ))
+                        ) : (
+                          <p className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+                            No district found.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <FieldError field="district" />
+              </div>
               <div>
                 <input
                   type="text"
-                  placeholder="City *"
-                  value={form.city}
-                  onChange={(e) => updateField("city", e.target.value)}
-                  className={`${inputClasses} ${errors.city ? errorInputClasses : ""}`}
+                  placeholder="Postal code (optional)"
+                  value={form.postalCode}
+                  onChange={(e) => updateField("postalCode", e.target.value)}
+                  className={inputClasses}
                 />
-                <FieldError field="city" />
               </div>
-              <input
-                type="text"
-                placeholder="Postal code (optional)"
-                value={form.postalCode}
-                onChange={(e) => updateField("postalCode", e.target.value)}
-                className={inputClasses}
-              />
             </div>
           </div>
         </section>
@@ -515,7 +603,7 @@ export default function CheckoutForm() {
               Processing...
             </span>
           ) : (
-            `Complete Order — ${formatPrice(total)}`
+            submitLabel
           )}
         </button>
       </div>
