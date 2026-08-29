@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
         orderNumber: matchingOrder.orderNumber,
         status: matchingOrder.status,
         customerName: matchingOrder.customerName,
-        city: matchingOrder.city,
+        address: matchingOrder.address,
         shippingMethod: matchingOrder.shippingMethod,
         shippingCost: matchingOrder.shippingCost,
         subtotal: matchingOrder.subtotal,
