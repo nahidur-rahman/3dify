@@ -106,9 +106,6 @@ model Order {
   customerPhone  String
   customerEmail  String?
   address        String
-  apartment      String?
-  city           String
-  postalCode     String?
   shippingMethod ShippingMethod
   shippingCost   Float
   subtotal       Float
