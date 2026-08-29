@@ -38,7 +38,7 @@ interface OrderSummary {
   orderNumber: string;
   customerName: string;
   customerPhone: string;
-  city: string;
+  address: string;
   shippingMethod: string;
   total: number;
   paymentMethod: string;
@@ -50,9 +50,6 @@ interface OrderSummary {
 
 interface Order extends OrderSummary {
   customerEmail: string | null;
-  address: string;
-  apartment: string | null;
-  postalCode: string | null;
   shippingCost: number;
   subtotal: number;
   notes: string | null;
@@ -372,7 +369,7 @@ export default function AdminOrdersPage() {
                         </div>
                         <div className="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                           <HiOutlineLocationMarker className="w-3.5 h-3.5" />
-                          {order.city} ({order.shippingMethod.replace(/_/g, " ")})
+                          <span className="truncate max-w-[16rem]">{order.address}</span>
                         </div>
                       </td>
 
@@ -519,10 +516,6 @@ export default function AdminOrdersPage() {
                   </h3>
                   <p className="text-xs text-gray-900 dark:text-white font-medium leading-relaxed">
                     {selectedOrder.address}
-                    {selectedOrder.apartment ? `, ${selectedOrder.apartment}` : ""}
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
-                    {selectedOrder.city} {selectedOrder.postalCode ? `- ${selectedOrder.postalCode}` : ""}
                   </p>
                   <p className="text-xs font-semibold text-primary-600 dark:text-primary-400 mt-1">
                     Method: {selectedOrder.shippingMethod.replace(/_/g, " ")} (৳{selectedOrder.shippingCost})
