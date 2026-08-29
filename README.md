@@ -71,6 +71,8 @@ ADMIN_PASSWORD=
 
 NEXT_PUBLIC_WHATSAPP=
 NEXT_PUBLIC_MESSENGER=
+NEXT_PUBLIC_FACEBOOK_URL=
+NEXT_PUBLIC_INSTAGRAM_URL=
 NEXT_PUBLIC_SITE_URL=
 NEXT_PUBLIC_APP_NAME=3Dify BD
 
@@ -83,6 +85,7 @@ Notes:
 - JWT_SECRET should be a strong random value (minimum 32 characters).
 - SUPABASE_SERVICE_ROLE_KEY is required for server-side Storage upload/delete.
 - NEXT_PUBLIC_WHATSAPP format example: 8801XXXXXXXXX.
+- NEXT_PUBLIC_FACEBOOK_URL and NEXT_PUBLIC_INSTAGRAM_URL should be full public profile/page URLs.
 - PRODUCT_IMAGE_LIMIT is optional. Set it to a positive integer to cap total images per product; leave it blank for unlimited uploads.
 - When the cap is set, the admin product form warns and skips any extra selected files beyond the limit.
 
