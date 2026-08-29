@@ -24,8 +24,8 @@ export interface CartItem {
 interface CartContextType {
   items: CartItem[];
   addToCart: (item: CartItem) => void;
-  removeFromCart: (productId: string, selectedSize?: string) => void;
-  updateQuantity: (productId: string, quantity: number, selectedSize?: string) => void;
+  removeFromCart: (productId: string, selectedSize?: string, color?: string) => void;
+  updateQuantity: (productId: string, quantity: number, selectedSize?: string, color?: string) => void;
   clearCart: () => void;
   cartCount: number;
   cartTotal: number;
@@ -40,8 +40,8 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 // --- Helpers ---
 
-function getCartKey(item: { productId: string; selectedSize?: string }): string {
-  return `${item.productId}__${item.selectedSize || "default"}`;
+function getCartKey(item: { productId: string; selectedSize?: string; color?: string }): string {
+  return `${item.productId}__${item.selectedSize || "default"}__${item.color || "default"}`;
 }
 
 function loadCart(): CartItem[] {
@@ -103,20 +103,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const removeFromCart = useCallback(
-    (productId: string, selectedSize?: string) => {
+    (productId: string, selectedSize?: string, color?: string) => {
       setItems((prev) =>
-        prev.filter((i) => getCartKey(i) !== getCartKey({ productId, selectedSize }))
+        prev.filter((i) => getCartKey(i) !== getCartKey({ productId, selectedSize, color }))
       );
     },
     []
   );
 
   const updateQuantity = useCallback(
-    (productId: string, quantity: number, selectedSize?: string) => {
+    (productId: string, quantity: number, selectedSize?: string, color?: string) => {
       if (quantity < 1) return;
       setItems((prev) =>
         prev.map((i) =>
-          getCartKey(i) === getCartKey({ productId, selectedSize })
+          getCartKey(i) === getCartKey({ productId, selectedSize, color })
             ? { ...i, quantity }
             : i
         )
