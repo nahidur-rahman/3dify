@@ -5,11 +5,33 @@ import { Product } from "@/lib/types";
 interface ProductGridProps {
   products: Product[];
   resetHref?: string;
+  variant?: "default" | "storefrontHighlights";
+}
+
+function getStorefrontHighlightItemClassName(index: number) {
+  if (index < 6) {
+    return "";
+  }
+
+  if (index < 8) {
+    return "hidden lg:block";
+  }
+
+  if (index < 10) {
+    return "hidden xl:block";
+  }
+
+  if (index < 12) {
+    return "hidden 2xl:block";
+  }
+
+  return "hidden";
 }
 
 export default function ProductGrid({
   products,
   resetHref = "/products",
+  variant = "default",
 }: ProductGridProps) {
   if (products.length === 0) {
     return (
@@ -31,10 +53,24 @@ export default function ProductGrid({
     );
   }
 
+  const gridClassName =
+    variant === "storefrontHighlights"
+      ? "grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
+      : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+    <div className={gridClassName}>
+      {products.map((product, index) => (
+        <div
+          key={product.id}
+          className={
+            variant === "storefrontHighlights"
+              ? getStorefrontHighlightItemClassName(index)
+              : undefined
+          }
+        >
+          <ProductCard product={product} />
+        </div>
       ))}
     </div>
   );
