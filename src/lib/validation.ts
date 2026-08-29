@@ -2,12 +2,19 @@ import {
   categoryValues,
   isValidSubcategoryForCategory,
 } from "@/lib/categories";
+import { normalizeProductColorOptions } from "@/lib/productColors";
 import { z } from "zod";
 
 const sizeOptionSchema = z.object({
   label: z.string().min(1, "Size option label is required").max(100),
   price: z.number().positive("Size option price must be positive"),
 });
+
+const colorOptionSchema = z
+  .string()
+  .trim()
+  .min(1, "Color option is required")
+  .max(50, "Color option must be 50 characters or fewer");
 
 const subcategorySchema = z.preprocess(
   (value) => {
@@ -141,12 +148,12 @@ const productSchemaBase = z.object({
   images: z.array(z.string().url()).default([]),
   category: z.enum(categoryValues),
   subcategory: subcategorySchema,
-  color: z.string().min(1, "Color is required"),
+  color: z.string().trim().max(200, "Color summary must be 200 characters or fewer").default(""),
+  colorMode: z.enum(["FIXED", "OPTIONS"]).default("FIXED"),
+  colorOptions: z.array(colorOptionSchema).default([]),
   size: z.string().min(1, "Size is required"),
   sizeMode: z.enum(["FIXED", "OPTIONS"]).default("FIXED"),
   sizeOptions: z.array(sizeOptionSchema).default([]),
-  weight: z.number().positive("Weight must be positive"),
-  infillPercentage: z.number().int().min(0).max(100).default(20),
   discountPercent: z.number().int().min(0).max(100).default(0),
   customizable: z.boolean().default(false),
   inStock: z.boolean().default(true),
@@ -157,6 +164,9 @@ function addSubcategoryValidation(
   data: {
     category?: (typeof categoryValues)[number];
     subcategory?: string | null;
+    colorMode?: "FIXED" | "OPTIONS";
+    color?: string;
+    colorOptions?: string[];
   },
   ctx: z.RefinementCtx
 ) {
@@ -169,6 +179,28 @@ function addSubcategoryValidation(
       code: z.ZodIssueCode.custom,
       message: "Subcategory must match the selected category",
       path: ["subcategory"],
+    });
+  }
+
+  if (data.colorMode === "OPTIONS") {
+    const normalizedColorOptions = normalizeProductColorOptions(data.colorOptions);
+
+    if (normalizedColorOptions.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Select at least one color option",
+        path: ["colorOptions"],
+      });
+    }
+
+    return;
+  }
+
+  if (!data.color?.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Color is required",
+      path: ["color"],
     });
   }
 }
