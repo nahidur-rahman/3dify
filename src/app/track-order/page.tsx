@@ -32,7 +32,7 @@ interface TrackedOrder {
   orderNumber: string;
   status: "PENDING" | "CONFIRMED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
   customerName: string;
-  city: string;
+  address: string;
   shippingMethod: string;
   shippingCost: number;
   subtotal: number;
@@ -361,7 +361,7 @@ function TrackOrderContent() {
                   <span className="font-semibold text-gray-900 dark:text-white">Customer:</span> {order.customerName}
                 </p>
                 <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
-                  <span className="font-semibold text-gray-900 dark:text-white">District:</span> {order.city}
+                  <span className="font-semibold text-gray-900 dark:text-white">Address:</span> {order.address}
                 </p>
                 <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
                   <span className="font-semibold text-gray-900 dark:text-white">Shipping Method:</span> {order.shippingMethod.replace(/_/g, " ")}
