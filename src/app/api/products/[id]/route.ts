@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/adminSession";
 import { getSession } from "@/lib/auth";
 import { isValidSubcategoryForCategory } from "@/lib/categories";
+import { PRODUCT_SEARCH_CACHE_TAG } from "@/lib/productSearch";
 import { productUpdateSchema } from "@/lib/validation";
 import {
   deleteProductImages,
@@ -121,6 +122,7 @@ export async function PUT(
     revalidatePath("/");
     revalidatePath("/products");
     revalidatePath(`/products/${params.id}`);
+    revalidateTag(PRODUCT_SEARCH_CACHE_TAG);
 
     return NextResponse.json(hydrateProductImages(product));
   } catch (error) {
@@ -157,6 +159,7 @@ export async function DELETE(
     revalidatePath("/");
     revalidatePath("/products");
     revalidatePath(`/products/${params.id}`);
+    revalidateTag(PRODUCT_SEARCH_CACHE_TAG);
 
     return NextResponse.json({ success: true });
   } catch (error) {
