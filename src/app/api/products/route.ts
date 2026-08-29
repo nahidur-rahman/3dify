@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/adminSession";
+import { resolveProductColorConfig } from "@/lib/productColors";
 import { PRODUCT_SEARCH_CACHE_TAG } from "@/lib/productSearch";
 import {
   isCategoryValue,
@@ -110,7 +111,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const parsed = productSchema.safeParse(body);
+    const parsed = productSchema.safeParse({
+      ...body,
+      ...resolveProductColorConfig(body),
+    });
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid input", details: parsed.error.flatten() },
