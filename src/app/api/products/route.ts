@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/adminSession";
+import { PRODUCT_SEARCH_CACHE_TAG } from "@/lib/productSearch";
 import {
   isCategoryValue,
   isValidSubcategoryForCategory,
@@ -20,6 +21,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const categoryParam = searchParams.get("category")?.trim();
+    const category = categoryParam && isCategoryValue(categoryParam) ? categoryParam : null;
     const subcategory = searchParams.get("subcategory")?.trim();
     const search = searchParams.get("search");
     const sort = searchParams.get("sort");
@@ -27,7 +29,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "12");
 
-    if (categoryParam && !isCategoryValue(categoryParam)) {
+    if (categoryParam && !category) {
       return NextResponse.json(
         { error: "Invalid category" },
         { status: 400 }
@@ -35,9 +37,9 @@ export async function GET(request: NextRequest) {
     }
 
     if (
-      categoryParam &&
+      category &&
       subcategory &&
-      !isValidSubcategoryForCategory(categoryParam as any, subcategory)
+      !isValidSubcategoryForCategory(category, subcategory)
     ) {
       return NextResponse.json(
         { error: "Invalid subcategory for the selected category" },
@@ -48,8 +50,8 @@ export async function GET(request: NextRequest) {
     // Build where clause
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {};
-    if (categoryParam) {
-      where.category = categoryParam;
+    if (category) {
+      where.category = category;
     }
     if (subcategory) {
       where.subcategory = subcategory;
@@ -155,6 +157,7 @@ export async function POST(request: NextRequest) {
 
       revalidatePath("/");
       revalidatePath("/products");
+      revalidateTag(PRODUCT_SEARCH_CACHE_TAG);
 
       return NextResponse.json(hydrateProductImages(product), { status: 201 });
     } catch (error) {
