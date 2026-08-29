@@ -1,5 +1,6 @@
 import { createHash } from "crypto";
 import { getSupabaseAdmin, productImageBucket } from "@/lib/supabaseAdmin";
+import { normalizeProductColorOptions } from "@/lib/productColors";
 import type { Product, ProductSizeOption } from "@/lib/types";
 
 const PRODUCT_FOLDER_PREFIX = "products";
@@ -102,11 +103,13 @@ function normalizeSizeOptions(
 export function hydrateProductImages(item: {
   images: string[];
   sizeOptions?: unknown;
+  colorOptions?: unknown;
 }): Product {
   return {
     ...item,
     images: uniqueStrings(item.images.map((imageRef) => resolveDisplayUrl(imageRef))),
     sizeOptions: normalizeSizeOptions(item.sizeOptions),
+    colorOptions: normalizeProductColorOptions(item.colorOptions),
   } as Product;
 }
 
