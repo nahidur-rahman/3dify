@@ -34,6 +34,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const discountPercent = product.discountPercent ?? 0;
   const displayPrice = calculateDiscountedPrice(basePrice, discountPercent);
   const categoryLabel = categoryLabels[product.category] ?? product.category;
+  const hasColorOptions =
+    product.colorMode === "OPTIONS" &&
+    product.colorOptions &&
+    product.colorOptions.length > 0;
 
   return (
     <>
@@ -115,7 +119,23 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
 
             {/* Color */}
-            {product.color && (
+            {hasColorOptions ? (
+              <div>
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Available Colors:
+                </span>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {product.colorOptions!.map((colorOption) => (
+                    <span
+                      key={colorOption}
+                      className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-dark-100 dark:text-gray-300"
+                    >
+                      {colorOption}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : product.color ? (
               <div>
                 <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
                   Color:{" "}
@@ -124,7 +144,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   {product.color}
                 </span>
               </div>
-            )}
+            ) : null}
 
             {/* Divider */}
             <hr className="border-gray-200 dark:border-dark-200" />
@@ -159,20 +179,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     </dd>
                   </div>
                 )}
-                <div className="flex justify-between px-4 py-3 text-sm">
-                  <dt className="text-gray-500 dark:text-gray-400">Weight</dt>
-                  <dd className="font-medium text-gray-900 dark:text-white">
-                    {product.weight}g
-                  </dd>
-                </div>
-                <div className="flex justify-between px-4 py-3 text-sm">
-                  <dt className="text-gray-500 dark:text-gray-400">
-                    Infill
-                  </dt>
-                  <dd className="font-medium text-gray-900 dark:text-white">
-                    {product.infillPercentage}%
-                  </dd>
-                </div>
                 {product.customizable && (
                   <div className="flex justify-between px-4 py-3 text-sm">
                     <dt className="text-gray-500 dark:text-gray-400">
