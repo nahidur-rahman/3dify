@@ -1,15 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   HiOutlineClock,
   HiOutlineDocumentText,
-  HiOutlineLocationMarker,
   HiOutlinePhone,
   HiOutlineSearch,
-  HiOutlineShoppingCart,
   HiX,
 } from "react-icons/hi";
 import {
@@ -25,10 +22,12 @@ interface OrdersDrawerProps {
 }
 
 function formatOrderDate(value: string) {
-  return new Date(value).toLocaleDateString("en-US", {
+  return new Date(value).toLocaleString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
   });
 }
 
@@ -123,93 +122,34 @@ export default function OrdersDrawer({ isOpen, onClose }: OrdersDrawerProps) {
               {orders.map((order) => (
                 <div
                   key={order.orderNumber}
-                  className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4 dark:border-dark-200 dark:bg-dark-100/60"
+                  className="rounded-xl border border-gray-100 bg-gray-50/60 p-3 dark:border-dark-200 dark:bg-dark-100/60"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-bold text-primary-600 dark:text-primary-400">
-                        {order.orderNumber}
-                      </p>
-                      <div className="mt-1 flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-                        <HiOutlineClock className="h-3.5 w-3.5" />
-                        {formatOrderDate(order.createdAt)}
-                      </div>
-                    </div>
-                    <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
-                      {order.status}
-                    </span>
-                  </div>
-
-                  <div className="mt-3 space-y-1.5 text-xs text-gray-600 dark:text-gray-300">
-                    <p className="font-semibold text-gray-900 dark:text-white">
-                      {order.customerName}
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="truncate text-sm font-bold text-primary-600 dark:text-primary-400">
+                      {order.orderNumber}
                     </p>
-                    <div className="flex items-center gap-1.5">
-                      <HiOutlinePhone className="h-3.5 w-3.5 text-primary-500" />
-                      <span>{order.customerPhone}</span>
-                    </div>
-                    <div className="flex items-start gap-1.5">
-                      <HiOutlineLocationMarker className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-primary-500" />
-                      <span>
-                        {order.district}
-                        {order.postalCode ? ` - ${order.postalCode}` : ""}
-                      </span>
-                    </div>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white">
+                      {formatPrice(order.total)}
+                    </p>
                   </div>
 
-                  <div className="mt-4 space-y-2">
-                    {order.items.slice(0, 2).map((item, index) => (
-                      <div key={`${order.orderNumber}-${item.productId}-${index}`} className="flex items-center gap-3">
-                        <div className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-dark-200">
-                          {item.productImage ? (
-                            <Image
-                              src={item.productImage}
-                              alt={item.productName}
-                              fill
-                              className="object-cover"
-                              sizes="44px"
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center text-gray-400 dark:text-gray-500">
-                              <HiOutlineShoppingCart className="h-4 w-4" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
-                            {item.productName}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Qty {item.quantity}
-                            {item.selectedSize ? ` • ${item.selectedSize}` : ""}
-                          </p>
-                        </div>
-                        <span className="text-xs font-semibold text-gray-900 dark:text-white">
-                          {formatPrice(item.totalPrice)}
-                        </span>
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <div className="space-y-1 text-xs text-gray-600 dark:text-gray-300">
+                      <div className="flex items-center gap-1.5">
+                        <HiOutlinePhone className="h-3 w-3 flex-shrink-0 text-primary-500" />
+                        <span className="truncate">{order.customerPhone}</span>
                       </div>
-                    ))}
-
-                    {order.items.length > 2 && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        +{order.items.length - 2} more item{order.items.length - 2 === 1 ? "" : "s"}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between border-t border-gray-200 pt-3 dark:border-dark-200">
-                    <div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
-                      <p className="text-base font-bold text-gray-900 dark:text-white">
-                        {formatPrice(order.total)}
-                      </p>
+                      <div className="flex items-center gap-1.5">
+                        <HiOutlineClock className="h-3 w-3 flex-shrink-0 text-primary-500" />
+                        <span className="truncate">{formatOrderDate(order.createdAt)}</span>
+                      </div>
                     </div>
                     <Link
-                      href={`/track-order?order=${encodeURIComponent(order.orderNumber)}`}
+                      href={`/track-order?order=${encodeURIComponent(order.orderNumber)}&phone=${encodeURIComponent(order.customerPhone)}`}
                       onClick={onClose}
-                      className="inline-flex items-center gap-2 rounded-xl bg-primary-500 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary-600 hover:shadow-lg hover:shadow-primary-500/25"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-primary-500 px-2.5 py-1.5 text-xs font-semibold text-white transition-all hover:bg-primary-600 hover:shadow-lg hover:shadow-primary-500/20"
                     >
-                      <HiOutlineSearch className="h-4 w-4" />
+                      <HiOutlineSearch className="h-3 w-3" />
                       Track
                     </Link>
                   </div>
