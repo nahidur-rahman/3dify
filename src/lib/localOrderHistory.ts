@@ -1,45 +1,24 @@
-export type LocalOrderStatus =
-  | "PENDING"
-  | "CONFIRMED"
-  | "PROCESSING"
-  | "SHIPPED"
-  | "DELIVERED"
-  | "CANCELLED";
-
-export interface LocalOrderItem {
-  productId: string;
-  productName: string;
-  productImage?: string;
-  selectedSize?: string;
-  color?: string;
-  quantity: number;
-  unitPrice: number;
-  totalPrice: number;
-}
-
 export interface LocalOrder {
   orderNumber: string;
-  orderId?: string;
-  customerName: string;
   customerPhone: string;
-  customerEmail?: string;
-  address: string;
-  district: string;
-  postalCode?: string;
-  shippingMethod: "INSIDE_DHAKA" | "OUTSIDE_DHAKA";
-  shippingCost: number;
-  subtotal: number;
   total: number;
-  paymentMethod: "COD";
-  status: LocalOrderStatus;
   createdAt: string;
-  items: LocalOrderItem[];
 }
 
 const STORAGE_KEY = "3dify-orders";
+const STORAGE_VERSION = 2;
 const MAX_STORED_ORDERS = 12;
 
 export const LOCAL_ORDERS_UPDATED_EVENT = "3dify-orders-updated";
+
+interface StoredOrdersPayload {
+  version: typeof STORAGE_VERSION;
+  orders: LocalOrder[];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object";
+}
 
 function sortOrdersByNewest(orders: LocalOrder[]) {
   return [...orders].sort(
@@ -48,23 +27,84 @@ function sortOrdersByNewest(orders: LocalOrder[]) {
   );
 }
 
-function isValidLocalOrder(value: unknown): value is LocalOrder {
-  if (!value || typeof value !== "object") {
-    return false;
+function normalizeStoredOrder(value: unknown): LocalOrder | null {
+  if (!isRecord(value)) {
+    return null;
   }
 
-  const order = value as Partial<LocalOrder>;
+  const { orderNumber, customerPhone, total, createdAt } = value;
 
-  return (
-    typeof order.orderNumber === "string" &&
-    typeof order.customerName === "string" &&
-    typeof order.customerPhone === "string" &&
-    typeof order.address === "string" &&
-    typeof order.district === "string" &&
-    typeof order.createdAt === "string" &&
-    typeof order.total === "number" &&
-    Array.isArray(order.items)
+  if (
+    typeof orderNumber !== "string" ||
+    typeof customerPhone !== "string" ||
+    typeof total !== "number" ||
+    Number.isNaN(total) ||
+    typeof createdAt !== "string"
+  ) {
+    return null;
+  }
+
+  return {
+    orderNumber,
+    customerPhone,
+    total,
+    createdAt,
+  };
+}
+
+function dedupeOrders(orders: LocalOrder[]) {
+  const uniqueOrders = new Map<string, LocalOrder>();
+
+  for (const order of sortOrdersByNewest(orders)) {
+    if (!uniqueOrders.has(order.orderNumber)) {
+      uniqueOrders.set(order.orderNumber, order);
+    }
+  }
+
+  return [...uniqueOrders.values()];
+}
+
+function normalizeOrders(orders: unknown[]) {
+  return dedupeOrders(orders.map(normalizeStoredOrder).filter(Boolean)).slice(
+    0,
+    MAX_STORED_ORDERS
   );
+}
+
+function persistOrders(orders: LocalOrder[]) {
+  const payload: StoredOrdersPayload = {
+    version: STORAGE_VERSION,
+    orders,
+  };
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+}
+
+function parseStoredOrders(value: string) {
+  const parsed = JSON.parse(value);
+
+  if (Array.isArray(parsed)) {
+    return {
+      orders: normalizeOrders(parsed),
+      needsRewrite: true,
+    };
+  }
+
+  if (
+    isRecord(parsed) &&
+    parsed.version === STORAGE_VERSION &&
+    Array.isArray(parsed.orders)
+  ) {
+    return {
+      orders: normalizeOrders(parsed.orders),
+      needsRewrite: false,
+    };
+  }
+
+  return {
+    orders: [] as LocalOrder[],
+    needsRewrite: false,
+  };
 }
 
 export function loadStoredOrders(): LocalOrder[] {
@@ -79,13 +119,13 @@ export function loadStoredOrders(): LocalOrder[] {
       return [];
     }
 
-    const parsed = JSON.parse(stored);
+    const { orders, needsRewrite } = parseStoredOrders(stored);
 
-    if (!Array.isArray(parsed)) {
-      return [];
+    if (needsRewrite) {
+      persistOrders(orders);
     }
 
-    return sortOrdersByNewest(parsed.filter(isValidLocalOrder));
+    return orders;
   } catch {
     return [];
   }
@@ -105,7 +145,7 @@ export function saveStoredOrder(order: LocalOrder) {
       MAX_STORED_ORDERS
     );
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextOrders));
+    persistOrders(nextOrders);
     window.dispatchEvent(new Event(LOCAL_ORDERS_UPDATED_EVENT));
   } catch {
     // Storage unavailable or full.
