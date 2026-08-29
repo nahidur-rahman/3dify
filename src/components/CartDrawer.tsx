@@ -92,7 +92,7 @@ export default function CartDrawer() {
           ) : (
             <div className="space-y-4">
               {items.map((item) => {
-                const itemKey = `${item.productId}__${item.selectedSize || "default"}`;
+                const itemKey = `${item.productId}__${item.selectedSize || "default"}__${item.color || "default"}`;
                 return (
                   <div
                     key={itemKey}
@@ -141,8 +141,8 @@ export default function CartDrawer() {
                           <button
                             onClick={() =>
                               item.quantity <= 1
-                                ? removeFromCart(item.productId, item.selectedSize)
-                                : updateQuantity(item.productId, item.quantity - 1, item.selectedSize)
+                                ? removeFromCart(item.productId, item.selectedSize, item.color)
+                                : updateQuantity(item.productId, item.quantity - 1, item.selectedSize, item.color)
                             }
                             className="flex h-7 w-7 items-center justify-center text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
                           >
@@ -153,7 +153,7 @@ export default function CartDrawer() {
                           </span>
                           <button
                             onClick={() =>
-                              updateQuantity(item.productId, item.quantity + 1, item.selectedSize)
+                              updateQuantity(item.productId, item.quantity + 1, item.selectedSize, item.color)
                             }
                             className="flex h-7 w-7 items-center justify-center text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
                           >
@@ -167,7 +167,7 @@ export default function CartDrawer() {
                             {formatPrice(item.price * item.quantity)}
                           </span>
                           <button
-                            onClick={() => removeFromCart(item.productId, item.selectedSize)}
+                            onClick={() => removeFromCart(item.productId, item.selectedSize, item.color)}
                             className="text-gray-400 transition-colors hover:text-red-500 dark:hover:text-red-400"
                             aria-label={`Remove ${item.name}`}
                           >
