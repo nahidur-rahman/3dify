@@ -8,6 +8,8 @@ import { hydrateProductImages } from "@/lib/productImages";
 
 export const revalidate = 60;
 
+const HOMEPAGE_HIGHLIGHT_LIMIT = 12;
+
 export default async function HomePage() {
   // Fetch featured products and top selling products concurrently
   let featuredProducts: Product[] = [];
@@ -16,18 +18,36 @@ export default async function HomePage() {
     const [featuredRaw, topSellingRaw] = await Promise.all([
       prisma.product.findMany({
         where: { featured: true, inStock: true },
-        take: 8,
+        take: HOMEPAGE_HIGHLIGHT_LIMIT,
         orderBy: { createdAt: "desc" },
       }),
       prisma.product.findMany({
         where: { inStock: true },
-        take: 4,
+        take: HOMEPAGE_HIGHLIGHT_LIMIT,
         orderBy: { updatedAt: "desc" },
       }),
     ]);
 
-    featuredProducts = featuredRaw.map((product) => hydrateProductImages(product));
-    topSellingProducts = topSellingRaw.map((product) => hydrateProductImages(product));
+    const featuredFallbackRaw =
+      featuredRaw.length < HOMEPAGE_HIGHLIGHT_LIMIT
+        ? await prisma.product.findMany({
+            where: {
+              inStock: true,
+              id: {
+                notIn: featuredRaw.map((product) => product.id),
+              },
+            },
+            take: HOMEPAGE_HIGHLIGHT_LIMIT - featuredRaw.length,
+            orderBy: { createdAt: "desc" },
+          })
+        : [];
+
+    featuredProducts = [...featuredRaw, ...featuredFallbackRaw]
+      .slice(0, HOMEPAGE_HIGHLIGHT_LIMIT)
+      .map((product) => hydrateProductImages(product));
+    topSellingProducts = topSellingRaw
+      .slice(0, HOMEPAGE_HIGHLIGHT_LIMIT)
+      .map((product) => hydrateProductImages(product));
   } catch {
     // DB might not be connected yet - show empty state
   }
@@ -55,7 +75,10 @@ export default async function HomePage() {
                 View All
               </Link>
             </div>
-            <ProductGrid products={featuredProducts} />
+            <ProductGrid
+              products={featuredProducts}
+              variant="storefrontHighlights"
+            />
           </div>
         </section>
       )}
@@ -75,7 +98,10 @@ export default async function HomePage() {
                 View All
               </Link>
             </div>
-            <ProductGrid products={topSellingProducts} />
+            <ProductGrid
+              products={topSellingProducts}
+              variant="storefrontHighlights"
+            />
           </div>
         </section>
       )}
