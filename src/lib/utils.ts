@@ -72,6 +72,14 @@ export function hasMessengerConfigured(): boolean {
   return Boolean((process.env.NEXT_PUBLIC_MESSENGER || "").trim());
 }
 
+export function hasFacebookConfigured(): boolean {
+  return Boolean((process.env.NEXT_PUBLIC_FACEBOOK_URL || "").trim());
+}
+
+export function hasInstagramConfigured(): boolean {
+  return Boolean((process.env.NEXT_PUBLIC_INSTAGRAM_URL || "").trim());
+}
+
 // Generate WhatsApp link with pre-filled message
 export function getWhatsAppLink(productName?: string, price?: number): string {
   const phone = process.env.NEXT_PUBLIC_WHATSAPP || "";
@@ -85,6 +93,14 @@ export function getWhatsAppLink(productName?: string, price?: number): string {
 export function getMessengerLink(): string {
   const pageId = process.env.NEXT_PUBLIC_MESSENGER || "";
   return `https://m.me/${pageId}`;
+}
+
+export function getFacebookLink(): string {
+  return (process.env.NEXT_PUBLIC_FACEBOOK_URL || "").trim();
+}
+
+export function getInstagramLink(): string {
+  return (process.env.NEXT_PUBLIC_INSTAGRAM_URL || "").trim();
 }
 
 // Truncate text
