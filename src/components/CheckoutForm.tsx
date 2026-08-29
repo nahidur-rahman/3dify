@@ -9,6 +9,7 @@ import {
   findBangladeshDistrict,
   getShippingMethodForDistrict,
 } from "@/lib/bangladeshDistricts";
+import { saveStoredOrder } from "@/lib/localOrderHistory";
 import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
 import {
@@ -50,6 +51,20 @@ function validateEmail(email: string): string | null {
     return "Please use a valid email(Gmail, Yahoo, Outlook, etc.)";
   }
   return null;
+}
+
+function buildStoredOrderAddress(form: {
+  houseRoad: string;
+  areaVillage: string;
+  townCityThana: string;
+}) {
+  const segments = [
+    form.houseRoad.trim() ? `House/Road: ${form.houseRoad.trim()}` : null,
+    `Area/Village: ${form.areaVillage.trim()}`,
+    `Town/City/Thana: ${form.townCityThana.trim()}`,
+  ];
+
+  return segments.filter((segment): segment is string => Boolean(segment)).join(", ");
 }
 
 interface ShippingOption {
@@ -220,6 +235,40 @@ export default function CheckoutForm() {
       const result = await createOrder(orderInput);
 
       if (result.success && result.orderNumber) {
+        const district = normalizedDistrict ?? form.district.trim();
+        const resolvedShippingMethod = getShippingMethodForDistrict(district);
+        const resolvedShippingCost =
+          shippingRates.find((rate) => rate.method === resolvedShippingMethod)?.price ??
+          (resolvedShippingMethod === "INSIDE_DHAKA" ? 70 : 130);
+
+        saveStoredOrder({
+          orderNumber: result.orderNumber,
+          orderId: result.orderId,
+          customerName: form.customerName.trim(),
+          customerPhone: form.customerPhone,
+          customerEmail: form.customerEmail.trim() || undefined,
+          address: buildStoredOrderAddress(form),
+          district,
+          postalCode: form.postalCode.trim() || undefined,
+          shippingMethod: resolvedShippingMethod,
+          shippingCost: resolvedShippingCost,
+          subtotal: cartTotal,
+          total: cartTotal + resolvedShippingCost,
+          paymentMethod: "COD",
+          status: "PENDING",
+          createdAt: new Date().toISOString(),
+          items: items.map((item) => ({
+            productId: item.productId,
+            productName: item.name,
+            productImage: item.image || undefined,
+            selectedSize: item.selectedSize,
+            color: item.color,
+            quantity: item.quantity,
+            unitPrice: item.price,
+            totalPrice: item.price * item.quantity,
+          })),
+        });
+
         clearCart();
         router.push(`/checkout/confirmation?order=${result.orderNumber}`);
       } else {
