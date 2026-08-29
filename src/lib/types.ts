@@ -5,12 +5,15 @@ import type { Category } from "@/lib/categories";
 
 export type { Category } from "@/lib/categories";
 export type SizeMode = "FIXED" | "OPTIONS";
+export type ColorMode = "FIXED" | "OPTIONS";
 export type AdminRole = "SUPER" | "ADMIN";
 
 export interface ProductSizeOption {
   label: string;
   price: number;
 }
+
+export type ProductColorOption = string;
 
 export interface Product {
   id: string;
@@ -21,11 +24,11 @@ export interface Product {
   category: Category;
   subcategory?: string | null;
   color: string;
+  colorMode?: ColorMode;
+  colorOptions?: ProductColorOption[];
   size: string;
   sizeMode?: SizeMode;
   sizeOptions?: ProductSizeOption[];
-  weight: number;
-  infillPercentage: number;
   discountPercent?: number;
   customizable: boolean;
   inStock: boolean;
