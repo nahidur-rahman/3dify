@@ -18,9 +18,16 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
   const discountPercent = product.discountPercent ?? 0;
   const hasSizeOptions =
     product.sizeOptions && product.sizeOptions.length > 0;
+  const hasColorOptions =
+    product.colorMode === "OPTIONS" &&
+    product.colorOptions &&
+    product.colorOptions.length > 0;
 
   const [selectedSize, setSelectedSize] = useState<string | undefined>(
     hasSizeOptions ? product.sizeOptions![0].label : undefined
+  );
+  const [selectedColor, setSelectedColor] = useState<string | undefined>(
+    hasColorOptions ? product.colorOptions![0] : product.color || undefined
   );
   const [quantity, setQuantity] = useState(1);
 
@@ -46,7 +53,7 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
       price: getUnitPrice(),
       quantity,
       selectedSize,
-      color: product.color || undefined,
+      color: selectedColor,
     });
     setQuantity(1);
     openDrawer();
@@ -60,7 +67,7 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
       price: getUnitPrice(),
       quantity,
       selectedSize,
-      color: product.color || undefined,
+      color: selectedColor,
     });
     setQuantity(1);
     router.push("/checkout");
@@ -97,6 +104,34 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
                   <span className="ml-1.5 text-xs opacity-70">
                     {formatPrice(optionPrice)}
                   </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {hasColorOptions && (
+        <div>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+            Color
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {product.colorOptions!.map((colorOption) => {
+              const isSelected = selectedColor === colorOption;
+
+              return (
+                <button
+                  key={colorOption}
+                  type="button"
+                  onClick={() => setSelectedColor(colorOption)}
+                  className={`rounded-lg border px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
+                    isSelected
+                      ? "border-primary-500 bg-primary-50 text-primary-700 ring-1 ring-primary-500 dark:bg-primary-900/20 dark:text-primary-300"
+                      : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 dark:border-dark-200 dark:bg-dark-100 dark:text-gray-300 dark:hover:border-dark-300"
+                  }`}
+                >
+                  {colorOption}
                 </button>
               );
             })}
