@@ -3,7 +3,18 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Category, Product, ProductSizeOption, SizeMode } from "@/lib/types";
+import {
+  Category,
+  ColorMode,
+  Product,
+  ProductSizeOption,
+  SizeMode,
+} from "@/lib/types";
+import {
+  PRODUCT_COLOR_OPTIONS,
+  buildProductColorSummary,
+  normalizeProductColorOptions,
+} from "@/lib/productColors";
 import {
   categoryLabels,
   categorySubcategories,
@@ -77,6 +88,7 @@ export default function ProductForm({
     product?.sizeOptions && product.sizeOptions.length > 0
       ? product.sizeOptions
       : [{ label: "Standard", price: product?.price || 0 }];
+  const initialColorOptions = normalizeProductColorOptions(product?.colorOptions);
 
   const [form, setForm] = useState({
     name: product?.name || "",
@@ -86,11 +98,11 @@ export default function ProductForm({
     category: product?.category || defaultCategory,
     subcategory: product?.subcategory || "",
     color: product?.color || "",
+    colorMode: (product?.colorMode || "FIXED") as ColorMode,
+    colorOptions: initialColorOptions,
     size: product?.size || "",
     sizeMode: (product?.sizeMode || "FIXED") as SizeMode,
     sizeOptions: initialSizeOptions,
-    weight: product?.weight || 0,
-    infillPercentage: product?.infillPercentage || 20,
     discountPercent: product?.discountPercent || 0,
     customizable: product?.customizable || false,
     inStock: product?.inStock ?? true,
@@ -105,6 +117,7 @@ export default function ProductForm({
     : null;
   const imageLimitReached = hasImageLimit && totalImageCount >= imageLimit;
   const availableSubcategories = categorySubcategories[form.category] || [];
+  const hasSelectedColorOptions = form.colorOptions.length > 0;
 
   const handleCategoryChange = (nextCategory: Category) => {
     setForm((prev) => ({
@@ -156,6 +169,19 @@ export default function ProductForm({
       ...prev,
       sizeOptions: prev.sizeOptions.filter((_, optionIndex) => optionIndex !== index),
     }));
+  };
+
+  const toggleColorOption = (colorOption: string) => {
+    setForm((prev) => {
+      const hasOption = prev.colorOptions.includes(colorOption);
+
+      return {
+        ...prev,
+        colorOptions: hasOption
+          ? prev.colorOptions.filter((option) => option !== colorOption)
+          : [...prev.colorOptions, colorOption],
+      };
+    });
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -301,6 +327,15 @@ export default function ProductForm({
         images.push(...uploadedImages);
       }
       const uniqueImages = Array.from(new Set(images));
+      const resolvedColorOptions =
+        form.colorMode === "OPTIONS"
+          ? normalizeProductColorOptions(form.colorOptions)
+          : [];
+      const resolvedColor = buildProductColorSummary({
+        colorMode: form.colorMode,
+        color: form.color,
+        colorOptions: resolvedColorOptions,
+      });
 
       const res = await fetch(url, {
         method,
@@ -310,8 +345,8 @@ export default function ProductForm({
           images: uniqueImages,
           subcategory: form.subcategory.trim() || null,
           price: Number(form.price),
-          weight: Number(form.weight),
-          infillPercentage: Number(form.infillPercentage),
+          color: resolvedColor,
+          colorOptions: resolvedColorOptions,
           discountPercent: Number(form.discountPercent),
           sizeOptions:
             form.sizeMode === "OPTIONS"
@@ -634,48 +669,83 @@ export default function ProductForm({
 
             <div>
               <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                Color *
+                Color Mode
               </label>
-              <input
-                type="text"
-                value={form.color}
-                onChange={(e) => setForm({ ...form, color: e.target.value })}
-                required
-                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
-                placeholder="e.g., Matte Black"
-              />
-            </div>
-
-            <div>
-              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                Weight (grams) *
-              </label>
-              <input
-                type="number"
-                value={form.weight}
-                onChange={(e) => setForm({ ...form, weight: parseFloat(e.target.value) || 0 })}
-                required
-                min="0"
-                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
-              />
-            </div>
-
-            <div>
-              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                Infill Percentage *
-              </label>
-              <input
-                type="number"
-                value={form.infillPercentage}
+              <select
+                value={form.colorMode}
                 onChange={(e) =>
-                  setForm({ ...form, infillPercentage: parseInt(e.target.value) || 0 })
+                  setForm((prev) => ({
+                    ...prev,
+                    colorMode: e.target.value as ColorMode,
+                  }))
                 }
-                required
-                min="0"
-                max="100"
                 className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
-              />
+              >
+                <option value="FIXED">Fixed color</option>
+                <option value="OPTIONS">Color options</option>
+              </select>
             </div>
+
+            {form.colorMode === "FIXED" ? (
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Color *
+                </label>
+                <input
+                  type="text"
+                  value={form.color}
+                  onChange={(e) => setForm({ ...form, color: e.target.value })}
+                  required
+                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+                  placeholder="e.g., Matte Black"
+                />
+              </div>
+            ) : (
+              <div className="sm:col-span-2 space-y-2.5 rounded-xl border border-dashed border-gray-200/80 bg-gray-50/60 p-3 dark:border-dark-200 dark:bg-dark-200/30">
+                <div className="flex items-center justify-between gap-4">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Available Colors
+                  </label>
+                  <span className="text-[11px] text-gray-500 dark:text-gray-400">
+                    {form.colorOptions.length} selected
+                  </span>
+                </div>
+
+                <div className="grid gap-2 sm:grid-cols-3">
+                  {PRODUCT_COLOR_OPTIONS.map((colorOption) => {
+                    const isSelected = form.colorOptions.includes(colorOption);
+
+                    return (
+                      <label
+                        key={colorOption}
+                        className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm transition-colors ${
+                          isSelected
+                            ? "border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300"
+                            : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 dark:border-dark-200 dark:bg-dark dark:text-gray-300 dark:hover:border-dark-300"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleColorOption(colorOption)}
+                          className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
+                        />
+                        <span>{colorOption}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                  Customers can choose from the selected colors. Typical 3D printing colors like Gray, Orange, and Purple are included.
+                </p>
+                {!hasSelectedColorOptions && (
+                  <p className="text-[11px] text-amber-600 dark:text-amber-400">
+                    Select at least one color option.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </section>
 
