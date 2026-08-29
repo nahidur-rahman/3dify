@@ -26,6 +26,11 @@ enum SizeMode {
   OPTIONS
 }
 
+enum ColorMode {
+  FIXED
+  OPTIONS
+}
+
 enum AdminRole {
   SUPER
   ADMIN
@@ -40,11 +45,11 @@ model Product {
   category         Category
   subcategory      String?
   color            String
+  colorMode        ColorMode @default(FIXED)
+  colorOptions     String[]  @default([])
   size             String
   sizeMode         SizeMode @default(FIXED)
   sizeOptions      Json?
-  weight           Float
-  infillPercentage Int      @default(20)
   discountPercent  Int      @default(0)
   customizable     Boolean  @default(false)
   inStock          Boolean  @default(true)
