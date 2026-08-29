@@ -296,7 +296,7 @@ export default function CheckoutForm() {
           {/* Items */}
           <div className="space-y-3 max-h-72 overflow-y-auto mb-4 px-1 pt-4 pb-2">
             {items.map((item: CartItem) => {
-              const itemKey = `${item.productId}__${item.selectedSize || "default"}`;
+              const itemKey = `${item.productId}__${item.selectedSize || "default"}__${item.color || "default"}`;
               return (
                 <div key={itemKey} className="flex items-center gap-3">
                   <div className="relative h-14 w-14 flex-shrink-0 overflow-visible rounded-lg bg-gray-100 dark:bg-dark-200">
@@ -324,6 +324,11 @@ export default function CheckoutForm() {
                     {item.selectedSize && (
                       <p className="text-xs text-gray-500 dark:text-gray-400">
                         {item.selectedSize}
+                      </p>
+                    )}
+                    {item.color && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {item.color}
                       </p>
                     )}
                   </div>
