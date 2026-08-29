@@ -53,20 +53,6 @@ function validateEmail(email: string): string | null {
   return null;
 }
 
-function buildStoredOrderAddress(form: {
-  houseRoad: string;
-  areaVillage: string;
-  townCityThana: string;
-}) {
-  const segments = [
-    form.houseRoad.trim() ? `House/Road: ${form.houseRoad.trim()}` : null,
-    `Area/Village: ${form.areaVillage.trim()}`,
-    `Town/City/Thana: ${form.townCityThana.trim()}`,
-  ];
-
-  return segments.filter((segment): segment is string => Boolean(segment)).join(", ");
-}
-
 interface ShippingOption {
   method: "INSIDE_DHAKA" | "OUTSIDE_DHAKA";
   label: string;
@@ -243,30 +229,9 @@ export default function CheckoutForm() {
 
         saveStoredOrder({
           orderNumber: result.orderNumber,
-          orderId: result.orderId,
-          customerName: form.customerName.trim(),
           customerPhone: form.customerPhone,
-          customerEmail: form.customerEmail.trim() || undefined,
-          address: buildStoredOrderAddress(form),
-          district,
-          postalCode: form.postalCode.trim() || undefined,
-          shippingMethod: resolvedShippingMethod,
-          shippingCost: resolvedShippingCost,
-          subtotal: cartTotal,
           total: cartTotal + resolvedShippingCost,
-          paymentMethod: "COD",
-          status: "PENDING",
           createdAt: new Date().toISOString(),
-          items: items.map((item) => ({
-            productId: item.productId,
-            productName: item.name,
-            productImage: item.image || undefined,
-            selectedSize: item.selectedSize,
-            color: item.color,
-            quantity: item.quantity,
-            unitPrice: item.price,
-            totalPrice: item.price * item.quantity,
-          })),
         });
 
         clearCart();
