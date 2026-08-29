@@ -2,23 +2,68 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { HiMenu, HiX, HiMoon, HiSun, HiSearch, HiOutlineShoppingCart, HiOutlineUser } from "react-icons/hi";
+import { useCallback, useEffect, useState } from "react";
+import { FaFacebookF, FaInstagram } from "react-icons/fa";
+import {
+  HiMenu,
+  HiMoon,
+  HiOutlineDocumentText,
+  HiOutlineShoppingCart,
+  HiSearch,
+  HiSun,
+  HiX,
+} from "react-icons/hi";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
 import BrandLogo from "./BrandLogo";
 import CartDrawer from "@/components/CartDrawer";
+import OrdersDrawer from "@/components/OrdersDrawer";
+import {
+  LOCAL_ORDERS_UPDATED_EVENT,
+  loadStoredOrders,
+} from "@/lib/localOrderHistory";
+import {
+  getFacebookLink,
+  getInstagramLink,
+  hasFacebookConfigured,
+  hasInstagramConfigured,
+} from "@/lib/utils";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isOrdersOpen, setIsOrdersOpen] = useState(false);
+  const [ordersCount, setOrdersCount] = useState(0);
   const [theme, setTheme] = useState<"dark" | "light">("light");
   const pathname = usePathname();
-  const { cartCount, openDrawer } = useCart();
+  const { cartCount, openDrawer, closeDrawer } = useCart();
+  const facebookReady = hasFacebookConfigured();
+  const instagramReady = hasInstagramConfigured();
+  const facebookLink = getFacebookLink();
+  const instagramLink = getInstagramLink();
+
+  const refreshOrdersCount = useCallback(() => {
+    setOrdersCount(loadStoredOrders().length);
+  }, []);
 
   useEffect(() => {
     const isDark = document.documentElement.classList.contains("dark");
     setTheme(isDark ? "dark" : "light");
-  }, []);
+    refreshOrdersCount();
+  }, [refreshOrdersCount]);
+
+  useEffect(() => {
+    function handleOrdersUpdated() {
+      refreshOrdersCount();
+    }
+
+    window.addEventListener("storage", handleOrdersUpdated);
+    window.addEventListener(LOCAL_ORDERS_UPDATED_EVENT, handleOrdersUpdated);
+
+    return () => {
+      window.removeEventListener("storage", handleOrdersUpdated);
+      window.removeEventListener(LOCAL_ORDERS_UPDATED_EVENT, handleOrdersUpdated);
+    };
+  }, [refreshOrdersCount]);
 
   const toggleTheme = () => {
     const nextTheme = theme === "dark" ? "light" : "dark";
@@ -36,6 +81,22 @@ export default function Navbar() {
     { href: "/products", label: "Products" },
     { href: "/about", label: "About" },
   ];
+
+  const socialButtonClasses =
+    "flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition-colors hover:border-primary-300 hover:text-primary-800 dark:border-dark-200 dark:text-gray-300 dark:hover:border-primary-500/30 dark:hover:text-primary-400";
+  const disabledSocialButtonClasses =
+    "flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-full border border-gray-200 text-gray-300 dark:border-dark-200 dark:text-gray-600";
+
+  const openOrdersDrawer = () => {
+    closeDrawer();
+    refreshOrdersCount();
+    setIsOrdersOpen(true);
+  };
+
+  const openCartPanel = () => {
+    setIsOrdersOpen(false);
+    openDrawer();
+  };
 
   return (
     <>
@@ -81,7 +142,39 @@ export default function Navbar() {
             </div>
 
             {/* Right Tools */}
-            <div className="hidden md:flex flex-shrink-0 items-center gap-6">
+            <div className="hidden md:flex flex-shrink-0 items-center gap-4">
+              {facebookReady ? (
+                <a
+                  href={facebookLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                  className={socialButtonClasses}
+                >
+                  <FaFacebookF className="h-4 w-4" />
+                </a>
+              ) : (
+                <button type="button" aria-label="Facebook unavailable" disabled className={disabledSocialButtonClasses}>
+                  <FaFacebookF className="h-4 w-4" />
+                </button>
+              )}
+
+              {instagramReady ? (
+                <a
+                  href={instagramLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className={socialButtonClasses}
+                >
+                  <FaInstagram className="h-4 w-4" />
+                </a>
+              ) : (
+                <button type="button" aria-label="Instagram unavailable" disabled className={disabledSocialButtonClasses}>
+                  <FaInstagram className="h-4 w-4" />
+                </button>
+              )}
+
               <button
                 onClick={toggleTheme}
                 aria-label="Toggle theme"
@@ -89,12 +182,22 @@ export default function Navbar() {
               >
                 {theme === "dark" ? <HiSun className="w-5 h-5" /> : <HiMoon className="w-5 h-5" />}
               </button>
-              <Link href="/login" className="flex flex-col items-center gap-1 text-gray-700 hover:text-primary-800 dark:text-gray-300 dark:hover:text-primary-400 transition-colors">
-                <HiOutlineUser className="w-6 h-6" />
-                <span className="text-[10px] uppercase font-bold sm:inline-block hidden">Account</span>
-              </Link>
               <button
-                onClick={openDrawer}
+                onClick={openOrdersDrawer}
+                className="flex flex-col items-center gap-1 text-gray-700 hover:text-primary-800 dark:text-gray-300 dark:hover:text-primary-400 transition-colors"
+              >
+                <div className="relative">
+                  <HiOutlineDocumentText className="w-6 h-6" />
+                  {ordersCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-500 px-1 text-[10px] font-bold text-white">
+                      {ordersCount > 99 ? "99+" : ordersCount}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] uppercase font-bold sm:inline-block hidden">Orders</span>
+              </button>
+              <button
+                onClick={openCartPanel}
                 className="flex flex-col items-center gap-1 text-gray-700 hover:text-primary-800 dark:text-gray-300 dark:hover:text-primary-400 transition-colors"
               >
                 <div className="relative">
@@ -150,23 +253,71 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
-            <div className="flex items-center gap-4 mt-6 pt-4 border-t border-black/5 dark:border-white/10">
+            <div className="mt-6 space-y-3 border-t border-black/5 pt-4 dark:border-white/10">
+              <div className="flex items-center gap-3">
+                {facebookReady ? (
+                  <a
+                    href={facebookLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Facebook"
+                    onClick={() => setIsOpen(false)}
+                    className={socialButtonClasses}
+                  >
+                    <FaFacebookF className="h-4 w-4" />
+                  </a>
+                ) : (
+                  <button type="button" aria-label="Facebook unavailable" disabled className={disabledSocialButtonClasses}>
+                    <FaFacebookF className="h-4 w-4" />
+                  </button>
+                )}
+
+                {instagramReady ? (
+                  <a
+                    href={instagramLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
+                    onClick={() => setIsOpen(false)}
+                    className={socialButtonClasses}
+                  >
+                    <FaInstagram className="h-4 w-4" />
+                  </a>
+                ) : (
+                  <button type="button" aria-label="Instagram unavailable" disabled className={disabledSocialButtonClasses}>
+                    <FaInstagram className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+
               <button
                 onClick={toggleTheme}
-                className="flex-1 flex items-center justify-center gap-2 rounded-xl px-2 py-3 font-medium text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-dark-100"
+                className="flex w-full items-center justify-center gap-2 rounded-xl px-2 py-3 font-medium text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-dark-100"
               >
                 {theme === "dark" ? <HiSun className="w-5 h-5" /> : <HiMoon className="w-5 h-5" />}
                 {theme === "dark" ? "Light Mode" : "Dark Mode"}
               </button>
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  openDrawer();
-                }}
-                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-primary-800 text-center font-bold text-white px-2 py-3"
-              >
-                <HiOutlineShoppingCart className="w-5 h-5" /> Cart ({cartCount})
-              </button>
+
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    openOrdersDrawer();
+                  }}
+                  className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-2 py-3 text-center font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-dark-200 dark:text-gray-300 dark:hover:bg-dark-100"
+                >
+                  <HiOutlineDocumentText className="w-5 h-5" /> Orders ({ordersCount})
+                </button>
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    openCartPanel();
+                  }}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-primary-800 px-2 py-3 text-center font-bold text-white"
+                >
+                  <HiOutlineShoppingCart className="w-5 h-5" /> Cart ({cartCount})
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -174,6 +325,7 @@ export default function Navbar() {
       
       {/* Cart Drawer rendered here so it's always available */}
       <CartDrawer />
+      <OrdersDrawer isOpen={isOrdersOpen} onClose={() => setIsOrdersOpen(false)} />
     </>
   );
 }
