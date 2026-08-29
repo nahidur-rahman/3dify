@@ -59,6 +59,7 @@ export async function GET(req: NextRequest) {
         { customerName: { contains: searchParam, mode: "insensitive" } },
         { customerPhone: { contains: searchParam, mode: "insensitive" } },
         { customerEmail: { contains: searchParam, mode: "insensitive" } },
+        { address: { contains: searchParam, mode: "insensitive" } },
       ];
     }
 
@@ -69,7 +70,7 @@ export async function GET(req: NextRequest) {
         orderNumber: true,
         customerName: true,
         customerPhone: true,
-        city: true,
+        address: true,
         shippingMethod: true,
         total: true,
         paymentMethod: true,
