@@ -5,6 +5,7 @@ import {
   findBangladeshDistrict,
   getShippingMethodForDistrict,
 } from "@/lib/bangladeshDistricts";
+import { buildOrderAddress } from "@/lib/orderAddress";
 import { z } from "zod";
 import { getShippingCost } from "@/lib/shipping";
 
@@ -101,20 +102,6 @@ function generateOrderNumber(): string {
   return `3D-${timestamp}${random}`;
 }
 
-function buildOrderAddress(data: {
-  houseRoad?: string;
-  areaVillage: string;
-  townCityThana: string;
-}): string {
-  const segments = [
-    data.houseRoad ? `House/Road: ${data.houseRoad}` : null,
-    `Area/Village: ${data.areaVillage}`,
-    `Town/City/Thana: ${data.townCityThana}`,
-  ];
-
-  return segments.filter((segment): segment is string => Boolean(segment)).join(", ");
-}
-
 // --- Server Action ---
 
 export async function createOrder(input: CreateOrderInput): Promise<OrderResult> {
@@ -159,10 +146,13 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderResult>
         customerName: data.customerName,
         customerPhone: data.customerPhone,
         customerEmail: data.customerEmail || null,
-        address: buildOrderAddress(data),
-        apartment: null,
-        city: district,
-        postalCode: data.postalCode || null,
+        address: buildOrderAddress({
+          houseRoad: data.houseRoad,
+          areaVillage: data.areaVillage,
+          townCityThana: data.townCityThana,
+          district,
+          postalCode: data.postalCode,
+        }),
         shippingMethod,
         shippingCost,
         subtotal,
