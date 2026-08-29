@@ -9,13 +9,13 @@ import {
   HiMoon,
   HiOutlineDocumentText,
   HiOutlineShoppingCart,
-  HiSearch,
   HiSun,
   HiX,
 } from "react-icons/hi";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
 import BrandLogo from "./BrandLogo";
+import NavbarSearch from "./NavbarSearch";
 import CartDrawer from "@/components/CartDrawer";
 import OrdersDrawer from "@/components/OrdersDrawer";
 import {
@@ -129,16 +129,7 @@ export default function Navbar() {
 
             {/* Desktop Search Bar */}
             <div className="hidden md:flex flex-1 max-w-sm ml-auto mr-4 lg:mx-auto">
-              <div className="flex w-full rounded-full border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-dark-100 overflow-hidden focus-within:ring-2 focus-within:ring-primary-800 focus-within:border-primary-800 transition-shadow">
-                <input 
-                  type="text" 
-                  placeholder="Search..." 
-                  className="w-full bg-transparent px-5 py-2.5 text-sm outline-none text-gray-900 dark:text-gray-100 placeholder-gray-500"
-                />
-                <button aria-label="Search" className="px-4 text-gray-500 hover:text-primary-800 dark:hover:text-primary-400 transition-colors flex items-center justify-center">
-                  <HiSearch className="w-5 h-5" />
-                </button>
-              </div>
+              <NavbarSearch />
             </div>
 
             {/* Right Tools */}
@@ -227,16 +218,7 @@ export default function Navbar() {
         {isOpen && (
           <div className="border-t border-black/5 py-4 dark:border-dark-100 md:hidden bg-white dark:bg-dark px-4 shadow-xl absolute w-full left-0">
             <div className="mb-4">
-               <div className="flex w-full rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-dark-100 overflow-hidden focus-within:ring-2 focus-within:ring-primary-800 focus-within:border-primary-800 transition-shadow">
-                  <input 
-                    type="text" 
-                    placeholder="Search..." 
-                    className="w-full bg-transparent px-4 py-2.5 text-sm outline-none text-gray-900 dark:text-gray-100"
-                  />
-                  <button aria-label="Search" className="bg-primary-800 dark:bg-primary-700 text-white px-4 flex items-center justify-center">
-                    <HiSearch className="w-5 h-5" />
-                  </button>
-               </div>
+              <NavbarSearch mobile onNavigate={() => setIsOpen(false)} />
             </div>
             {navLinks.map((link) => (
               <Link
