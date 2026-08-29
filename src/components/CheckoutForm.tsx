@@ -9,6 +9,7 @@ import {
   findBangladeshDistrict,
   getShippingMethodForDistrict,
 } from "@/lib/bangladeshDistricts";
+import { normalizeOrderPostalCode } from "@/lib/orderAddress";
 import { saveStoredOrder } from "@/lib/localOrderHistory";
 import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
@@ -145,6 +146,12 @@ export default function CheckoutForm() {
 
   function selectDistrict(district: string) {
     updateField("district", district);
+    if (form.postalCode.trim()) {
+      const normalizedPostalCode = normalizeOrderPostalCode(form.postalCode, district);
+      if (normalizedPostalCode && normalizedPostalCode !== form.postalCode) {
+        updateField("postalCode", normalizedPostalCode);
+      }
+    }
     setDistrictQuery("");
     setIsDistrictOpen(false);
   }
@@ -160,6 +167,18 @@ export default function CheckoutForm() {
         delete next[field];
         return next;
       });
+    }
+  }
+
+  function normalizePostalCodeField() {
+    const district = findBangladeshDistrict(form.district);
+    if (!district) {
+      return;
+    }
+
+    const normalizedPostalCode = normalizeOrderPostalCode(form.postalCode, district);
+    if (normalizedPostalCode && normalizedPostalCode !== form.postalCode) {
+      updateField("postalCode", normalizedPostalCode);
     }
   }
 
@@ -195,6 +214,9 @@ export default function CheckoutForm() {
     setGlobalError("");
 
     const normalizedDistrict = findBangladeshDistrict(form.district);
+    const normalizedPostalCode = normalizedDistrict
+      ? normalizeOrderPostalCode(form.postalCode, normalizedDistrict)
+      : null;
 
     const orderInput: CreateOrderInput = {
       customerName: form.customerName,
@@ -204,7 +226,7 @@ export default function CheckoutForm() {
       areaVillage: form.areaVillage,
       townCityThana: form.townCityThana,
       district: normalizedDistrict ?? form.district,
-      postalCode: form.postalCode || undefined,
+      postalCode: normalizedPostalCode || undefined,
       notes: form.notes || undefined,
       items: items.map((item: CartItem) => ({
         productId: item.productId,
@@ -552,9 +574,10 @@ export default function CheckoutForm() {
               <div>
                 <input
                   type="text"
-                  placeholder="Postal code (optional)"
+                  placeholder="Postal code (optional, e.g. Dhaka-1206)"
                   value={form.postalCode}
                   onChange={(e) => updateField("postalCode", e.target.value)}
+                  onBlur={normalizePostalCodeField}
                   className={inputClasses}
                 />
               </div>
