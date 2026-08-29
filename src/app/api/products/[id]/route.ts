@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/adminSession";
 import { getSession } from "@/lib/auth";
 import { isValidSubcategoryForCategory } from "@/lib/categories";
+import { resolveProductColorConfig } from "@/lib/productColors";
 import { PRODUCT_SEARCH_CACHE_TAG } from "@/lib/productSearch";
 import { productUpdateSchema } from "@/lib/validation";
 import {
@@ -50,7 +51,10 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const parsed = productUpdateSchema.safeParse(body);
+    const parsed = productUpdateSchema.safeParse({
+      ...body,
+      ...resolveProductColorConfig(body),
+    });
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid input", details: parsed.error.flatten() },
