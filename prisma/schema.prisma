@@ -54,6 +54,8 @@ model Product {
   customizable     Boolean  @default(false)
   inStock          Boolean  @default(true)
   featured         Boolean  @default(false)
+  topSelling       Boolean  @default(false)
+  sellCount        Int      @default(0)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   createdBy        String?
@@ -62,6 +64,7 @@ model Product {
   @@index([category])
   @@index([featured, inStock])
   @@index([inStock, updatedAt])
+  @@index([topSelling, sellCount, updatedAt])
   @@index([createdAt])
   @@index([price])
 
