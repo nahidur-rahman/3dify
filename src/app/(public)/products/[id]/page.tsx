@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import ProductImageGallery from "@/components/ProductImageGallery";
 import AddToCartSection from "@/components/AddToCartSection";
 import Link from "next/link";
-import { formatPrice, calculateDiscountedPrice, categoryLabels } from "@/lib/utils";
+import { categoryLabels } from "@/lib/utils";
 
 // Revalidate page content every 60 seconds (ISR / cached RSC responses)
 export const revalidate = 60;
@@ -28,16 +28,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   if (!product) notFound();
 
-  const sizeOptionPrices = product.sizeOptions?.map((o) => o.price) ?? [];
-  const basePrice =
-    sizeOptionPrices.length > 0 ? Math.min(...sizeOptionPrices) : product.price;
-  const discountPercent = product.discountPercent ?? 0;
-  const displayPrice = calculateDiscountedPrice(basePrice, discountPercent);
   const categoryLabel = categoryLabels[product.category] ?? product.category;
-  const hasColorOptions =
-    product.colorMode === "OPTIONS" &&
-    product.colorOptions &&
-    product.colorOptions.length > 0;
 
   return (
     <>
@@ -81,24 +72,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </h1>
             </div>
 
-            {/* Price */}
-            <div className="flex items-baseline gap-3">
-              <span className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                {sizeOptionPrices.length > 0 ? "From " : ""}
-                {formatPrice(displayPrice)}
-              </span>
-              {discountPercent > 0 && (
-                <>
-                  <span className="text-lg text-gray-400 line-through dark:text-gray-500">
-                    {formatPrice(basePrice)}
-                  </span>
-                  <span className="rounded-full bg-rose-500 px-2.5 py-0.5 text-xs font-bold text-white">
-                    -{discountPercent}%
-                  </span>
-                </>
-              )}
-            </div>
-
             {/* Stock status */}
             <div className="flex items-center gap-2">
               {product.inStock ? (
@@ -118,34 +91,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
               )}
             </div>
 
-            {/* Color */}
-            {hasColorOptions ? (
-              <div>
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Available Colors:
-                </span>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {product.colorOptions!.map((colorOption) => (
-                    <span
-                      key={colorOption}
-                      className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-dark-100 dark:text-gray-300"
-                    >
-                      {colorOption}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) : product.color ? (
-              <div>
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Color:{" "}
-                </span>
-                <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {product.color}
-                </span>
-              </div>
-            ) : null}
-
             {/* Divider */}
             <hr className="border-gray-200 dark:border-dark-200" />
 
@@ -154,16 +99,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             {/* Divider */}
             <hr className="border-gray-200 dark:border-dark-200" />
-
-            {/* Description */}
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3">
-                Description
-              </h2>
-              <div className="text-sm leading-relaxed text-gray-600 dark:text-gray-300 whitespace-pre-line">
-                {product.description}
-              </div>
-            </div>
 
             {/* Details */}
             <div className="rounded-xl border border-gray-200 dark:border-dark-200 overflow-hidden">
@@ -191,6 +126,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 )}
               </dl>
             </div>
+          </div>
+        </div>
+
+        <div className="mt-10">
+          <h2 className="mb-3 text-lg font-bold text-gray-900 dark:text-white">
+            Description
+          </h2>
+          <div className="text-sm leading-relaxed text-gray-600 dark:text-gray-300 whitespace-pre-line">
+            {product.description}
           </div>
         </div>
       </section>
