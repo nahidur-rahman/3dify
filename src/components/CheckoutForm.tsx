@@ -65,10 +65,7 @@ export default function CheckoutForm() {
   const { items, cartTotal, clearCart } = useCart();
   const districtPickerRef = useRef<HTMLDivElement>(null);
 
-  const [shippingRates, setShippingRates] = useState<ShippingOption[]>([
-    { method: "INSIDE_DHAKA", label: "Inside Dhaka", price: 70 },
-    { method: "OUTSIDE_DHAKA", label: "Outside Dhaka", price: 130 },
-  ]);
+  const [shippingRates, setShippingRates] = useState<ShippingOption[]>([]);
 
   const [form, setForm] = useState({
     customerName: "",
@@ -93,10 +90,12 @@ export default function CheckoutForm() {
     fetch("/api/shipping")
       .then((r) => r.json())
       .then((data: ShippingOption[]) => {
-        if (data && data.length > 0) setShippingRates(data);
+        if (Array.isArray(data)) {
+          setShippingRates(data);
+        }
       })
       .catch(() => {
-        // Use defaults
+        setShippingRates([]);
       });
   }, []);
 
@@ -121,8 +120,7 @@ export default function CheckoutForm() {
     ? getShippingMethodForDistrict(form.district)
     : null;
   const shippingCost = shippingMethod
-    ? shippingRates.find((rate) => rate.method === shippingMethod)?.price ??
-      (shippingMethod === "INSIDE_DHAKA" ? 70 : 130)
+    ? shippingRates.find((rate) => rate.method === shippingMethod)?.price ?? null
     : null;
   const total = shippingCost === null ? null : cartTotal + shippingCost;
   const filteredDistricts = BANGLADESH_DISTRICTS.filter((district) =>
@@ -209,6 +207,11 @@ export default function CheckoutForm() {
       return;
     }
 
+    if (shippingCost === null) {
+      setGlobalError("Shipping is not available for the selected district right now.");
+      return;
+    }
+
     setIsSubmitting(true);
     setErrors({});
     setGlobalError("");
@@ -243,16 +246,10 @@ export default function CheckoutForm() {
       const result = await createOrder(orderInput);
 
       if (result.success && result.orderNumber) {
-        const district = normalizedDistrict ?? form.district.trim();
-        const resolvedShippingMethod = getShippingMethodForDistrict(district);
-        const resolvedShippingCost =
-          shippingRates.find((rate) => rate.method === resolvedShippingMethod)?.price ??
-          (resolvedShippingMethod === "INSIDE_DHAKA" ? 70 : 130);
-
         saveStoredOrder({
           orderNumber: result.orderNumber,
           customerPhone: form.customerPhone,
-          total: cartTotal + resolvedShippingCost,
+          total: cartTotal + shippingCost,
           createdAt: new Date().toISOString(),
         });
 
