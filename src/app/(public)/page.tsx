@@ -22,7 +22,6 @@ export default async function HomePage() {
         orderBy: { createdAt: "desc" },
       }),
       prisma.product.findMany({
-        where: { inStock: true },
         take: HOMEPAGE_HIGHLIGHT_LIMIT,
         orderBy: { updatedAt: "desc" },
       }),
