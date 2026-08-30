@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/adminSession";
-import { getSession } from "@/lib/auth";
 import { isValidSubcategoryForCategory } from "@/lib/categories";
 import { resolveProductColorConfig } from "@/lib/productColors";
 import { PRODUCT_SEARCH_CACHE_TAG } from "@/lib/productSearch";
@@ -144,8 +143,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getSession();
-    if (!session) {
+    const admin = await getCurrentAdmin();
+    if (!admin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -157,7 +156,15 @@ export async function DELETE(
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    await deleteProductImages(existing.images);
+    
+    try {
+      await deleteProductImages(existing.images);
+    } catch (cleanupError) {
+      console.error(
+        `Delete product image cleanup error for ${params.id}:`,
+        cleanupError
+      );
+    }
     await prisma.product.delete({ where: { id: params.id } });
 
     revalidatePath("/");
