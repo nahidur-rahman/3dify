@@ -2,8 +2,8 @@ import Skeleton from "@/components/ui/Skeleton";
 
 function ProductGridSkeleton() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {Array.from({ length: 8 }).map((_, index) => (
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+      {Array.from({ length: 10 }).map((_, index) => (
         <div
           key={index}
           className="bg-white dark:bg-dark-100 rounded-2xl overflow-hidden border border-gray-200 dark:border-dark-200"
