@@ -33,6 +33,8 @@ export interface Product {
   customizable: boolean;
   inStock: boolean;
   featured: boolean;
+  topSelling: boolean;
+  sellCount: number;
   createdAt: string | Date;
   updatedAt: string | Date;
   createdBy: string | null;
