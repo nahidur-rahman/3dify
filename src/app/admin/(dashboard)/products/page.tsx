@@ -22,12 +22,42 @@ const statusOptions = [
   { value: "out-of-stock", label: "Out of stock" },
 ];
 
+const storefrontOptions = [
+  { value: "", label: "All storefront tags" },
+  { value: "featured", label: "Featured only" },
+  { value: "top-selling", label: "Top selling only" },
+  { value: "homepage", label: "Featured or top selling" },
+  { value: "both", label: "Featured and top selling" },
+];
+
+const salesOptions = [
+  { value: "", label: "All sales counts" },
+  { value: "sold", label: "Sold at least once" },
+  { value: "unsold", label: "Never sold" },
+];
+
+const sortOptions = [
+  { value: "newest", label: "Newest first" },
+  { value: "updated", label: "Recently updated" },
+  { value: "top-selling", label: "Top selling tag first" },
+  { value: "best-selling", label: "Best selling" },
+  { value: "lowest-selling", label: "Lowest selling" },
+  { value: "price-asc", label: "Price: low to high" },
+  { value: "price-desc", label: "Price: high to low" },
+  { value: "name-asc", label: "Name: A to Z" },
+  { value: "name-desc", label: "Name: Z to A" },
+];
+
 interface ProductsPageSearchParams {
   name?: string;
   category?: string;
   subcategory?: string;
   status?: string;
   createdBy?: string;
+  updatedBy?: string;
+  storefront?: string;
+  sales?: string;
+  sort?: string;
 }
 
 function normalizeSearchParam(value?: string) {
@@ -41,6 +71,10 @@ async function getProducts(searchParams: ProductsPageSearchParams) {
   const subcategoryParam = normalizeSearchParam(searchParams.subcategory);
   const status = normalizeSearchParam(searchParams.status);
   const createdBy = normalizeSearchParam(searchParams.createdBy);
+  const updatedBy = normalizeSearchParam(searchParams.updatedBy);
+  const storefront = normalizeSearchParam(searchParams.storefront);
+  const sales = normalizeSearchParam(searchParams.sales);
+  const sort = normalizeSearchParam(searchParams.sort) || "newest";
   const availableSubcategories = category
     ? categorySubcategories[category]
     : categoryConfig.flatMap((categoryItem) => categoryItem.subcategories);
@@ -75,17 +109,81 @@ async function getProducts(searchParams: ProductsPageSearchParams) {
     where.createdBy = { contains: createdBy, mode: "insensitive" };
   }
 
+  if (updatedBy) {
+    where.updatedBy = { contains: updatedBy, mode: "insensitive" };
+  }
+
+  if (storefront === "featured") {
+    where.featured = true;
+  }
+
+  if (storefront === "top-selling") {
+    where.topSelling = true;
+  }
+
+  if (storefront === "homepage") {
+    where.OR = [{ featured: true }, { topSelling: true }];
+  }
+
+  if (storefront === "both") {
+    where.featured = true;
+    where.topSelling = true;
+  }
+
+  if (sales === "sold") {
+    where.sellCount = { gt: 0 };
+  }
+
+  if (sales === "unsold") {
+    where.sellCount = 0;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let orderBy: any = { createdAt: "desc" };
+  if (sort === "updated") orderBy = { updatedAt: "desc" };
+  if (sort === "top-selling") {
+    orderBy = [{ topSelling: "desc" }, { sellCount: "desc" }, { updatedAt: "desc" }];
+  }
+  if (sort === "best-selling") {
+    orderBy = [{ sellCount: "desc" }, { topSelling: "desc" }, { updatedAt: "desc" }];
+  }
+  if (sort === "lowest-selling") {
+    orderBy = [{ sellCount: "asc" }, { updatedAt: "desc" }];
+  }
+  if (sort === "price-asc") orderBy = { price: "asc" };
+  if (sort === "price-desc") orderBy = { price: "desc" };
+  if (sort === "name-asc") orderBy = { name: "asc" };
+  if (sort === "name-desc") orderBy = { name: "desc" };
+
   try {
     const products = await prisma.product.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy,
     });
 
     return {
       products: products.map((product) => hydrateProductImages(product)),
-      filters: { name, category, subcategory, status, createdBy },
+      filters: {
+        name,
+        category,
+        subcategory,
+        status,
+        createdBy,
+        updatedBy,
+        storefront,
+        sales,
+        sort,
+      },
       hasActiveFilters: Boolean(
-        name || category || subcategory || status || createdBy
+        name ||
+          category ||
+          subcategory ||
+          status ||
+          createdBy ||
+          updatedBy ||
+          storefront ||
+          sales ||
+          sort !== "newest"
       ),
     };
   } catch {
@@ -97,6 +195,10 @@ async function getProducts(searchParams: ProductsPageSearchParams) {
         subcategory: "",
         status: "",
         createdBy: "",
+        updatedBy: "",
+        storefront: "",
+        sales: "",
+        sort: "newest",
       },
       hasActiveFilters: false,
     };
@@ -130,9 +232,16 @@ export default async function AdminProductsPage({
     filters.subcategory,
     filters.status,
     filters.createdBy,
+    filters.updatedBy,
+    filters.storefront,
+    filters.sales,
+    filters.sort,
   ].join("|");
+  const activeSortLabel =
+    sortOptions.find((option) => option.value === filters.sort)?.label ||
+    sortOptions[0].label;
   const productSummary = hasActiveFilters
-    ? `Showing ${products.length} matching product${products.length === 1 ? "" : "s"}`
+    ? `Showing ${products.length} matching product${products.length === 1 ? "" : "s"} · ${activeSortLabel}`
     : `Manage your product listings (${products.length} total)`;
 
   return (
@@ -158,9 +267,9 @@ export default async function AdminProductsPage({
           <p className="text-sm font-semibold text-gray-900 dark:text-white">
             Search and refine
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
-            Search by product name, category, subcategory, stock status, or creator.
-          </p>
+          {/* <p className="text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
+            Search by name and narrow products by storefront tags, sales activity, stock status, creator, or editor.
+          </p> */}
         </div>
 
         <form
@@ -231,6 +340,51 @@ export default async function AdminProductsPage({
             </select>
           </label>
 
+          <label className="min-w-[170px] flex-[1_1_190px]">
+            <span className="sr-only">Filter by storefront tag</span>
+            <select
+              name="storefront"
+              defaultValue={filters.storefront}
+              className="w-full cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-dark-200 dark:bg-dark-200 dark:text-white"
+            >
+              {storefrontOptions.map((option) => (
+                <option key={option.value || "all-storefront"} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="min-w-[150px] flex-[1_1_170px]">
+            <span className="sr-only">Filter by sales count</span>
+            <select
+              name="sales"
+              defaultValue={filters.sales}
+              className="w-full cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-dark-200 dark:bg-dark-200 dark:text-white"
+            >
+              {salesOptions.map((option) => (
+                <option key={option.value || "all-sales"} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="min-w-[170px] flex-[1_1_210px]">
+            <span className="sr-only">Sort products</span>
+            <select
+              name="sort"
+              defaultValue={filters.sort}
+              className="w-full cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-dark-200 dark:bg-dark-200 dark:text-white"
+            >
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
           <label className="min-w-[150px] flex-[1_1_180px]">
             <span className="sr-only">Filter by creator</span>
             <input
@@ -238,6 +392,17 @@ export default async function AdminProductsPage({
               name="createdBy"
               defaultValue={filters.createdBy}
               placeholder="Created by username"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2 text-sm text-gray-900 placeholder:text-gray-400 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-dark-200 dark:bg-dark-200 dark:text-white"
+            />
+          </label>
+
+          <label className="min-w-[150px] flex-[1_1_180px]">
+            <span className="sr-only">Filter by editor</span>
+            <input
+              type="text"
+              name="updatedBy"
+              defaultValue={filters.updatedBy}
+              placeholder="Updated by username"
               className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2 text-sm text-gray-900 placeholder:text-gray-400 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-dark-200 dark:bg-dark-200 dark:text-white"
             />
           </label>
@@ -361,14 +526,19 @@ export default async function AdminProductsPage({
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        {formatPrice(product.price)}
-                      </span>
+                      <div className="space-y-0.5">
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                          {formatPrice(product.price)}
+                        </span>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Sold {product.sellCount}
+                        </p>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-col items-start gap-1.5">
                         <span
-                          className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          className={`inline-flex w-fit whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-medium leading-4 ${
                             product.inStock
                               ? "bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400"
                               : "bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400"
@@ -377,8 +547,13 @@ export default async function AdminProductsPage({
                           {product.inStock ? "In Stock" : "Out of Stock"}
                         </span>
                         {product.featured && (
-                          <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                          <span className="inline-flex w-fit whitespace-nowrap rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium leading-4 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
                             Featured
+                          </span>
+                        )}
+                        {product.topSelling && (
+                          <span className="inline-flex w-fit whitespace-nowrap rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-medium leading-4 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400">
+                            Top Selling
                           </span>
                         )}
                       </div>
