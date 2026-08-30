@@ -31,7 +31,7 @@ interface CachedSuggestionsEntry {
 }
 
 const MIN_QUERY_LENGTH = 2;
-const REQUEST_DEBOUNCE_MS = 220;
+const REQUEST_DEBOUNCE_MS = 350;
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const MAX_CACHE_ENTRIES = 40;
 
@@ -213,14 +213,14 @@ export default function NavbarSearch({
   }
 
   const wrapperClasses = mobile
-    ? "flex w-full rounded-md border border-gray-300 bg-gray-50 transition-shadow focus-within:border-primary-800 focus-within:ring-2 focus-within:ring-primary-800 dark:border-gray-700 dark:bg-dark-100"
-    : "flex w-full rounded-full border border-gray-300 bg-gray-50 transition-shadow focus-within:border-primary-800 focus-within:ring-2 focus-within:ring-primary-800 dark:border-gray-700 dark:bg-dark-100";
+    ? "flex w-full overflow-hidden rounded-xl border border-gray-300 bg-gray-50 transition-all focus-within:border-primary-800 focus-within:ring-2 focus-within:ring-primary-800/25 dark:border-gray-700 dark:bg-dark-100 dark:focus-within:ring-primary-700/25"
+    : "flex w-full overflow-hidden rounded-full border border-gray-300 bg-gray-50 transition-all focus-within:border-primary-800 focus-within:ring-2 focus-within:ring-primary-800/25 dark:border-gray-700 dark:bg-dark-100 dark:focus-within:ring-primary-700/25";
   const inputClasses = mobile
-    ? "w-full bg-transparent px-4 py-2.5 text-sm text-gray-900 outline-none placeholder-gray-500 dark:text-gray-100"
-    : "w-full bg-transparent px-5 py-2.5 text-sm text-gray-900 outline-none placeholder-gray-500 dark:text-gray-100";
+    ? "w-full min-w-0 bg-transparent px-4 py-2.5 text-sm text-gray-900 outline-none placeholder-gray-500 dark:text-gray-100"
+    : "w-full min-w-0 bg-transparent px-5 py-2.5 text-sm text-gray-900 outline-none placeholder-gray-500 dark:text-gray-100";
   const buttonClasses = mobile
-    ? "flex items-center justify-center bg-primary-800 px-4 text-white transition-colors disabled:opacity-70 dark:bg-primary-700"
-    : "flex items-center justify-center px-4 text-gray-500 transition-colors hover:text-primary-800 disabled:opacity-70 dark:hover:text-primary-400";
+    ? "flex flex-shrink-0 items-center justify-center bg-primary-800 px-4 text-white transition-colors disabled:opacity-70 dark:bg-primary-700"
+    : "flex flex-shrink-0 items-center justify-center px-4 text-gray-500 transition-colors hover:text-primary-800 disabled:opacity-70 dark:hover:text-primary-400";
   const dropdownClasses = mobile
     ? "absolute inset-x-0 top-[calc(100%+0.5rem)] z-[80] overflow-hidden rounded-[1.5rem] border border-gray-200/80 bg-white/95 p-2 shadow-2xl backdrop-blur dark:border-dark-200 dark:bg-dark/95"
     : "absolute inset-x-0 top-[calc(100%+0.75rem)] z-[80] overflow-hidden rounded-[1.5rem] border border-gray-200/80 bg-white/95 p-2 shadow-2xl backdrop-blur dark:border-dark-200 dark:bg-dark/95";
