@@ -213,6 +213,14 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderResult>
     };
   } catch (err) {
     console.error("Failed to create order:", err);
+
+    if (err instanceof Error && err.message === "Shipping rate unavailable") {
+      return {
+        success: false,
+        error: "Shipping is not configured for the selected district right now.",
+      };
+    }
+
     return {
       success: false,
       error: "Something went wrong. Please try again.",
