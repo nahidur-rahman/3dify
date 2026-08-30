@@ -158,6 +158,7 @@ const productSchemaBase = z.object({
   customizable: z.boolean().default(false),
   inStock: z.boolean().default(true),
   featured: z.boolean().default(false),
+  topSelling: z.boolean().default(false),
 });
 
 function addSubcategoryValidation(
