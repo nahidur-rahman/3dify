@@ -102,6 +102,20 @@ function generateOrderNumber(): string {
   return `3D-${timestamp}${random}`;
 }
 
+function aggregateSellCounts(items: CreateOrderInput["items"]) {
+  const sellCounts = new Map<string, number>();
+
+  for (const item of items) {
+    const currentCount = sellCounts.get(item.productId) ?? 0;
+    sellCounts.set(item.productId, currentCount + item.quantity);
+  }
+
+  return Array.from(sellCounts.entries(), ([productId, quantity]) => ({
+    productId,
+    quantity,
+  }));
+}
+
 // --- Server Action ---
 
 export async function createOrder(input: CreateOrderInput): Promise<OrderResult> {
@@ -138,40 +152,58 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderResult>
       0
     );
     const total = subtotal + shippingCost;
+    const sellCountUpdates = aggregateSellCounts(data.items);
 
-    // Create order + items in a transaction
-    const order = await prisma.order.create({
-      data: {
-        orderNumber: generateOrderNumber(),
-        customerName: data.customerName,
-        customerPhone: data.customerPhone,
-        customerEmail: data.customerEmail || null,
-        address: buildOrderAddress({
-          houseRoad: data.houseRoad,
-          areaVillage: data.areaVillage,
-          townCityThana: data.townCityThana,
-          district,
-          postalCode: data.postalCode,
-        }),
-        shippingMethod,
-        shippingCost,
-        subtotal,
-        total,
-        paymentMethod: "COD",
-        notes: data.notes || null,
-        items: {
-          create: data.items.map((item) => ({
-            productId: item.productId,
-            productName: item.productName,
-            productImage: item.productImage || null,
-            selectedSize: item.selectedSize || null,
-            color: item.color || null,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            totalPrice: item.unitPrice * item.quantity,
-          })),
+    // Create the order and update product sales atomically.
+    const order = await prisma.$transaction(async (tx) => {
+      const createdOrder = await tx.order.create({
+        data: {
+          orderNumber: generateOrderNumber(),
+          customerName: data.customerName,
+          customerPhone: data.customerPhone,
+          customerEmail: data.customerEmail || null,
+          address: buildOrderAddress({
+            houseRoad: data.houseRoad,
+            areaVillage: data.areaVillage,
+            townCityThana: data.townCityThana,
+            district,
+            postalCode: data.postalCode,
+          }),
+          shippingMethod,
+          shippingCost,
+          subtotal,
+          total,
+          paymentMethod: "COD",
+          notes: data.notes || null,
+          items: {
+            create: data.items.map((item) => ({
+              productId: item.productId,
+              productName: item.productName,
+              productImage: item.productImage || null,
+              selectedSize: item.selectedSize || null,
+              color: item.color || null,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              totalPrice: item.unitPrice * item.quantity,
+            })),
+          },
         },
-      },
+      });
+
+      await Promise.all(
+        sellCountUpdates.map(({ productId, quantity }) =>
+          tx.product.updateMany({
+            where: { id: productId },
+            data: {
+              sellCount: {
+                increment: quantity,
+              },
+            },
+          })
+        )
+      );
+
+      return createdOrder;
     });
 
     return {
