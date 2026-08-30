@@ -15,7 +15,6 @@ export default function ProductCatalogPage({
   sort,
   activeCategory,
   activeSubcategory,
-  selectedCategory,
 }: ProductCatalogPageProps) {
   return (
     <div className="max-w-7xl mx-auto px-4 py-5 sm:px-6 lg:px-8">
@@ -32,6 +31,7 @@ export default function ProductCatalogPage({
       <ProductGrid
         products={products}
         resetHref={activeCategory ? getCategoryPath(activeCategory) : "/products"}
+        variant="storefrontCatalog"
       />
 
       {totalPages > 1 && (
