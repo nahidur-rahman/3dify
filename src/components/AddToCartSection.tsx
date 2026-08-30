@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/contexts/CartContext";
 import { Product } from "@/lib/types";
+import { getProductColorSwatch } from "@/lib/productColors";
 import { calculateDiscountedPrice, formatPrice } from "@/lib/utils";
 import { HiMinus, HiPlus, HiShoppingCart } from "react-icons/hi";
 
@@ -30,27 +31,18 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
     hasColorOptions ? product.colorOptions![0] : product.color || undefined
   );
   const [quantity, setQuantity] = useState(1);
-
-  // Get the price for the selected size option, or the base price
-  function getUnitPrice(): number {
-    if (hasSizeOptions && selectedSize) {
-      const option = product.sizeOptions!.find(
-        (o) => o.label === selectedSize
-      );
-      return calculateDiscountedPrice(
-        option ? option.price : product.price,
-        discountPercent
-      );
-    }
-    return calculateDiscountedPrice(product.price, discountPercent);
-  }
+  const selectedSizeOption = hasSizeOptions
+    ? product.sizeOptions!.find((option) => option.label === selectedSize)
+    : undefined;
+  const baseUnitPrice = selectedSizeOption?.price ?? product.price;
+  const unitPrice = calculateDiscountedPrice(baseUnitPrice, discountPercent);
 
   function handleAddToCart() {
     addToCart({
       productId: product.id,
       name: product.name,
       image: product.images[0] || "",
-      price: getUnitPrice(),
+      price: unitPrice,
       quantity,
       selectedSize,
       color: selectedColor,
@@ -64,7 +56,7 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
       productId: product.id,
       name: product.name,
       image: product.images[0] || "",
-      price: getUnitPrice(),
+      price: unitPrice,
       quantity,
       selectedSize,
       color: selectedColor,
@@ -75,6 +67,22 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
 
   return (
     <div className="flex flex-col gap-5">
+      <div className="flex items-baseline gap-3">
+        <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+          {formatPrice(unitPrice)}
+        </span>
+        {discountPercent > 0 && (
+          <>
+            <span className="text-base text-gray-400 line-through dark:text-gray-500">
+              {formatPrice(baseUnitPrice)}
+            </span>
+            <span className="rounded-full bg-rose-500 px-2.5 py-0.5 text-xs font-bold text-white">
+              -{discountPercent}%
+            </span>
+          </>
+        )}
+      </div>
+
       {/* Size options */}
       {hasSizeOptions && (
         <div>
@@ -94,14 +102,14 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
                   key={option.label}
                   type="button"
                   onClick={() => setSelectedSize(option.label)}
-                  className={`rounded-lg border px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
+                    className={`rounded-md border px-3 py-2 text-[13px] font-medium leading-none transition-all duration-200 ${
                     isSelected
                       ? "border-primary-500 bg-primary-50 text-primary-700 ring-1 ring-primary-500 dark:bg-primary-900/20 dark:text-primary-300"
                       : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 dark:border-dark-200 dark:bg-dark-100 dark:text-gray-300 dark:hover:border-dark-300"
                   }`}
                 >
                   <span>{option.label}</span>
-                  <span className="ml-1.5 text-xs opacity-70">
+                    <span className="ml-1.5 text-[11px] opacity-70">
                     {formatPrice(optionPrice)}
                   </span>
                 </button>
@@ -111,7 +119,7 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
         </div>
       )}
 
-      {hasColorOptions && (
+      {hasColorOptions ? (
         <div>
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
             Color
@@ -119,25 +127,45 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
           <div className="flex flex-wrap gap-2">
             {product.colorOptions!.map((colorOption) => {
               const isSelected = selectedColor === colorOption;
+              const colorSwatch = getProductColorSwatch(colorOption);
 
               return (
                 <button
                   key={colorOption}
                   type="button"
                   onClick={() => setSelectedColor(colorOption)}
-                  className={`rounded-lg border px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
+                  className={`inline-grid grid-cols-[30px_auto] items-stretch overflow-hidden rounded-md border text-[13px] font-medium leading-none transition-all duration-200 ${
                     isSelected
                       ? "border-primary-500 bg-primary-50 text-primary-700 ring-1 ring-primary-500 dark:bg-primary-900/20 dark:text-primary-300"
                       : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 dark:border-dark-200 dark:bg-dark-100 dark:text-gray-300 dark:hover:border-dark-300"
                   }`}
                 >
-                  {colorOption}
+                  <span className="flex h-full items-center justify-center border-r border-black/10 bg-white/60 px-2 dark:border-white/10 dark:bg-white/5">
+                    <span
+                      className="h-3.5 w-3.5 rounded-full border shadow-sm"
+                      style={{
+                        background: colorSwatch.background,
+                        borderColor: colorSwatch.borderColor,
+                      }}
+                      aria-hidden="true"
+                    />
+                  </span>
+                  <span className="px-3 py-2.5">{colorOption}</span>
                 </button>
               );
             })}
           </div>
         </div>
-      )}
+      ) : product.color ? (
+        <div>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+            Color
+          </h3>
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {product.color}
+          </p>
+        </div>
+      ) : null}
 
       {/* Quantity selector */}
       <div>
