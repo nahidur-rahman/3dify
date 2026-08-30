@@ -74,10 +74,16 @@ export async function getProductCatalogData(
   }
 
   if (search) {
-    where.OR = [
-      { name: { contains: search, mode: "insensitive" } },
-      { description: { contains: search, mode: "insensitive" } },
-    ];
+    // Split search into tokens — each token must appear as a substring in the product name
+    const searchTokens = search.toLowerCase().split(/\s+/).filter(Boolean);
+    if (searchTokens.length > 0) {
+      where.AND = [
+        ...(where.AND || []),
+        ...searchTokens.map((token: string) => ({
+          name: { contains: token, mode: "insensitive" },
+        })),
+      ];
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
