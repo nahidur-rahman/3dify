@@ -28,23 +28,7 @@ export default async function HomePage() {
       }),
     ]);
 
-    const featuredFallbackRaw =
-      featuredRaw.length < HOMEPAGE_HIGHLIGHT_LIMIT
-        ? await prisma.product.findMany({
-            where: {
-              inStock: true,
-              id: {
-                notIn: featuredRaw.map((product) => product.id),
-              },
-            },
-            take: HOMEPAGE_HIGHLIGHT_LIMIT - featuredRaw.length,
-            orderBy: { createdAt: "desc" },
-          })
-        : [];
-
-    featuredProducts = [...featuredRaw, ...featuredFallbackRaw]
-      .slice(0, HOMEPAGE_HIGHLIGHT_LIMIT)
-      .map((product) => hydrateProductImages(product));
+    featuredProducts = featuredRaw.map((product) => hydrateProductImages(product));
     topSellingProducts = topSellingRaw
       .slice(0, HOMEPAGE_HIGHLIGHT_LIMIT)
       .map((product) => hydrateProductImages(product));
