@@ -107,6 +107,7 @@ export default function ProductForm({
     customizable: product?.customizable || false,
     inStock: product?.inStock ?? true,
     featured: product?.featured || false,
+    topSelling: product?.topSelling || false,
   });
 
   const hasImageLimit = typeof imageLimit === "number" && imageLimit > 0;
@@ -857,7 +858,7 @@ export default function ProductForm({
                 In Stock
               </span>
             </label>
-            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200/80 bg-gray-50/70 px-3 py-2 dark:border-dark-200 dark:bg-dark-200/40 sm:col-span-2">
+            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200/80 bg-gray-50/70 px-3 py-2 dark:border-dark-200 dark:bg-dark-200/40">
               <input
                 type="checkbox"
                 checked={form.featured}
@@ -866,6 +867,17 @@ export default function ProductForm({
               />
               <span className="text-xs text-gray-700 dark:text-gray-300">
                 Featured (show on homepage)
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200/80 bg-gray-50/70 px-3 py-2 dark:border-dark-200 dark:bg-dark-200/40">
+              <input
+                type="checkbox"
+                checked={form.topSelling}
+                onChange={(e) => setForm({ ...form, topSelling: e.target.checked })}
+                className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
+              />
+              <span className="text-xs text-gray-700 dark:text-gray-300">
+                Top Selling (show on homepage)
               </span>
             </label>
           </div>
