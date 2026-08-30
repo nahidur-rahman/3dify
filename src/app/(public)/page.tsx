@@ -22,8 +22,15 @@ export default async function HomePage() {
         orderBy: { createdAt: "desc" },
       }),
       prisma.product.findMany({
+        where: {
+          OR: [{ topSelling: true }, { sellCount: { gt: 0 } }],
+        },
         take: HOMEPAGE_HIGHLIGHT_LIMIT,
-        orderBy: { updatedAt: "desc" },
+        orderBy: [
+          { topSelling: "desc" },
+          { sellCount: "desc" },
+          { updatedAt: "desc" },
+        ],
       }),
     ]);
 
