@@ -7,7 +7,6 @@ import {
   Category,
   ColorMode,
   Product,
-  ProductSizeOption,
   SizeMode,
 } from "@/lib/types";
 import {
@@ -33,6 +32,39 @@ interface PendingImage {
   file: File;
   previewUrl: string;
   signature: string;
+}
+
+interface ProductSizeOptionFormItem {
+  id: string;
+  label: string;
+  price: string;
+}
+
+function formatRequiredNumberInput(value?: number | null): string {
+  return typeof value === "number" ? String(value) : "";
+}
+
+function formatOptionalNumberInput(value?: number | null): string {
+  return typeof value === "number" && value > 0 ? String(value) : "";
+}
+
+function createSizeOptionFormItem(
+  label = "Standard",
+  price?: number | string | null
+): ProductSizeOptionFormItem {
+  let normalizedPrice = "";
+
+  if (typeof price === "number") {
+    normalizedPrice = price > 0 ? String(price) : "";
+  } else if (typeof price === "string") {
+    normalizedPrice = price.trim();
+  }
+
+  return {
+    id: crypto.randomUUID(),
+    label,
+    price: normalizedPrice,
+  };
 }
 
 function bytesToHex(bytes: Uint8Array) {
@@ -84,16 +116,18 @@ export default function ProductForm({
     }
   };
 
-  const initialSizeOptions: ProductSizeOption[] =
+  const initialSizeOptions: ProductSizeOptionFormItem[] =
     product?.sizeOptions && product.sizeOptions.length > 0
-      ? product.sizeOptions
-      : [{ label: "Standard", price: product?.price || 0 }];
+      ? product.sizeOptions.map((option) =>
+          createSizeOptionFormItem(option.label, option.price)
+        )
+      : [createSizeOptionFormItem("Standard", product?.price)];
   const initialColorOptions = normalizeProductColorOptions(product?.colorOptions);
 
   const [form, setForm] = useState({
     name: product?.name || "",
     description: product?.description || "",
-    price: product?.price || 0,
+    price: formatRequiredNumberInput(product?.price),
     images: product?.images || [] as string[],
     category: product?.category || defaultCategory,
     subcategory: product?.subcategory || "",
@@ -103,7 +137,7 @@ export default function ProductForm({
     size: product?.size || "",
     sizeMode: (product?.sizeMode || "FIXED") as SizeMode,
     sizeOptions: initialSizeOptions,
-    discountPercent: product?.discountPercent || 0,
+    discountPercent: formatOptionalNumberInput(product?.discountPercent),
     customizable: product?.customizable || false,
     inStock: product?.inStock ?? true,
     featured: product?.featured || false,
@@ -139,17 +173,17 @@ export default function ProductForm({
   }, [pendingImages]);
 
   const updateSizeOption = (
-    index: number,
-    field: keyof ProductSizeOption,
-    value: string | number
+    sizeOptionId: string,
+    field: "label" | "price",
+    value: string
   ) => {
     setForm((prev) => ({
       ...prev,
-      sizeOptions: prev.sizeOptions.map((option, optionIndex) =>
-        optionIndex === index
+      sizeOptions: prev.sizeOptions.map((option) =>
+        option.id === sizeOptionId
           ? {
               ...option,
-              [field]: field === "price" ? Number(value) || 0 : value,
+              [field]: value,
             }
           : option
       ),
@@ -160,15 +194,18 @@ export default function ProductForm({
     setForm((prev) => ({
       ...prev,
       sizeMode: "OPTIONS",
-      sizeOptions: [...prev.sizeOptions, { label: "New size", price: prev.price }],
+      sizeOptions: [
+        ...prev.sizeOptions,
+        createSizeOptionFormItem("New size", prev.price),
+      ],
       size: prev.size || "Multiple sizes available",
     }));
   };
 
-  const removeSizeOption = (index: number) => {
+  const removeSizeOption = (sizeOptionId: string) => {
     setForm((prev) => ({
       ...prev,
-      sizeOptions: prev.sizeOptions.filter((_, optionIndex) => optionIndex !== index),
+      sizeOptions: prev.sizeOptions.filter((option) => option.id !== sizeOptionId),
     }));
   };
 
@@ -328,6 +365,10 @@ export default function ProductForm({
         images.push(...uploadedImages);
       }
       const uniqueImages = Array.from(new Set(images));
+      const resolvedPrice = Number(form.price);
+      const resolvedDiscountPercent = form.discountPercent.trim()
+        ? Number(form.discountPercent)
+        : 0;
       const resolvedColorOptions =
         form.colorMode === "OPTIONS"
           ? normalizeProductColorOptions(form.colorOptions)
@@ -345,14 +386,14 @@ export default function ProductForm({
           ...form,
           images: uniqueImages,
           subcategory: form.subcategory.trim() || null,
-          price: Number(form.price),
+          price: resolvedPrice,
           color: resolvedColor,
           colorOptions: resolvedColorOptions,
-          discountPercent: Number(form.discountPercent),
+          discountPercent: resolvedDiscountPercent,
           sizeOptions:
             form.sizeMode === "OPTIONS"
               ? form.sizeOptions.map((option) => ({
-                  label: option.label,
+                  label: option.label.trim(),
                   price: Number(option.price),
                 }))
               : [],
@@ -480,7 +521,7 @@ export default function ProductForm({
                         e.target.value === "OPTIONS"
                           ? prev.sizeOptions.length > 0
                             ? prev.sizeOptions
-                            : [{ label: "Standard", price: prev.price }]
+                            : [createSizeOptionFormItem("Standard", prev.price)]
                           : prev.sizeOptions,
                     }))
                   }
@@ -531,9 +572,9 @@ export default function ProductForm({
                 </div>
 
                 <div className="space-y-2.5">
-                  {form.sizeOptions.map((option, index) => (
+                  {form.sizeOptions.map((option) => (
                     <div
-                      key={`${option.label}-${index}`}
+                      key={option.id}
                       className="grid gap-2.5 md:grid-cols-[minmax(0,1fr)_96px_auto] md:items-end"
                     >
                       <div>
@@ -543,7 +584,10 @@ export default function ProductForm({
                         <input
                           type="text"
                           value={option.label}
-                          onChange={(e) => updateSizeOption(index, "label", e.target.value)}
+                          onChange={(e) =>
+                            updateSizeOption(option.id, "label", e.target.value)
+                          }
+                          required
                           className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
                           placeholder="Small"
                         />
@@ -555,15 +599,18 @@ export default function ProductForm({
                         <input
                           type="number"
                           value={option.price}
-                          onChange={(e) => updateSizeOption(index, "price", e.target.value)}
-                          min="0"
-                          className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
-                          placeholder="0"
+                          onChange={(e) =>
+                            updateSizeOption(option.id, "price", e.target.value)
+                          }
+                          required
+                          min="0.01"
+                          step="0.01"
+                          className="number-input-no-spinner w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
                         />
                       </div>
                       <button
                         type="button"
-                        onClick={() => removeSizeOption(index)}
+                        onClick={() => removeSizeOption(option.id)}
                         disabled={form.sizeOptions.length === 1}
                         className="h-10 rounded-xl border border-gray-200 px-3 text-sm text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-200 dark:text-gray-400 dark:hover:bg-dark-200"
                       >
@@ -597,11 +644,11 @@ export default function ProductForm({
               <input
                 type="number"
                 value={form.price}
-                onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })}
+                onChange={(e) => setForm({ ...form, price: e.target.value })}
                 required
-                min="0"
+                min="0.01"
                 step="0.01"
-                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+                className="number-input-no-spinner w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
               />
             </div>
 
@@ -658,13 +705,13 @@ export default function ProductForm({
                 onChange={(e) =>
                   setForm({
                     ...form,
-                    discountPercent: parseInt(e.target.value) || 0,
+                    discountPercent: e.target.value,
                   })
                 }
                 min="0"
                 max="100"
-                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
-                placeholder="0"
+                step="1"
+                className="number-input-no-spinner w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
               />
             </div>
 
