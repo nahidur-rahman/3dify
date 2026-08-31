@@ -55,6 +55,17 @@ html {
   .text-balance {
     text-wrap: balance;
   }
+
+  .number-input-no-spinner {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+
+  .number-input-no-spinner::-webkit-inner-spin-button,
+  .number-input-no-spinner::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
