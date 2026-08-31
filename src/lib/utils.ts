@@ -80,9 +80,13 @@ export function hasInstagramConfigured(): boolean {
   return Boolean((process.env.NEXT_PUBLIC_INSTAGRAM_URL || "").trim());
 }
 
+function isAbsoluteUrl(value: string): boolean {
+  return /^https?:\/\//i.test(value);
+}
+
 // Generate WhatsApp link with pre-filled message
 export function getWhatsAppLink(productName?: string, price?: number): string {
-  const phone = process.env.NEXT_PUBLIC_WHATSAPP || "";
+  const phone = (process.env.NEXT_PUBLIC_WHATSAPP || "").replace(/\D/g, "");
   const message = productName
     ? `Hi! I'm interested in "${productName}"${price ? ` (Price: ৳${price})` : ""}. Is it available?`
     : "Hi! I'm interested in your 3D printed products.";
@@ -91,8 +95,13 @@ export function getWhatsAppLink(productName?: string, price?: number): string {
 
 // Generate Messenger link
 export function getMessengerLink(): string {
-  const pageId = process.env.NEXT_PUBLIC_MESSENGER || "";
-  return `https://m.me/${pageId}`;
+  const target = (process.env.NEXT_PUBLIC_MESSENGER || "").trim();
+
+  if (!target) {
+    return "";
+  }
+
+  return isAbsoluteUrl(target) ? target : `https://m.me/${target}`;
 }
 
 export function getFacebookLink(): string {
