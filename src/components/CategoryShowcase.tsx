@@ -83,10 +83,10 @@ export default function CategoryShowcase() {
   };
 
   return (
-    <section className="mt-6 sm:mt-8 mb-6 sm:mb-8 mx-4 sm:mx-auto max-w-7xl pb-10 pt-2 bg-white dark:bg-dark rounded-3xl">
-      <div className="px-4 sm:px-6 lg:px-8 relative transition-all pt-2">
+    <section className="mt-4 mb-4 mx-4 max-w-7xl rounded-3xl bg-white pb-6 pt-1 dark:bg-dark sm:mx-auto sm:mb-6 sm:mt-6 sm:pb-7 sm:pt-1.5">
+      <div className="relative px-4 pt-1 transition-all sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-4 flex items-center justify-between sm:mb-5">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
             Shop by Category
           </h2>
@@ -119,7 +119,7 @@ export default function CategoryShowcase() {
           {/* Scrollable / Flexible Row */}
           <div
             ref={scrollRef}
-            className={`flex items-start overflow-x-auto hide-scrollbar py-2 px-1 gap-2 sm:gap-3 md:gap-4 snap-x transition-all ${
+            className={`flex items-start overflow-x-auto hide-scrollbar py-1 px-1 gap-2 sm:gap-3 md:gap-4 snap-x transition-all ${
               isScrollable ? "justify-start" : "justify-between"
             }`}
           >
