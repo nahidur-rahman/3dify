@@ -24,7 +24,7 @@ export default function HeroSection() {
             Bring Your Imagination to Life
           </h1>
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 font-medium">
-            Explore our collection of custom decor, intricate collectibles, and functional desk accessories.
+            Explore our collection of custom decor, intricate collectibles, and functional accessories.
           </p>
           <Link
             href="/products"
