@@ -2,7 +2,12 @@ import Link from "next/link";
 import { FaFacebookMessenger, FaWhatsapp } from "react-icons/fa";
 import { categoryByValue, getCategoryPath, type Category } from "@/lib/categories";
 import BrandLogo from "./BrandLogo";
-import { getMessengerLink, getWhatsAppLink } from "@/lib/utils";
+import {
+  getMessengerLink,
+  getWhatsAppLink,
+  hasMessengerConfigured,
+  hasWhatsAppConfigured,
+} from "@/lib/utils";
 
 const footerCategoryValues: Category[] = [
   "HOME_DECOR",
@@ -12,8 +17,8 @@ const footerCategoryValues: Category[] = [
 ];
 
 export default function Footer() {
-  const whatsappReady = Boolean((process.env.NEXT_PUBLIC_WHATSAPP || "").trim());
-  const messengerReady = Boolean((process.env.NEXT_PUBLIC_MESSENGER || "").trim());
+  const whatsappReady = hasWhatsAppConfigured();
+  const messengerReady = hasMessengerConfigured();
 
   return (
     <footer className="border-t border-gray-200/80 bg-gray-50/80 dark:border-dark-200 dark:bg-dark-100/80">
