@@ -4,50 +4,48 @@ import Link from "next/link";
 import { HiArrowRight } from "react-icons/hi";
 
 const heroCategories = [
-  { id: 1, title: "Home Decor", href: "/products?category=HOME_DECOR" },
-  { id: 2, title: "Desk Accessories", href: "/products?category=DESK_ACCESSORIES" },
-  { id: 3, title: "Cosplay & Props", href: "/products?category=COSPLAY_PROPS_AND_MODEL_KITS" },
-  { id: 4, title: "Toys & Fidgets", href: "/products?category=TOYS_AND_FIDGETS" },
+  { id: 1, title: "Home Decor", href: "/products?category=HOME_DECOR", image: "https://btstoifqqztzdyseejic.supabase.co/storage/v1/object/public/3Dify_bd/homepage/home_decor.png" },
+  { id: 2, title: "Desk Accessories", href: "/products?category=DESK_ACCESSORIES", image: "https://btstoifqqztzdyseejic.supabase.co/storage/v1/object/public/3Dify_bd/homepage/desk_accessories.jpg" },
+  { id: 3, title: "Collectibles & Figures", href: "/products?category=COLLECTIBLES_AND_FIGURES", image: "https://btstoifqqztzdyseejic.supabase.co/storage/v1/object/public/3Dify_bd/homepage/collectibles_and_figures.png" },
+  { id: 4, title: "Toys & Fidgets", href: "/products?category=TOYS_AND_FIDGETS", image: "https://btstoifqqztzdyseejic.supabase.co/storage/v1/object/public/3Dify_bd/homepage/toys_and_fidgets.png" },
 ];
 
 export default function HeroSection() {
   return (
-    <section className="py-6 sm:py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white dark:bg-dark rounded-b-3xl">
-      <div className="relative rounded-3xl overflow-hidden bg-gray-50 dark:bg-dark-100 flex flex-col lg:flex-row min-h-[500px] border border-gray-200 dark:border-white/10">
+    <section className="max-w-7xl mx-auto rounded-b-3xl bg-white px-4 py-4 dark:bg-dark sm:px-6 sm:py-5 lg:px-8 lg:py-6">
+      <div className="relative flex min-h-[420px] flex-col overflow-hidden rounded-3xl border border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-dark-100 lg:min-h-[430px] lg:flex-row xl:min-h-[450px]">
         
         {/* Left Content Area (Text & Button) */}
-        <div className="lg:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-center relative z-20">
-          <span className="text-sm font-bold tracking-wider text-primary-600 dark:text-primary-400 uppercase mb-3 block">
+        <div className="relative z-20 flex flex-col justify-center p-5 sm:p-7 md:p-9 lg:w-5/12 lg:px-10 lg:py-8 xl:px-12 xl:py-10">
+          <span className="mb-2 block text-[11px] font-bold uppercase tracking-[0.22em] text-primary-600 dark:text-primary-400 sm:text-xs md:text-sm">
             Premium 3D Printed
           </span>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-[1.1] mb-6 tracking-tight">
+          <h1 className="mb-4 text-[2.15rem] font-extrabold leading-[1.02] tracking-tight text-gray-900 dark:text-white sm:text-4xl md:text-5xl lg:text-[3rem] xl:text-[3.35rem]">
             Bring Your Imagination to Life
           </h1>
-          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8 font-medium">
-            Explore our collection of custom decor, intricate collectibles, and functional accessories.
+          <p className="mb-6 max-w-md text-sm font-medium text-gray-600 dark:text-gray-300 sm:text-base md:text-lg lg:mb-7 lg:text-[1.1rem]">
+            Discover custom decor, collectible pieces, and practical accessories made to order.
           </p>
           <Link
             href="/products"
-            className="inline-flex items-center gap-2 rounded-xl bg-primary-800 px-8 py-4 text-base font-bold text-white transition-all hover:bg-primary-900 hover:shadow-xl hover:-translate-y-1 w-max dark:bg-primary-600 dark:hover:bg-primary-500"
+            className="inline-flex w-max items-center gap-2 rounded-xl bg-primary-800 px-5 py-2.5 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-primary-900 hover:shadow-lg dark:bg-primary-600 dark:hover:bg-primary-500 sm:px-6 sm:py-3 sm:text-[0.95rem]"
           >
-            Shop Collection <HiArrowRight className="w-5 h-5" />
+            Shop Collection <HiArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
           </Link>
         </div>
 
         {/* Right Content Area (4 Category Slides/Figures) */}
-        <div className="lg:w-1/2 bg-gray-100 dark:bg-dark-200 p-8 flex items-center justify-center border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-white/10">
-          <div className="grid grid-cols-2 gap-4 w-full h-full max-h-[500px]">
+        <div className="flex items-center justify-center border-t border-gray-200 bg-gray-100 p-4 dark:border-white/10 dark:bg-dark-200 lg:w-7/12 lg:border-l lg:border-t-0 lg:p-5 xl:p-6">
+          <div className="grid h-full max-h-[360px] w-full grid-cols-2 gap-3 sm:max-h-[400px] sm:gap-4 lg:max-h-[430px] xl:max-h-[450px]">
              {heroCategories.map((cat) => (
-                <Link key={cat.id} href={cat.href} className="group relative rounded-2xl overflow-hidden bg-gray-200 dark:bg-dark-300 flex items-end justify-center aspect-square md:aspect-auto hover:shadow-lg transition-all">
-                   {/* Image Placeholder */}
-                   <div className="absolute inset-0 bg-gray-300 dark:bg-gray-700 w-full h-full flex items-center justify-center border border-black/5">
-                      <span className="text-gray-400 dark:text-gray-500 font-medium text-xs md:text-sm">Placeholder Image</span>
-                   </div>
+                <Link key={cat.id} href={cat.href} className="group relative flex aspect-square items-end justify-center overflow-hidden rounded-2xl bg-gray-200 transition-all hover:shadow-lg dark:bg-dark-300 md:aspect-auto">
+                   {/* Category Image */}
+                   <img src={cat.image} alt={cat.title} className="absolute inset-0 w-full h-full object-cover" />
                    {/* Gradient overlay for text */}
                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
                    
-                   <div className="relative z-10 p-4 w-full text-center transform translate-y-2 group-hover:translate-y-0 transition-transform">
-                      <h3 className="text-white font-bold text-sm md:text-base">{cat.title}</h3>
+                   <div className="relative z-10 w-full p-3 text-center transform translate-y-2 transition-transform group-hover:translate-y-0 sm:p-4">
+                      <h3 className="text-xs font-bold text-white sm:text-sm md:text-base">{cat.title}</h3>
                    </div>
                 </Link>
              ))}
