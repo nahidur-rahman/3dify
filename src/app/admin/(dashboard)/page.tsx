@@ -3,9 +3,7 @@ import { prisma } from "@/lib/db";
 import {
   HiOutlineCube,
   HiOutlineStar,
-  HiOutlineTag,
   HiOutlinePlusCircle,
-  HiOutlineUserAdd,
   HiOutlineShoppingBag,
   HiOutlineClock,
   HiOutlineTruck,
