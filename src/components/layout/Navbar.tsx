@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { FaFacebookF, FaInstagram } from "react-icons/fa";
 import {
   HiMenu,
@@ -28,6 +28,18 @@ import {
   hasFacebookConfigured,
   hasInstagramConfigured,
 } from "@/lib/utils";
+
+function NavbarSearchFallback({ mobile = false }: { mobile?: boolean }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "animate-pulse border border-gray-200 bg-gray-50 dark:border-dark-200 dark:bg-dark-100",
+        mobile ? "h-11 w-full rounded-xl" : "h-11 w-full rounded-full"
+      )}
+    />
+  );
+}
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -137,7 +149,9 @@ export default function Navbar() {
 
             {/* Desktop Search Bar */}
             <div className="hidden md:flex flex-1 max-w-sm ml-auto mr-4 lg:mx-auto">
-              <NavbarSearch />
+              <Suspense fallback={<NavbarSearchFallback />}>
+                <NavbarSearch />
+              </Suspense>
             </div>
 
             {/* Right Tools */}
@@ -226,7 +240,9 @@ export default function Navbar() {
         {isOpen && (
           <div className="border-t border-black/5 py-4 dark:border-dark-100 md:hidden bg-white dark:bg-dark px-4 shadow-xl absolute w-full left-0">
             <div className="mb-4">
-              <NavbarSearch mobile onNavigate={() => setIsOpen(false)} />
+              <Suspense fallback={<NavbarSearchFallback mobile />}>
+                <NavbarSearch mobile onNavigate={() => setIsOpen(false)} />
+              </Suspense>
             </div>
             {navLinks.map((link) => (
               <Link
