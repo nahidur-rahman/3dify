@@ -82,8 +82,16 @@ export default function Navbar() {
     { href: "/about", label: "About" },
   ];
 
-  const socialButtonClasses =
-    "flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition-colors hover:border-primary-300 hover:text-primary-800 dark:border-dark-200 dark:text-gray-300 dark:hover:border-primary-500/30 dark:hover:text-primary-400";
+  const socialButtonBaseClasses =
+    "flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors duration-200";
+  const facebookSocialButtonClasses = cn(
+    socialButtonBaseClasses,
+    "bg-[#1877F2] hover:bg-blue-600"
+  );
+  const instagramSocialButtonClasses = cn(
+    socialButtonBaseClasses,
+    "bg-[#E1306C] hover:bg-[#C13584]"
+  );
   const disabledSocialButtonClasses =
     "flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-full border border-gray-200 text-gray-300 dark:border-dark-200 dark:text-gray-600";
 
@@ -140,7 +148,7 @@ export default function Navbar() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Facebook"
-                  className={socialButtonClasses}
+                  className={facebookSocialButtonClasses}
                 >
                   <FaFacebookF className="h-4 w-4" />
                 </a>
@@ -156,7 +164,7 @@ export default function Navbar() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"
-                  className={socialButtonClasses}
+                  className={instagramSocialButtonClasses}
                 >
                   <FaInstagram className="h-4 w-4" />
                 </a>
@@ -244,7 +252,7 @@ export default function Navbar() {
                     rel="noopener noreferrer"
                     aria-label="Facebook"
                     onClick={() => setIsOpen(false)}
-                    className={socialButtonClasses}
+                    className={facebookSocialButtonClasses}
                   >
                     <FaFacebookF className="h-4 w-4" />
                   </a>
@@ -261,7 +269,7 @@ export default function Navbar() {
                     rel="noopener noreferrer"
                     aria-label="Instagram"
                     onClick={() => setIsOpen(false)}
-                    className={socialButtonClasses}
+                    className={instagramSocialButtonClasses}
                   >
                     <FaInstagram className="h-4 w-4" />
                   </a>
