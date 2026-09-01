@@ -19,6 +19,7 @@ export interface CartItem {
   quantity: number;
   selectedSize?: string;
   color?: string;
+  addedAt?: number; // Timestamp in ms for expiration tracking
 }
 
 interface CartContextType {
@@ -35,6 +36,7 @@ interface CartContextType {
 }
 
 const STORAGE_KEY = "3dify-cart";
+const CART_EXPIRATION_DAYS = 30;
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -44,11 +46,23 @@ function getCartKey(item: { productId: string; selectedSize?: string; color?: st
   return `${item.productId}__${item.selectedSize || "default"}__${item.color || "default"}`;
 }
 
+function isExpired(item: CartItem): boolean {
+  if (!item.addedAt) return false; // Old items without timestamp are kept
+  const now = Date.now();
+  const expirationMs = CART_EXPIRATION_DAYS * 24 * 60 * 60 * 1000;
+  const itemAgeMs = now - item.addedAt;
+  return itemAgeMs >= expirationMs;
+}
+
 function loadCart(): CartItem[] {
   if (typeof window === "undefined") return [];
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    if (!stored) return [];
+    const items = JSON.parse(stored);
+    if (!Array.isArray(items)) return [];
+    // Filter out expired items
+    return items.filter((item) => !isExpired(item));
   } catch {
     return [];
   }
@@ -88,17 +102,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const existingIndex = prev.findIndex((i) => getCartKey(i) === key);
 
       if (existingIndex >= 0) {
-        // Increase quantity of existing item
+        // Increase quantity of existing item and refresh timestamp
         const updated = [...prev];
         updated[existingIndex] = {
           ...updated[existingIndex],
           quantity: updated[existingIndex].quantity + newItem.quantity,
+          addedAt: Date.now(),
         };
         return updated;
       }
 
-      // Add new item
-      return [...prev, { ...newItem }];
+      // Add new item with timestamp
+      return [...prev, { ...newItem, addedAt: Date.now() }];
     });
   }, []);
 

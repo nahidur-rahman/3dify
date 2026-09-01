@@ -8,6 +8,7 @@ export interface LocalOrder {
 const STORAGE_KEY = "3dify-orders";
 const STORAGE_VERSION = 2;
 const MAX_STORED_ORDERS = 12;
+const ORDER_EXPIRATION_DAYS = 14;
 
 export const LOCAL_ORDERS_UPDATED_EVENT = "3dify-orders-updated";
 
@@ -52,6 +53,16 @@ function normalizeStoredOrder(value: unknown): LocalOrder | null {
   };
 }
 
+function filterExpiredOrders(orders: LocalOrder[]): LocalOrder[] {
+  const now = Date.now();
+  const expirationMs = ORDER_EXPIRATION_DAYS * 24 * 60 * 60 * 1000;
+
+  return orders.filter((order) => {
+    const orderAgeMs = now - new Date(order.createdAt).getTime();
+    return orderAgeMs < expirationMs;
+  });
+}
+
 function dedupeOrders(orders: LocalOrder[]) {
   const uniqueOrders = new Map<string, LocalOrder>();
 
@@ -65,11 +76,12 @@ function dedupeOrders(orders: LocalOrder[]) {
 }
 
 function normalizeOrders(orders: unknown[]) {
-  return dedupeOrders(
+  const normalized = dedupeOrders(
     orders
       .map(normalizeStoredOrder)
       .filter((order): order is LocalOrder => order !== null)
-  ).slice(0, MAX_STORED_ORDERS);
+  );
+  return filterExpiredOrders(normalized).slice(0, MAX_STORED_ORDERS);
 }
 
 function persistOrders(orders: LocalOrder[]) {
