@@ -61,14 +61,15 @@ function dedupeOrders(orders: LocalOrder[]) {
     }
   }
 
-  return [...uniqueOrders.values()];
+  return Array.from(uniqueOrders.values());
 }
 
 function normalizeOrders(orders: unknown[]) {
-  return dedupeOrders(orders.map(normalizeStoredOrder).filter(Boolean)).slice(
-    0,
-    MAX_STORED_ORDERS
-  );
+  return dedupeOrders(
+    orders
+      .map(normalizeStoredOrder)
+      .filter((order): order is LocalOrder => order !== null)
+  ).slice(0, MAX_STORED_ORDERS);
 }
 
 function persistOrders(orders: LocalOrder[]) {
