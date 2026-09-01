@@ -225,25 +225,47 @@ export default function Navbar() {
               </button>
             </div>
 
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              aria-label={isOpen ? "Close menu" : "Open menu"}
-              className="rounded-xl p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-100 md:hidden"
-            >
-              {isOpen ? <HiX className="w-6 h-6" /> : <HiMenu className="w-6 h-6" />}
-            </button>
+            {/* Mobile Social Icons & Menu Button */}
+            <div className="md:hidden flex items-center gap-1">
+              {facebookReady ? (
+                <a
+                  href={facebookLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors duration-200 bg-[#1877F2] hover:bg-blue-600"
+                >
+                  <FaFacebookF className="h-3.5 w-3.5" />
+                </a>
+              ) : null}
+
+              {instagramReady ? (
+                <a
+                  href={instagramLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors duration-200 bg-[#E1306C] hover:bg-[#C13584]"
+                >
+                  <FaInstagram className="h-3.5 w-3.5" />
+                </a>
+              ) : null}
+
+              {/* Mobile menu button */}
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                aria-label={isOpen ? "Close menu" : "Open menu"}
+                className="rounded-xl p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-100"
+              >
+                {isOpen ? <HiX className="w-6 h-6" /> : <HiMenu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Mobile Nav Menu */}
         {isOpen && (
           <div className="border-t border-black/5 py-4 dark:border-dark-100 md:hidden bg-white dark:bg-dark px-4 shadow-xl absolute w-full left-0">
-            <div className="mb-4">
-              <Suspense fallback={<NavbarSearchFallback mobile />}>
-                <NavbarSearch mobile onNavigate={() => setIsOpen(false)} />
-              </Suspense>
-            </div>
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -260,42 +282,6 @@ export default function Navbar() {
               </Link>
             ))}
             <div className="mt-6 space-y-3 border-t border-black/5 pt-4 dark:border-white/10">
-              <div className="flex items-center gap-3">
-                {facebookReady ? (
-                  <a
-                    href={facebookLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Facebook"
-                    onClick={() => setIsOpen(false)}
-                    className={facebookSocialButtonClasses}
-                  >
-                    <FaFacebookF className="h-4 w-4" />
-                  </a>
-                ) : (
-                  <button type="button" aria-label="Facebook unavailable" disabled className={disabledSocialButtonClasses}>
-                    <FaFacebookF className="h-4 w-4" />
-                  </button>
-                )}
-
-                {instagramReady ? (
-                  <a
-                    href={instagramLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Instagram"
-                    onClick={() => setIsOpen(false)}
-                    className={instagramSocialButtonClasses}
-                  >
-                    <FaInstagram className="h-4 w-4" />
-                  </a>
-                ) : (
-                  <button type="button" aria-label="Instagram unavailable" disabled className={disabledSocialButtonClasses}>
-                    <FaInstagram className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-
               <button
                 onClick={toggleTheme}
                 className="flex w-full items-center justify-center gap-2 rounded-xl px-2 py-3 font-medium text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-dark-100"
