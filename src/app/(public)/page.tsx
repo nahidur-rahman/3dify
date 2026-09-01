@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import HeroSection from "@/components/HeroSection";
 import CategoryShowcase from "@/components/CategoryShowcase";
 import ProductGrid from "@/components/ProductGrid";
+import NavbarSearch from "@/components/layout/NavbarSearch";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { Product } from "@/lib/types";
@@ -9,6 +11,15 @@ import { hydrateProductImages } from "@/lib/productImages";
 export const revalidate = 60;
 
 const HOMEPAGE_HIGHLIGHT_LIMIT = 12;
+
+function HomepageSearchFallback() {
+  return (
+    <div
+      aria-hidden="true"
+      className="animate-pulse border border-gray-200 bg-gray-50 dark:border-dark-200 dark:bg-dark-100 h-11 w-full rounded-full"
+    />
+  );
+}
 
 export default async function HomePage() {
   // Fetch featured products and top selling products concurrently
@@ -44,6 +55,15 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* Search Bar - Visible on Mobile Only */}
+      <section className="md:hidden bg-white dark:bg-dark border-b border-gray-100 dark:border-dark-100 px-4 py-4">
+        <div className="flex flex-1 max-w-md mx-auto w-full">
+          <Suspense fallback={<HomepageSearchFallback />}>
+            <NavbarSearch mobile />
+          </Suspense>
+        </div>
+      </section>
+
       {/* Hero Banner */}
       <HeroSection />
 
