@@ -7,6 +7,8 @@ export const MIN_PRODUCT_SEARCH_QUERY_LENGTH = 2;
 export const PRODUCT_SEARCH_SUGGESTION_LIMIT = 5;
 export const PRODUCT_SEARCH_CACHE_TAG = "product-search-suggestions";
 
+const SEARCH_TOKEN_PATTERN = new RegExp("[\\p{L}\\p{N}]+", "gu");
+
 export interface ProductSearchSuggestion {
   id: string;
   name: string;
@@ -21,7 +23,7 @@ function normalizeSearchQuery(value: string) {
 }
 
 function extractSearchTokens(value: string) {
-  return value.match(/[\p{L}\p{N}]+/gu) ?? [];
+  return value.match(SEARCH_TOKEN_PATTERN) ?? [];
 }
 
 function parseSizeOptionPrices(value: unknown) {
