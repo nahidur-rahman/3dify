@@ -1,13 +1,33 @@
-"use client";
-
+import Image from "next/image";
 import Link from "next/link";
 import { HiArrowRight } from "react-icons/hi";
+import { resolveStorageImageUrl } from "@/lib/productImages";
 
 const heroCategories = [
-  { id: 1, title: "Home Decor", href: "/products?category=HOME_DECOR", image: "https://btstoifqqztzdyseejic.supabase.co/storage/v1/object/public/3Dify_bd/homepage/home_decor.png" },
-  { id: 2, title: "Desk Accessories", href: "/products?category=DESK_ACCESSORIES", image: "https://btstoifqqztzdyseejic.supabase.co/storage/v1/object/public/3Dify_bd/homepage/desk_accessories.jpg" },
-  { id: 3, title: "Collectibles & Figures", href: "/products?category=COLLECTIBLES_AND_FIGURES", image: "https://btstoifqqztzdyseejic.supabase.co/storage/v1/object/public/3Dify_bd/homepage/collectibles_and_figures.png" },
-  { id: 4, title: "Toys & Fidgets", href: "/products?category=TOYS_AND_FIDGETS", image: "https://btstoifqqztzdyseejic.supabase.co/storage/v1/object/public/3Dify_bd/homepage/toys_and_fidgets.png" },
+  {
+    id: 1,
+    title: "Home Decor",
+    href: "/products?category=HOME_DECOR",
+    imagePath: "homepage/home_decor.png",
+  },
+  {
+    id: 2,
+    title: "Desk Accessories",
+    href: "/products?category=DESK_ACCESSORIES",
+    imagePath: "homepage/desk_accessories.jpg",
+  },
+  {
+    id: 3,
+    title: "Collectibles & Figures",
+    href: "/products?category=COLLECTIBLES_AND_FIGURES",
+    imagePath: "homepage/collectibles_and_figures.png",
+  },
+  {
+    id: 4,
+    title: "Toys & Fidgets",
+    href: "/products?category=TOYS_AND_FIDGETS",
+    imagePath: "homepage/toys_and_fidgets.png",
+  },
 ];
 
 export default function HeroSection() {
@@ -40,7 +60,13 @@ export default function HeroSection() {
              {heroCategories.map((cat) => (
                 <Link key={cat.id} href={cat.href} className="group relative flex aspect-square items-end justify-center overflow-hidden rounded-2xl bg-gray-200 transition-all hover:shadow-lg dark:bg-dark-300 md:aspect-auto">
                    {/* Category Image */}
-                   <img src={cat.image} alt={cat.title} className="absolute inset-0 w-full h-full object-cover" />
+                   <Image
+                     src={resolveStorageImageUrl(cat.imagePath)}
+                     alt={cat.title}
+                     fill
+                     className="object-cover"
+                     sizes="(max-width: 640px) 44vw, (max-width: 1024px) 42vw, 24vw"
+                   />
                    {/* Gradient overlay for text */}
                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
                    
