@@ -68,7 +68,7 @@ function normalizeStoragePath(imageRef: string) {
   return trimmed.replace(/^\/+/, "") || null;
 }
 
-function resolveDisplayUrl(imageRef: string) {
+export function resolveStorageImageUrl(imageRef: string) {
   if (isUrlInBucket(imageRef)) {
     return imageRef;
   }
@@ -107,7 +107,9 @@ export function hydrateProductImages(item: {
 }): Product {
   return {
     ...item,
-    images: uniqueStrings(item.images.map((imageRef) => resolveDisplayUrl(imageRef))),
+    images: uniqueStrings(
+      item.images.map((imageRef) => resolveStorageImageUrl(imageRef))
+    ),
     sizeOptions: normalizeSizeOptions(item.sizeOptions),
     colorOptions: normalizeProductColorOptions(item.colorOptions),
   } as Product;
