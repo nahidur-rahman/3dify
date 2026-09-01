@@ -110,7 +110,7 @@ export function normalizeProductColorOptions(value: unknown): string[] {
     }
   }
 
-  return [...uniqueOptions];
+  return Array.from(uniqueOptions);
 }
 
 export function buildProductColorSummary(input: {
