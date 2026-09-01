@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getCurrentAdmin } from "@/lib/adminSession";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const currentAdmin = await getCurrentAdmin();
