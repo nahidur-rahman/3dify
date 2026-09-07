@@ -1,0 +1,105 @@
+.admin-table-hint {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .admin-content h1 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  .admin-content :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+    min-width: 0;
+    max-width: 100%;
+    font-size: 16px;
+  }
+
+  .admin-content button,
+  .admin-content a {
+    touch-action: manipulation;
+  }
+
+  .admin-table-hint {
+    display: block;
+    padding: 0.75rem;
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+
+  .admin-table-scroll {
+    max-width: 100%;
+    overscroll-behavior-x: contain;
+  }
+
+  .admin-table {
+    min-width: 760px;
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  .admin-table :is(th, td) {
+    padding: 0.75rem;
+  }
+
+  .admin-table th {
+    font-size: 0.6875rem;
+    line-height: 1rem;
+  }
+
+  .admin-table td,
+  .admin-table td :is(.text-sm, .text-base) {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  .admin-table:not(.admin-accounts-table) :is(th, td):last-child {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    background: white;
+    box-shadow: -1px 0 0 #e5e7eb;
+  }
+
+  .dark .admin-table:not(.admin-accounts-table) :is(th, td):last-child {
+    background: #1e293b;
+    box-shadow: -1px 0 0 #374151;
+  }
+
+  .admin-table :is(button, a, select) {
+    min-height: 40px;
+  }
+
+  .admin-table select {
+    min-height: 32px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  .admin-table .admin-order-status {
+    min-height: 26px;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.5rem;
+    font-size: 0.625rem;
+    line-height: 0.875rem;
+  }
+
+  .admin-table a {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .admin-table :is(button, a) {
+    min-width: 40px;
+  }
+
+  .admin-products-table :is(button, a) {
+    min-width: 32px;
+    min-height: 32px;
+  }
+
+  .admin-accounts-table .truncate {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
