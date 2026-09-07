@@ -9,7 +9,7 @@ interface ProductGridProps {
 }
 
 const storefrontGridClassName =
-  "grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6";
+  "grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6";
 
 function getStorefrontHighlightItemClassName(index: number) {
   if (index < 6) {
