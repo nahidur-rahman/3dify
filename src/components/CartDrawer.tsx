@@ -42,7 +42,7 @@ export default function CartDrawer() {
 
       {/* Drawer */}
       <div
-        className={`fixed top-0 right-0 z-[70] flex h-full w-full max-w-md flex-col bg-white shadow-2xl transition-transform duration-300 ease-out dark:bg-dark ${
+        className={`fixed inset-y-0 right-0 z-[70] flex h-[100dvh] w-full max-w-md flex-col bg-white shadow-2xl transition-transform duration-300 ease-out dark:bg-dark ${
           isDrawerOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -69,7 +69,7 @@ export default function CartDrawer() {
         </div>
 
         {/* Items */}
-        <div className="flex-1 overflow-y-auto px-5 py-4">
+        <div className="flex-1 overflow-y-auto px-3 py-3 sm:px-5 sm:py-4">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 dark:bg-dark-100">
@@ -96,7 +96,7 @@ export default function CartDrawer() {
                 return (
                   <div
                     key={itemKey}
-                    className="flex gap-4 rounded-xl border border-gray-100 bg-gray-50/50 p-3 dark:border-dark-200 dark:bg-dark-100/50"
+                    className="flex gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-3 dark:border-dark-200 dark:bg-dark-100/50 sm:gap-4"
                   >
                     {/* Image */}
                     <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-dark-200">
@@ -144,18 +144,18 @@ export default function CartDrawer() {
                                 ? removeFromCart(item.productId, item.selectedSize, item.color)
                                 : updateQuantity(item.productId, item.quantity - 1, item.selectedSize, item.color)
                             }
-                            className="flex h-7 w-7 items-center justify-center text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
+                            className="flex h-10 w-10 items-center justify-center text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
                           >
                             <HiMinus className="h-3 w-3" />
                           </button>
-                          <span className="flex h-7 w-8 items-center justify-center border-x border-gray-200 text-xs font-semibold text-gray-900 dark:border-dark-200 dark:text-white">
+                          <span className="flex h-10 w-8 items-center justify-center border-x border-gray-200 text-xs font-semibold text-gray-900 dark:border-dark-200 dark:text-white">
                             {item.quantity}
                           </span>
                           <button
                             onClick={() =>
                               updateQuantity(item.productId, item.quantity + 1, item.selectedSize, item.color)
                             }
-                            className="flex h-7 w-7 items-center justify-center text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
+                            className="flex h-10 w-10 items-center justify-center text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
                           >
                             <HiPlus className="h-3 w-3" />
                           </button>
@@ -185,7 +185,7 @@ export default function CartDrawer() {
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="border-t border-gray-200 p-5 dark:border-dark-200">
+          <div className="safe-area-pb border-t border-gray-200 p-4 dark:border-dark-200 sm:p-5">
             <div className="mb-4 flex items-center justify-between">
               <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
                 Subtotal
