@@ -122,11 +122,12 @@ export default function Navbar() {
     <>
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-black/5 dark:border-white/10 dark:bg-dark/95">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-20 items-center justify-between gap-4 sm:gap-8">
+          <div className="flex h-16 items-center justify-between gap-3 sm:h-20 sm:gap-8">
             {/* Logo & Navigation */}
             <div className="flex items-center gap-8">
                 <Link href="/" className="group inline-flex flex-shrink-0">
-                  <BrandLogo className="transition-transform group-hover:scale-[1.04]" />
+                  <BrandLogo size="sm" className="transition-transform group-hover:scale-[1.04] sm:hidden" />
+                  <BrandLogo className="hidden transition-transform group-hover:scale-[1.04] sm:block" />
                 </Link>
                 
                 <div className="hidden lg:flex items-center gap-6">
@@ -225,47 +226,47 @@ export default function Navbar() {
               </button>
             </div>
 
-            {/* Mobile Social Icons & Menu Button */}
-            <div className="md:hidden flex items-center gap-1">
-              {facebookReady ? (
-                <a
-                  href={facebookLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook"
-                  className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors duration-200 bg-[#1877F2] hover:bg-blue-600"
-                >
-                  <FaFacebookF className="h-3.5 w-3.5" />
+            {/* High-frequency mobile actions */}
+            <div className="flex items-center gap-0 md:hidden">
+              {facebookReady && (
+                <a href={facebookLink} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="flex h-8 w-8 items-center justify-center rounded-full text-[#1877F2] active:bg-blue-50 dark:active:bg-dark-100">
+                  <FaFacebookF className="h-4 w-4" />
                 </a>
-              ) : null}
-
-              {instagramReady ? (
-                <a
-                  href={instagramLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram"
-                  className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors duration-200 bg-[#E1306C] hover:bg-[#C13584]"
-                >
-                  <FaInstagram className="h-3.5 w-3.5" />
+              )}
+              {instagramReady && (
+                <a href={instagramLink} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="flex h-8 w-8 items-center justify-center rounded-full text-[#E1306C] active:bg-pink-50 dark:active:bg-dark-100">
+                  <FaInstagram className="h-4 w-4" />
                 </a>
-              ) : null}
+              )}
+              <button onClick={openOrdersDrawer} aria-label={`Orders, ${ordersCount} saved`} className="relative flex h-10 w-10 items-center justify-center rounded-xl text-gray-600 active:bg-gray-100 dark:text-gray-300 dark:active:bg-dark-100">
+                <HiOutlineDocumentText className="h-6 w-6" />
+                {ordersCount > 0 && <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-500 px-1 text-[9px] font-bold text-white">{ordersCount > 99 ? "99+" : ordersCount}</span>}
+              </button>
+              <button onClick={openCartPanel} aria-label={`Cart, ${cartCount} items`} className="relative flex h-10 w-10 items-center justify-center rounded-xl text-gray-600 active:bg-gray-100 dark:text-gray-300 dark:active:bg-dark-100">
+                <HiOutlineShoppingCart className="h-6 w-6" />
+                {cartCount > 0 && <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-white">{cartCount > 99 ? "99+" : cartCount}</span>}
+              </button>
 
               {/* Mobile menu button */}
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 aria-label={isOpen ? "Close menu" : "Open menu"}
-                className="rounded-xl p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-100"
+                className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-100"
               >
                 {isOpen ? <HiX className="w-6 h-6" /> : <HiMenu className="w-6 h-6" />}
               </button>
             </div>
           </div>
+          <div className="pb-3 md:hidden">
+            <Suspense fallback={<NavbarSearchFallback mobile />}>
+              <NavbarSearch />
+            </Suspense>
+          </div>
         </div>
 
         {/* Mobile Nav Menu */}
         {isOpen && (
-          <div className="border-t border-black/5 py-4 dark:border-dark-100 md:hidden bg-white dark:bg-dark px-4 shadow-xl absolute w-full left-0">
+          <div className="absolute left-0 max-h-[calc(100dvh-7rem)] w-full overflow-y-auto border-t border-black/5 bg-white px-4 py-4 shadow-xl dark:border-dark-100 dark:bg-dark md:hidden">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
