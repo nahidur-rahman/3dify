@@ -1,6 +1,7 @@
 import { getCurrentAdmin } from "@/lib/adminSession";
 import AdminSidebar from "@/components/layout/AdminSidebar";
 import { redirect } from "next/navigation";
+import "./admin.css";
 
 export default async function AdminLayout({
   children,
@@ -17,9 +18,9 @@ export default async function AdminLayout({
   const adminRole = currentAdmin?.role === "SUPER" ? "SUPER" : "ADMIN";
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="admin-shell flex h-dvh flex-col overflow-hidden md:h-screen md:flex-row">
       <AdminSidebar adminUsername={adminUsername} adminRole={adminRole} />
-      <div className="flex-1 min-h-0 overflow-y-auto p-6 sm:p-8">{children}</div>
+      <main className="admin-content min-w-0 flex-1 min-h-0 overflow-y-auto p-3 sm:p-8">{children}</main>
     </div>
   );
 }
