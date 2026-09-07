@@ -817,7 +817,7 @@ export default function ProductForm({
                 <button
                   type="button"
                   onClick={() => removeImage(i)}
-                  className="absolute inset-0 flex items-center justify-center bg-black/50 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
+                  className="absolute inset-0 flex items-center justify-center bg-black/50 text-xs text-white opacity-100 md:opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 [@media(hover:none)]:opacity-100"
                 >
                   Remove
                 </button>
@@ -836,7 +836,7 @@ export default function ProductForm({
                 <button
                   type="button"
                   onClick={() => removePendingImage(image.id)}
-                  className="absolute inset-0 flex items-center justify-center bg-black/50 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
+                  className="absolute inset-0 flex items-center justify-center bg-black/50 text-xs text-white opacity-100 md:opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 [@media(hover:none)]:opacity-100"
                 >
                   Remove
                 </button>
