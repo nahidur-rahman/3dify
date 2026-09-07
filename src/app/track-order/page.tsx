@@ -46,7 +46,7 @@ interface TrackedOrder {
 const TRACKING_STEPS = [
   { key: "PENDING", label: "Order Received", desc: "We received your order", icon: HiOutlineClock },
   { key: "CONFIRMED", label: "Order Confirmed", desc: "Order verified & accepted", icon: HiOutlineCheckCircle },
-  { key: "PROCESSING", label: "3D Printing & Prep", desc: "Items being 3D printed", icon: HiOutlineDocumentText },
+  { key: "PROCESSING", label: "Preparing Order", desc: "Items being ready", icon: HiOutlineDocumentText },
   { key: "SHIPPED", label: "Out for Delivery", desc: "Dispatched to courier", icon: HiOutlineTruck },
   { key: "DELIVERED", label: "Delivered", desc: "Package delivered to you", icon: HiOutlineCheckCircle },
 ];
@@ -121,10 +121,10 @@ function TrackOrderContent() {
   const currentStepIndex = order ? getStepIndex(order.status) : -1;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="mx-auto max-w-4xl px-3 py-6 sm:px-6 sm:py-12 lg:px-8">
       {/* Header */}
-      <div className="text-center max-w-xl mx-auto mb-10">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+      <div className="mx-auto mb-5 max-w-xl text-center sm:mb-10">
+        <h1 className="mb-1.5 text-2xl font-bold text-gray-900 dark:text-white sm:mb-2 sm:text-3xl">
           Track Your Order
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -133,16 +133,16 @@ function TrackOrderContent() {
       </div>
 
       {/* Search Card */}
-      <div className="bg-white dark:bg-dark-100 rounded-3xl border border-gray-200 dark:border-dark-200 p-6 sm:p-8 shadow-sm mb-10">
+      <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-dark-200 dark:bg-dark-100 sm:mb-10 sm:rounded-3xl sm:p-8">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleTrack();
           }}
-          className="grid grid-cols-1 sm:grid-cols-5 gap-4"
+          className="grid grid-cols-1 gap-3 sm:grid-cols-5 sm:gap-4"
         >
           <div className="sm:col-span-2">
-            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+            <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:mb-2 sm:text-xs">
               Order Number
             </label>
             <div className="relative">
@@ -158,7 +158,7 @@ function TrackOrderContent() {
           </div>
 
           <div className="sm:col-span-2">
-            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+            <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:mb-2 sm:text-xs">
               Phone Number
             </label>
             <div className="relative">
@@ -200,12 +200,12 @@ function TrackOrderContent() {
 
       {/* Order Result View */}
       {order && (
-        <div className="space-y-8 animate-fade-in">
+        <div className="animate-fade-in space-y-5 sm:space-y-8">
           {/* Order Header Summary */}
-          <div className="bg-white dark:bg-dark-100 rounded-3xl border border-gray-200 dark:border-dark-200 p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-dark-200 dark:bg-dark-100 sm:flex-row sm:items-center sm:gap-4 sm:rounded-3xl sm:p-8">
             <div>
               <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h2 className="break-all text-lg font-bold text-gray-900 dark:text-white sm:text-2xl">
                   Order {order.orderNumber}
                 </h2>
                 {order.status === "CANCELLED" && (
@@ -222,9 +222,9 @@ function TrackOrderContent() {
               </p>
             </div>
 
-            <div className="text-left sm:text-right">
+            <div className="flex w-full items-baseline justify-between border-t border-gray-100 pt-3 text-left dark:border-dark-200 sm:block sm:w-auto sm:border-0 sm:pt-0 sm:text-right">
               <span className="text-xs text-gray-500 dark:text-gray-400">Total Amount</span>
-              <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">
+              <p className="text-xl font-bold text-primary-600 dark:text-primary-400 sm:text-2xl">
                 {formatPrice(order.total)}
               </p>
             </div>
@@ -232,8 +232,8 @@ function TrackOrderContent() {
 
           {/* Timeline Status */}
           {order.status === "CANCELLED" ? (
-            <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-3xl p-8 text-center space-y-3">
-              <HiOutlineXCircle className="w-16 h-16 text-red-500 mx-auto" />
+            <div className="space-y-2 rounded-2xl border border-red-200 bg-red-50 p-5 text-center dark:border-red-900/30 dark:bg-red-900/10 sm:space-y-3 sm:rounded-3xl sm:p-8">
+              <HiOutlineXCircle className="mx-auto h-12 w-12 text-red-500 sm:h-16 sm:w-16" />
               <h3 className="text-xl font-bold text-red-900 dark:text-red-300">
                 This order has been cancelled
               </h3>
@@ -242,13 +242,13 @@ function TrackOrderContent() {
               </p>
             </div>
           ) : (
-            <div className="bg-white dark:bg-dark-100 rounded-3xl border border-gray-200 dark:border-dark-200 p-6 sm:p-8 shadow-sm">
-              <h3 className="text-base font-bold text-gray-900 dark:text-white mb-6">
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-dark-200 dark:bg-dark-100 sm:rounded-3xl sm:p-8">
+              <h3 className="mb-4 text-base font-bold text-gray-900 dark:text-white sm:mb-6">
                 Order Status Timeline
               </h3>
 
               {/* Progress Bar */}
-              <div className="relative flex flex-col md:flex-row justify-between gap-8 md:gap-4">
+              <div className="relative flex flex-col justify-between gap-4 md:flex-row md:gap-4">
                 {TRACKING_STEPS.map((step, idx) => {
                   const isCompleted = idx <= currentStepIndex;
                   const isCurrent = idx === currentStepIndex;
@@ -304,15 +304,15 @@ function TrackOrderContent() {
           )}
 
           {/* Itemized Order Details */}
-          <div className="bg-white dark:bg-dark-100 rounded-3xl border border-gray-200 dark:border-dark-200 p-6 sm:p-8 shadow-sm">
+          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-dark-200 dark:bg-dark-100 sm:rounded-3xl sm:p-8">
             <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4">
               Order Items
             </h3>
 
             <div className="divide-y divide-gray-200 dark:divide-dark-200">
               {order.items.map((item) => (
-                <div key={item.id} className="py-4 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
+                <div key={item.id} className="flex items-center justify-between gap-2 py-3 sm:gap-4 sm:py-4">
+                  <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                     <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-gray-100 dark:bg-dark-200 flex-shrink-0">
                       {item.productImage ? (
                         <Image
@@ -328,18 +328,18 @@ function TrackOrderContent() {
                         </div>
                       )}
                     </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+                    <div className="min-w-0">
+                      <h4 className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white">
                         {item.productName}
                       </h4>
-                      <div className="flex gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      <div className="mt-0.5 flex flex-wrap gap-x-2 text-[11px] text-gray-500 dark:text-gray-400 sm:text-xs">
                         {item.selectedSize && <span>Size: {item.selectedSize}</span>}
                         {item.color && <span>• Color: {item.color}</span>}
                       </div>
                     </div>
                   </div>
 
-                  <div className="text-right">
+                  <div className="flex-shrink-0 text-right">
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       {formatPrice(item.unitPrice)} × {item.quantity}
                     </p>
@@ -352,7 +352,7 @@ function TrackOrderContent() {
             </div>
 
             {/* Delivery & Totals Breakdown */}
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-dark-200 grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="mt-4 grid grid-cols-1 gap-4 border-t border-gray-200 pt-4 dark:border-dark-200 sm:mt-6 sm:grid-cols-2 sm:gap-6 sm:pt-6">
               <div>
                 <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                   Delivery & Payment
@@ -393,7 +393,7 @@ function TrackOrderContent() {
       )}
 
       {/* Back to Products CTA */}
-      <div className="mt-10 text-center">
+      <div className="mt-6 text-center sm:mt-10">
         <Link
           href="/products"
           className="inline-flex items-center gap-2 text-sm font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 transition-colors"
