@@ -16,6 +16,17 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: "Inter", system-ui, sans-serif;
+  min-width: 320px;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
 }
 
 ::selection {
@@ -66,6 +77,27 @@ html {
     -webkit-appearance: none;
     margin: 0;
   }
+
+  .safe-area-pb {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Mobile font size reduction */
+@media (max-width: 640px) {
+  /* Scale down text-* utilities for better mobile readability */
+  .text-lg { font-size: 0.875rem !important; line-height: 1.25rem !important; } /* sm */
+  .text-xl { font-size: 0.875rem !important; line-height: 1.25rem !important; } /* sm */
+  .text-2xl { font-size: 1rem !important; line-height: 1.5rem !important; } /* lg */
+  .text-3xl { font-size: 1.25rem !important; line-height: 1.75rem !important; } /* xl */
+  .text-4xl { font-size: 1.5rem !important; line-height: 2rem !important; } /* 2xl */
+  .text-5xl { font-size: 1.875rem !important; line-height: 2.25rem !important; } /* 3xl */
+  .text-6xl { font-size: 2.25rem !important; line-height: 2.5rem !important; } /* 4xl */
+
+  /* Reduce heading sizes */
+  h1 { font-size: calc(1em * 0.9) !important; }
+  h2 { font-size: calc(1em * 0.9) !important; }
+  h3 { font-size: calc(1em * 0.95) !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
