@@ -35,9 +35,9 @@ export default function CartPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-3 py-5 sm:px-6 sm:py-8 lg:px-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="mb-5 flex items-center justify-between sm:mb-8">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
             Shopping Cart
@@ -62,10 +62,10 @@ export default function CartPage() {
             return (
               <div
                 key={itemKey}
-                className="flex gap-4 sm:gap-6 rounded-2xl border border-gray-100 bg-white p-4 sm:p-5 shadow-sm dark:border-dark-200 dark:bg-dark-100"
+                className="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100 sm:flex sm:gap-6 sm:p-5"
               >
                 {/* Image */}
-                <div className="relative h-24 w-24 sm:h-32 sm:w-32 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 dark:bg-dark-200">
+                <div className="relative h-[5.5rem] w-[5.5rem] flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 dark:bg-dark-200 sm:h-32 sm:w-32">
                   {item.image ? (
                     <Image
                       src={item.image}
@@ -107,7 +107,7 @@ export default function CartPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between mt-3">
+                  <div className="mt-3 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
                     {/* Quantity controls */}
                     <div className="flex items-center rounded-lg border border-gray-200 dark:border-dark-200">
                       <button
@@ -132,7 +132,7 @@ export default function CartPage() {
                     </div>
 
                     {/* Price + remove */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:gap-4">
                       <span className="text-lg font-bold text-gray-900 dark:text-white">
                         {formatPrice(item.price * item.quantity)}
                       </span>
