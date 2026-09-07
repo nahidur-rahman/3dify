@@ -118,9 +118,9 @@ export default function AdminShippingPage() {
         {rates.map((rate) => (
           <div
             key={rate.method}
-            className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-dark-200 dark:bg-dark-100"
+            className="rounded-2xl border border-gray-200 bg-white p-3 sm:p-6 dark:border-dark-200 dark:bg-dark-100"
           >
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {rate.label}
@@ -150,12 +150,13 @@ export default function AdminShippingPage() {
               </button>
             </div>
 
-            <div className="flex items-end gap-3">
-              <div className="flex-1">
-                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+            <div className="flex flex-wrap items-end gap-3">
+              <div className="min-w-0 basis-full sm:basis-auto flex-1">
+                <label htmlFor={`shipping-price-${rate.method}`} className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                   Price (৳)
                 </label>
                 <input
+                  id={`shipping-price-${rate.method}`}
                   type="number"
                   min="0"
                   step="1"
