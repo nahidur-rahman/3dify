@@ -236,6 +236,7 @@ export default function OrdersPageClient({
           <HiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
             type="text"
+            aria-label="Search orders"
             placeholder="Search by order #, customer name, or phone number..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -243,6 +244,7 @@ export default function OrdersPageClient({
           />
           {search && (
             <button
+              aria-label="Clear order search"
               onClick={() => setSearch("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
             >
@@ -298,8 +300,9 @@ export default function OrdersPageClient({
         </div>
       ) : (
         <div className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <p className="admin-table-hint">Swipe to see all columns. Details stay on the right.</p>
+          <div className="admin-table-scroll overflow-x-auto" role="region" aria-label="Orders table" tabIndex={0}>
+            <table className="admin-table w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-dark-200 bg-gray-50/50 dark:bg-dark-200/50 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   <th className="px-6 py-4">Order #</th>
@@ -389,10 +392,11 @@ export default function OrdersPageClient({
 
                       <td className="px-6 py-4">
                         <select
+                          aria-label={`Status for order ${order.orderNumber}`}
                           value={order.status}
                           disabled={updatingId === order.id}
                           onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold border outline-none cursor-pointer transition-all ${getStatusBadge(
+                          className={`admin-order-status px-3 py-1.5 rounded-xl text-xs font-bold border outline-none cursor-pointer transition-all ${getStatusBadge(
                             order.status
                           )}`}
                         >
@@ -424,11 +428,11 @@ export default function OrdersPageClient({
       )}
 
       {selectedOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white dark:bg-dark-100 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-dark-200 shadow-2xl">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-dark-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-dark-100 rounded-3xl max-w-2xl w-full max-h-[calc(100dvh-1rem)] sm:max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-dark-200 shadow-2xl">
+            <div className="flex items-start justify-between gap-2 p-3 sm:p-6 border-b border-gray-200 dark:border-dark-200">
               <div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                     Order {selectedOrder.orderNumber}
                   </h2>
@@ -450,6 +454,7 @@ export default function OrdersPageClient({
                 </p>
               </div>
               <button
+                aria-label="Close order details"
                 onClick={() => setSelectedOrder(null)}
                 className="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-dark-200 dark:hover:text-white transition-colors"
               >
@@ -457,7 +462,7 @@ export default function OrdersPageClient({
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 break-words">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-4 rounded-2xl bg-gray-50 dark:bg-dark-200 border border-gray-100 dark:border-dark-300">
                   <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
@@ -508,7 +513,7 @@ export default function OrdersPageClient({
                   {selectedOrder.items.map((item) => (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between p-3 rounded-2xl bg-gray-50 dark:bg-dark-200 border border-gray-100 dark:border-dark-300"
+                      className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-dark-200 border border-gray-100 dark:border-dark-300"
                     >
                       <div className="flex items-center gap-3">
                         <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-gray-200 dark:bg-dark-300 flex-shrink-0">
@@ -530,7 +535,7 @@ export default function OrdersPageClient({
                           <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
                             {item.productName}
                           </h4>
-                          <div className="flex gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                             {item.selectedSize && <span>Size: {item.selectedSize}</span>}
                             {item.color && <span>• Color: {item.color}</span>}
                           </div>
@@ -573,6 +578,7 @@ export default function OrdersPageClient({
                 </span>
                 <div className="flex items-center gap-2">
                   <select
+                    aria-label="Update order status"
                     value={selectedOrder.status}
                     disabled={updatingId === selectedOrder.id}
                     onChange={(e) => updateOrderStatus(selectedOrder.id, e.target.value)}
