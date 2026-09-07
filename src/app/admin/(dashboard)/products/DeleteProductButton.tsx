@@ -41,8 +41,9 @@ export default function DeleteProductButton({
     <button
       onClick={handleDelete}
       disabled={loading}
-      className="p-2 rounded-lg text-gray-500 hover:text-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+      className="rounded-lg p-1.5 text-red-500 transition-colors hover:bg-red-500/10 hover:text-red-600 disabled:opacity-50 sm:p-2"
       title="Delete"
+      aria-label={`Delete ${productName}`}
     >
       <HiOutlineTrash className="w-4 h-4" />
     </button>
