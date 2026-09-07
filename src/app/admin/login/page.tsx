@@ -45,7 +45,7 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
+    <div className="min-h-[80dvh] sm:min-h-[80vh] flex items-center justify-center px-4 py-6 sm:py-0">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <BrandLogo size="lg" className="mb-4 mx-auto" />
@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
 
         <form onSubmit={handleSubmit}>
           <Card>
-            <CardContent className="p-8 space-y-5">
+            <CardContent className="p-4 sm:p-8 space-y-5">
               {error && (
                 <div className="bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
                   {error}
@@ -67,10 +67,13 @@ export default function AdminLoginPage() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                <label htmlFor="admin-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   Email
                 </label>
                 <Input
+                  id="admin-email"
+                  autoComplete="username"
+                  className="text-base"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -80,17 +83,19 @@ export default function AdminLoginPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                <label htmlFor="admin-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   Password
                 </label>
                 <div className="relative">
                   <Input
+                    id="admin-password"
+                    autoComplete="current-password"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     placeholder="••••••••"
-                    className="pr-12"
+                    className="pr-12 text-base"
                   />
                   <button
                     type="button"
