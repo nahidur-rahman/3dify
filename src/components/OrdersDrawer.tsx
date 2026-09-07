@@ -72,7 +72,7 @@ export default function OrdersDrawer({ isOpen, onClose }: OrdersDrawerProps) {
       />
 
       <div
-        className={`fixed top-0 right-0 z-[70] flex h-full w-full max-w-md flex-col bg-white shadow-2xl transition-transform duration-300 ease-out dark:bg-dark ${
+        className={`fixed inset-y-0 right-0 z-[70] flex h-[100dvh] w-full max-w-md flex-col bg-white shadow-2xl transition-transform duration-300 ease-out dark:bg-dark ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -97,7 +97,7 @@ export default function OrdersDrawer({ isOpen, onClose }: OrdersDrawerProps) {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-4">
+        <div className="safe-area-pb flex-1 overflow-y-auto px-4 py-4 sm:px-5">
           {orders.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 dark:bg-dark-100">
