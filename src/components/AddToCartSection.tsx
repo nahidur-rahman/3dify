@@ -102,7 +102,7 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
                   key={option.label}
                   type="button"
                   onClick={() => setSelectedSize(option.label)}
-                    className={`rounded-md border px-3 py-2 text-[13px] font-medium leading-none transition-all duration-200 ${
+                    className={`h-9 rounded-lg border px-3 py-2 text-[13px] font-medium leading-none transition-all duration-200 ${
                     isSelected
                       ? "border-primary-500 bg-primary-50 text-primary-700 ring-1 ring-primary-500 dark:bg-primary-900/20 dark:text-primary-300"
                       : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 dark:border-dark-200 dark:bg-dark-100 dark:text-gray-300 dark:hover:border-dark-300"
@@ -134,7 +134,7 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
                   key={colorOption}
                   type="button"
                   onClick={() => setSelectedColor(colorOption)}
-                  className={`inline-grid grid-cols-[30px_auto] items-stretch overflow-hidden rounded-md border text-[13px] font-medium leading-none transition-all duration-200 ${
+                  className={`inline-grid h-9 grid-cols-[34px_auto] items-center overflow-hidden rounded-lg border text-[13px] font-medium leading-none transition-all duration-200 ${
                     isSelected
                       ? "border-primary-500 bg-primary-50 text-primary-700 ring-1 ring-primary-500 dark:bg-primary-900/20 dark:text-primary-300"
                       : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 dark:border-dark-200 dark:bg-dark-100 dark:text-gray-300 dark:hover:border-dark-300"
@@ -150,7 +150,7 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
                       aria-hidden="true"
                     />
                   </span>
-                  <span className="px-3 py-2.5">{colorOption}</span>
+                  <span className="px-3 py-1.5">{colorOption}</span>
                 </button>
               );
             })}
@@ -177,17 +177,17 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
             type="button"
             onClick={() => setQuantity((q) => Math.max(1, q - 1))}
             disabled={quantity <= 1}
-            className="flex h-10 w-10 items-center justify-center text-gray-600 transition-colors hover:bg-gray-100 disabled:opacity-40 dark:text-gray-400 dark:hover:bg-dark-100"
+            className="flex h-11 w-11 items-center justify-center text-gray-600 transition-colors hover:bg-gray-100 disabled:opacity-40 dark:text-gray-400 dark:hover:bg-dark-100"
           >
             <HiMinus className="h-4 w-4" />
           </button>
-          <span className="flex h-10 w-12 items-center justify-center border-x border-gray-200 text-sm font-semibold text-gray-900 dark:border-dark-200 dark:text-white">
+          <span className="flex h-11 w-12 items-center justify-center border-x border-gray-200 text-sm font-semibold text-gray-900 dark:border-dark-200 dark:text-white">
             {quantity}
           </span>
           <button
             type="button"
             onClick={() => setQuantity((q) => q + 1)}
-            className="flex h-10 w-10 items-center justify-center text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-dark-100"
+            className="flex h-11 w-11 items-center justify-center text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-dark-100"
           >
             <HiPlus className="h-4 w-4" />
           </button>
@@ -195,23 +195,25 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
       </div>
 
       {/* Action buttons */}
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-3">
         <button
           type="button"
           onClick={handleAddToCart}
           disabled={!product.inStock}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary-500 px-6 py-3.5 font-semibold text-white transition-all duration-200 hover:bg-primary-600 hover:shadow-lg hover:shadow-primary-500/25 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary-500 px-4 py-3 font-semibold text-white transition-all duration-200 hover:bg-primary-600 hover:shadow-lg hover:shadow-primary-500/25 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
         >
           <HiShoppingCart className="h-5 w-5" />
-          Add to Cart
+          <span className="hidden sm:inline">Add to Cart</span>
+          <span className="sm:hidden">Add</span>
         </button>
         <button
           type="button"
           onClick={handleBuyNow}
           disabled={!product.inStock}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-primary-500 px-6 py-3.5 font-semibold text-primary-600 transition-all duration-200 hover:bg-primary-50 hover:shadow-lg hover:-translate-y-0.5 dark:text-primary-400 dark:hover:bg-primary-900/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-primary-500 px-4 py-3 font-semibold text-primary-600 transition-all duration-200 hover:bg-primary-50 hover:shadow-lg hover:-translate-y-0.5 dark:text-primary-400 dark:hover:bg-primary-900/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
         >
-          Buy it Now
+          <span className="hidden sm:inline">Buy it Now</span>
+          <span className="sm:hidden">Buy</span>
         </button>
       </div>
     </div>
