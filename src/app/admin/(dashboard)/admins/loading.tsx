@@ -36,9 +36,9 @@ export default function AdminsLoading() {
         <Skeleton className="h-10 w-44 rounded-full" />
       </div>
 
-      <div className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 p-6 space-y-5">
+      <div className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 p-3 sm:p-6 space-y-5">
         <Skeleton className="h-6 w-32" />
-        <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-dark-200">
+        <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-dark-200">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-dark-200 text-left">
