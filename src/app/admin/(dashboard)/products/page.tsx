@@ -246,7 +246,7 @@ export default async function AdminProductsPage({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col items-start gap-3 mb-5 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Products
@@ -255,7 +255,7 @@ export default async function AdminProductsPage({
         </div>
         <Link
           href="/admin/products/new"
-          className="flex items-center gap-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white px-5 py-2.5 rounded-xl font-medium hover:from-primary-600 hover:to-primary-700 transition-all"
+          className="flex items-center gap-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white px-3 py-2 text-sm sm:text-base sm:px-5 sm:py-2.5 shrink-0 rounded-xl font-medium hover:from-primary-600 hover:to-primary-700 transition-all"
         >
           <HiOutlinePlusCircle className="w-5 h-5" />
           Add Product
@@ -458,8 +458,9 @@ export default async function AdminProductsPage({
         </div>
       ) : (
         <div className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <p className="admin-table-hint">Swipe to see all columns. Actions stay on the right.</p>
+          <div className="admin-table-scroll overflow-x-auto" role="region" aria-label="Products table" tabIndex={0}>
+            <table className="admin-table admin-products-table w-full">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-dark-200">
                   <th className="text-left px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -569,11 +570,12 @@ export default async function AdminProductsPage({
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1 sm:gap-2">
                         <Link
                           href={`/admin/products/${product.id}/edit`}
-                          className="p-2 rounded-lg text-gray-500 hover:text-primary-500 hover:bg-primary-500/10 transition-colors"
+                          className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-primary-500/10 hover:text-primary-500 sm:p-2"
                           title="Edit"
+                          aria-label={`Edit ${product.name}`}
                         >
                           <HiOutlinePencil className="w-4 h-4" />
                         </Link>
