@@ -63,7 +63,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col gap-3 mb-5 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Dashboard
@@ -72,17 +72,17 @@ export default async function AdminDashboardPage() {
             Overview of your 3Dify BD store
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           <Link
             href="/admin/orders"
-            className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-medium hover:bg-emerald-700 transition-all text-sm"
+            className="flex items-center gap-2 bg-emerald-600 text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-medium hover:bg-emerald-700 transition-all text-sm"
           >
             <HiOutlineShoppingBag className="w-5 h-5" />
             View Orders
           </Link>
           <Link
             href="/admin/products/new"
-            className="flex items-center gap-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white px-4 py-2.5 rounded-xl font-medium hover:from-primary-600 hover:to-primary-700 transition-all text-sm"
+            className="flex items-center gap-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-medium hover:from-primary-600 hover:to-primary-700 transition-all text-sm"
           >
             <HiOutlinePlusCircle className="w-5 h-5" />
             Add Product
@@ -91,25 +91,25 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-5 sm:mb-8">
         {statCards.map((stat) => (
           <div
             key={stat.label}
-            className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 p-6 shadow-sm"
+            className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 p-3 sm:p-6 shadow-sm"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                   {stat.label}
                 </p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">
                   {stat.value}
                 </p>
               </div>
               <div
-                className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white`}
+                className={`w-8 h-8 sm:w-12 sm:h-12 shrink-0 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white`}
               >
-                <stat.icon className="w-6 h-6" />
+                <stat.icon className="w-4 h-4 sm:w-6 sm:h-6" />
               </div>
             </div>
           </div>
@@ -117,18 +117,18 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 p-6 shadow-sm">
+      <div className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 p-3 sm:p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Quick Actions
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
           <Link
             href="/admin/orders"
-            className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-dark-200 hover:bg-gray-100 dark:hover:bg-dark-300 transition-colors"
+            className="flex flex-col items-start gap-2 p-3 sm:flex-row sm:items-center sm:gap-3 sm:p-4 rounded-xl bg-gray-50 dark:bg-dark-200 hover:bg-gray-100 dark:hover:bg-dark-300 transition-colors"
           >
-            <HiOutlineShoppingBag className="w-8 h-8 text-emerald-500" />
+            <HiOutlineShoppingBag className="w-5 h-5 sm:w-8 sm:h-8 shrink-0 text-emerald-500" />
             <div>
-              <p className="font-medium text-gray-900 dark:text-white">
+              <p className="text-xs sm:text-base font-medium text-gray-900 dark:text-white">
                 Manage Orders
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -138,11 +138,11 @@ export default async function AdminDashboardPage() {
           </Link>
           <Link
             href="/admin/products"
-            className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-dark-200 hover:bg-gray-100 dark:hover:bg-dark-300 transition-colors"
+            className="flex flex-col items-start gap-2 p-3 sm:flex-row sm:items-center sm:gap-3 sm:p-4 rounded-xl bg-gray-50 dark:bg-dark-200 hover:bg-gray-100 dark:hover:bg-dark-300 transition-colors"
           >
-            <HiOutlineCube className="w-8 h-8 text-primary-500" />
+            <HiOutlineCube className="w-5 h-5 sm:w-8 sm:h-8 shrink-0 text-primary-500" />
             <div>
-              <p className="font-medium text-gray-900 dark:text-white">
+              <p className="text-xs sm:text-base font-medium text-gray-900 dark:text-white">
                 Manage Products
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -153,11 +153,11 @@ export default async function AdminDashboardPage() {
 
           <Link
             href="/admin/shipping"
-            className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-dark-200 hover:bg-gray-100 dark:hover:bg-dark-300 transition-colors"
+            className="flex flex-col items-start gap-2 p-3 sm:flex-row sm:items-center sm:gap-3 sm:p-4 rounded-xl bg-gray-50 dark:bg-dark-200 hover:bg-gray-100 dark:hover:bg-dark-300 transition-colors"
           >
-            <HiOutlineTruck className="w-8 h-8 text-cyan-500" />
+            <HiOutlineTruck className="w-5 h-5 sm:w-8 sm:h-8 shrink-0 text-cyan-500" />
             <div>
-              <p className="font-medium text-gray-900 dark:text-white">
+              <p className="text-xs sm:text-base font-medium text-gray-900 dark:text-white">
                 Shipping Rates
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -168,11 +168,11 @@ export default async function AdminDashboardPage() {
 
           <Link
             href="/admin/products/new"
-            className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-dark-200 hover:bg-gray-100 dark:hover:bg-dark-300 transition-colors"
+            className="flex flex-col items-start gap-2 p-3 sm:flex-row sm:items-center sm:gap-3 sm:p-4 rounded-xl bg-gray-50 dark:bg-dark-200 hover:bg-gray-100 dark:hover:bg-dark-300 transition-colors"
           >
-            <HiOutlinePlusCircle className="w-8 h-8 text-green-500" />
+            <HiOutlinePlusCircle className="w-5 h-5 sm:w-8 sm:h-8 shrink-0 text-green-500" />
             <div>
-              <p className="font-medium text-gray-900 dark:text-white">
+              <p className="text-xs sm:text-base font-medium text-gray-900 dark:text-white">
                 Add New Product
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
