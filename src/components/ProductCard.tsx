@@ -20,7 +20,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/products/${product.id}`} className="group">
-      <div className="overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:border-dark-200 dark:bg-dark-100">
+      <div className="h-full overflow-hidden rounded-xl border border-gray-200/80 bg-white shadow-sm transition-all duration-200 active:scale-[0.98] hover:-translate-y-0.5 hover:shadow-lg dark:border-dark-200 dark:bg-dark-100 sm:rounded-2xl">
         {/* Image */}
         <div className="relative aspect-square overflow-hidden bg-gray-50 dark:bg-dark/60">
           {imageSrc ? (
@@ -55,12 +55,12 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Content */}
-        <div className="p-3">
-          <h3 className="line-clamp-1 text-sm font-medium text-gray-900 group-hover:text-primary-600 dark:text-white dark:group-hover:text-primary-400 transition-colors">
+        <div className="p-2.5 sm:p-3">
+          <h3 className="line-clamp-2 text-[13px] font-medium leading-[1.35] text-gray-900 transition-colors group-hover:text-primary-600 dark:text-white dark:group-hover:text-primary-400 sm:text-sm">
             {product.name}
           </h3>
-          <div className="mt-1.5 flex items-center gap-2">
-            <span className="text-sm font-bold text-gray-900 dark:text-white">
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+            <span className="text-[13px] font-bold text-gray-900 dark:text-white sm:text-sm">
               {sizeOptionPrices.length > 0 ? "From " : ""}
               {formatPrice(displayPrice)}
             </span>
