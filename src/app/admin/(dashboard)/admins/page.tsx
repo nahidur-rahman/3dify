@@ -39,7 +39,7 @@ export default async function AdminsPage() {
             Review administrator accounts. Only SUPER admins can create or delete admin accounts.
           </p>
         </div>
-        <div className="inline-flex items-center gap-2 rounded-full border border-primary-500/20 bg-primary-500/5 px-4 py-2 text-sm text-primary-500">
+        <div className="inline-flex flex-wrap items-center gap-2 break-all rounded-full border border-primary-500/20 bg-primary-500/5 px-4 py-2 text-sm text-primary-500">
           Signed in as {adminUsername}
           <span className="rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-semibold tracking-[0.18em] text-primary-500 dark:bg-dark-100/80 dark:text-primary-300">
             {adminRole === "SUPER" ? "SUPER ADMIN" : "ADMIN"}
@@ -52,17 +52,20 @@ export default async function AdminsPage() {
       >
         {canCreateAdmins && <AdminForm />}
 
-        <Card className="h-fit">
+        <Card className="h-fit min-w-0">
           <CardHeader>
             <CardTitle>Current Admins</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 sm:p-6">
             {admins.length === 0 ? (
               <div className="rounded-xl border border-dashed border-gray-200 dark:border-dark-200 px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
                 No admins found.
               </div>
             ) : (
-              <table className="w-full table-fixed">
+              <div>
+              <p className="admin-table-hint">Swipe to see all account details.</p>
+              <div className="admin-table-scroll overflow-x-auto" role="region" aria-label="Administrators table" tabIndex={0}>
+              <table className="admin-table admin-accounts-table w-full table-fixed">
                 <thead>
                   <tr className="border-b border-gray-200 text-left text-sm text-gray-500 dark:border-dark-200 dark:text-gray-400">
                     <th className="w-[16%] px-4 py-3 font-medium">Username</th>
@@ -137,6 +140,8 @@ export default async function AdminsPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
+              </div>
             )}
           </CardContent>
         </Card>
