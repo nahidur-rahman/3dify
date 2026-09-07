@@ -33,8 +33,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
   return (
     <>
       {/* Breadcrumb */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+      <div className="max-w-7xl mx-auto px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
+        <nav className="flex items-center gap-1.5 overflow-hidden text-xs text-gray-500 dark:text-gray-400 sm:gap-2 sm:text-sm">
           <Link href="/" className="hover:text-primary-600 transition-colors">
             Home
           </Link>
@@ -51,7 +51,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
       {/* Product Detail */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 gap-5 sm:gap-8 lg:grid-cols-2 lg:gap-12">
           {/* Left: Image Gallery */}
           <div className="lg:sticky lg:top-24 lg:self-start">
             <ProductImageGallery
@@ -61,13 +61,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
 
           {/* Right: Product Info */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-5 sm:gap-6">
             {/* Category badge */}
             <div>
               <span className="inline-block rounded-full bg-primary-50 dark:bg-primary-900/30 px-3 py-1 text-xs font-semibold text-primary-700 dark:text-primary-300 mb-3">
                 {categoryLabel}
               </span>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-[1.4rem] font-bold leading-tight text-gray-900 dark:text-white sm:text-3xl">
                 {product.name}
               </h1>
             </div>
@@ -129,7 +129,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
         </div>
 
-        <div className="mt-10">
+        <div className="mt-8 sm:mt-10">
           <h2 className="mb-3 text-lg font-bold text-gray-900 dark:text-white">
             Description
           </h2>
