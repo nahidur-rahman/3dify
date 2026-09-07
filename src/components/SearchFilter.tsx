@@ -87,14 +87,14 @@ export default function SearchFilter({
   };
 
   return (
-    <div className="mb-6 rounded-[1.5rem] border border-gray-200/70 bg-white/85 p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100/85 sm:p-4">
+    <div className="mb-4 rounded-2xl border border-gray-200/70 bg-white/85 p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100/85 sm:mb-6 sm:rounded-[1.5rem] sm:p-4">
 
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,0.9fr)]">
         <select
           value={currentCategory || ""}
           onChange={(e) => handleCategoryChange(e.target.value)}
           aria-label="Filter by category"
-          className="cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-dark-200 dark:bg-dark dark:text-white"
+          className="min-h-11 cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-dark-200 dark:bg-dark dark:text-white"
         >
           <option value="">All Categories</option>
           {categoryConfig.map((category) => (
@@ -109,7 +109,7 @@ export default function SearchFilter({
           onChange={(e) => updateParams({ subcategory: e.target.value || null })}
           aria-label="Filter by subcategory"
           disabled={!currentCategory}
-          className="cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 disabled:cursor-not-allowed disabled:opacity-60 dark:border-dark-200 dark:bg-dark dark:text-white"
+          className="min-h-11 cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 disabled:cursor-not-allowed disabled:opacity-60 dark:border-dark-200 dark:bg-dark dark:text-white"
         >
           <option value="">{currentCategory ? "All Subcategories" : "Select category first"}</option>
           {availableSubcategories.map((subcategory) => (
@@ -123,7 +123,7 @@ export default function SearchFilter({
           value={currentSort}
           onChange={(e) => updateParams({ sort: e.target.value })}
           aria-label="Sort products"
-          className="cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-dark-200 dark:bg-dark dark:text-white"
+          className="min-h-11 cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-dark-200 dark:bg-dark dark:text-white"
         >
           <option value="newest">Newest First</option>
           <option value="price-asc">Price: Low to High</option>
