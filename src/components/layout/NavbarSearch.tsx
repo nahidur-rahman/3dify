@@ -59,8 +59,6 @@ export default function NavbarSearch({
   const searchParams = useSearchParams();
   const rootRef = useRef<HTMLFormElement>(null);
   const cacheRef = useRef(new Map<string, CachedSuggestionsEntry>());
-  const debounceRef = useRef<number | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<ProductSearchSuggestion[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -72,6 +70,8 @@ export default function NavbarSearch({
   const searchHref = buildSearchHref(normalizedQuery);
 
   useEffect(() => {
+    setIsOpen(false);
+
     if (!pathname.startsWith("/products")) {
       return;
     }
@@ -94,14 +94,9 @@ export default function NavbarSearch({
   }, []);
 
   useEffect(() => {
-    if (normalizedQuery.length < MIN_QUERY_LENGTH) {
-      if (debounceRef.current !== null) {
-        window.clearTimeout(debounceRef.current);
-        debounceRef.current = null;
-      }
-
-      abortControllerRef.current?.abort();
-      abortControllerRef.current = null;
+    // The desktop and mobile forms both stay mounted. Only request suggestions
+    // for the form the customer is using, never while syncing a page's URL.
+    if (!isOpen || normalizedQuery.length < MIN_QUERY_LENGTH) {
       setIsLoading(false);
       setSuggestions([]);
       return;
@@ -114,16 +109,10 @@ export default function NavbarSearch({
       return;
     }
 
-    if (debounceRef.current !== null) {
-      window.clearTimeout(debounceRef.current);
-    }
-
-    abortControllerRef.current?.abort();
     const controller = new AbortController();
-    abortControllerRef.current = controller;
     setIsLoading(true);
 
-    debounceRef.current = window.setTimeout(async () => {
+    const debounceTimeout = window.setTimeout(async () => {
       try {
         const response = await fetch(
           `/api/products/suggestions?q=${encodeURIComponent(normalizedQuery)}`,
@@ -169,34 +158,14 @@ export default function NavbarSearch({
         if (!controller.signal.aborted) {
           setIsLoading(false);
         }
-
-        if (abortControllerRef.current === controller) {
-          abortControllerRef.current = null;
-        }
-
-        debounceRef.current = null;
       }
     }, REQUEST_DEBOUNCE_MS);
 
     return () => {
-      if (debounceRef.current !== null) {
-        window.clearTimeout(debounceRef.current);
-        debounceRef.current = null;
-      }
-
+      window.clearTimeout(debounceTimeout);
       controller.abort();
     };
-  }, [normalizedCacheKey, normalizedQuery]);
-
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current !== null) {
-        window.clearTimeout(debounceRef.current);
-      }
-
-      abortControllerRef.current?.abort();
-    };
-  }, []);
+  }, [isOpen, normalizedCacheKey, normalizedQuery]);
 
   function handleNavigate() {
     setIsOpen(false);
