@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
+import TrackOrderSkeleton from "@/components/loading/TrackOrderSkeleton";
 import {
   HiSearch,
   HiOutlinePhone,
@@ -408,13 +409,7 @@ function TrackOrderContent() {
 
 export default function TrackOrderPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex justify-center items-center py-24">
-          <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
-        </div>
-      }
-    >
+    <Suspense fallback={<TrackOrderSkeleton />}>
       <TrackOrderContent />
     </Suspense>
   );
