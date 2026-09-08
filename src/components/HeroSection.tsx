@@ -2,30 +2,31 @@ import Image from "next/image";
 import Link from "next/link";
 import { HiArrowRight } from "react-icons/hi";
 import { resolveStorageImageUrl } from "@/lib/productImages";
+import { getCategoryPath } from "@/lib/categories";
 
 const heroCategories = [
   {
     id: 1,
     title: "Home Decor",
-    href: "/products?category=HOME_DECOR",
+    href: getCategoryPath("HOME_DECOR"),
     imagePath: "homepage/home_decor.png",
   },
   {
     id: 2,
     title: "Desk Accessories",
-    href: "/products?category=DESK_ACCESSORIES",
+    href: getCategoryPath("DESK_ACCESSORIES"),
     imagePath: "homepage/desk_accessories.jpg",
   },
   {
     id: 3,
     title: "Collectibles & Figures",
-    href: "/products?category=COLLECTIBLES_AND_FIGURES",
+    href: getCategoryPath("COLLECTIBLES_AND_FIGURES"),
     imagePath: "homepage/collectibles_and_figures.png",
   },
   {
     id: 4,
     title: "Toys & Fidgets",
-    href: "/products?category=TOYS_AND_FIDGETS",
+    href: getCategoryPath("TOYS_AND_FIDGETS"),
     imagePath: "homepage/toys_and_fidgets.png",
   },
 ];
