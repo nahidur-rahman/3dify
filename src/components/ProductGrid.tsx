@@ -10,6 +10,8 @@ interface ProductGridProps {
 
 const storefrontGridClassName =
   "grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6";
+const storefrontImageSizes =
+  "(max-width: 639px) 50vw, (max-width: 1023px) 33vw, (max-width: 1279px) 25vw, (max-width: 1535px) 231px, 190px";
 
 function getStorefrontHighlightItemClassName(index: number) {
   if (index < 6) {
@@ -56,8 +58,10 @@ export default function ProductGrid({
     );
   }
 
+  const isStorefront =
+    variant === "storefrontHighlights" || variant === "storefrontCatalog";
   const gridClassName =
-    variant === "storefrontHighlights" || variant === "storefrontCatalog"
+    isStorefront
       ? storefrontGridClassName
       : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
 
@@ -72,7 +76,10 @@ export default function ProductGrid({
               : undefined
           }
         >
-          <ProductCard product={product} />
+          <ProductCard
+            product={product}
+            imageSizes={isStorefront ? storefrontImageSizes : undefined}
+          />
         </div>
       ))}
     </div>
