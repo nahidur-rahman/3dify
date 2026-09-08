@@ -259,7 +259,7 @@ export default function Navbar() {
           </div>
           <div className="pb-3 md:hidden">
             <Suspense fallback={<NavbarSearchFallback mobile />}>
-              <NavbarSearch />
+              <NavbarSearch mobile />
             </Suspense>
           </div>
         </div>
