@@ -64,6 +64,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (pathname !== "/admin" && !pathname.startsWith("/admin/")) {
+    return NextResponse.next();
+  }
+
   const token = request.cookies.get(ADMIN_TOKEN_COOKIE)?.value;
   const isLoginPage = pathname === "/admin/login";
 
@@ -97,5 +101,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/products", "/products/:path*", "/admin", "/admin/:path*"],
+  matcher: ["/products", "/admin/:path*"],
 };
