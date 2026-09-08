@@ -15,8 +15,6 @@ interface SearchFilterProps {
   currentCategory?: Category | null;
 }
 
-type NavigationMode = "push" | "reload";
-
 export default function SearchFilter({
   currentCategory = null,
 }: SearchFilterProps) {
@@ -40,8 +38,7 @@ export default function SearchFilter({
   const updateParams = useCallback(
     (
       updates: Record<string, string | null>,
-      nextCategory = currentCategory,
-      navigationMode: NavigationMode = "push"
+      nextCategory = currentCategory
     ) => {
       const params = new URLSearchParams(searchParams.toString());
       Object.entries(updates).forEach(([key, value]) => {
@@ -59,19 +56,14 @@ export default function SearchFilter({
         subcategory: params.get("subcategory"),
       });
 
-      if (navigationMode === "reload") {
-        window.location.assign(nextUrl);
-        return;
-      }
-
-      router.push(nextUrl);
+      router.push(nextUrl, { scroll: false });
     },
     [currentCategory, router, searchParams]
   );
 
   const handleCategoryChange = (value: string) => {
     if (!value) {
-      updateParams({ subcategory: null }, null, "reload");
+      updateParams({ subcategory: null }, null);
       return;
     }
 
@@ -83,7 +75,7 @@ export default function SearchFilter({
         ? currentSubcategory
         : null;
 
-    updateParams({ subcategory: nextSubcategory }, nextCategory, "reload");
+    updateParams({ subcategory: nextSubcategory }, nextCategory);
   };
 
   return (
