@@ -2,38 +2,38 @@ import Skeleton from "@/components/ui/Skeleton";
 
 function TableRowSkeleton() {
   return (
-    <tr className="border-b border-gray-100 dark:border-dark-200 last:border-0">
+    <tr className="border-b border-gray-100 last:border-0 dark:border-dark-200">
       <td className="px-6 py-4">
         <div className="flex items-center gap-3">
-          <Skeleton className="h-10 w-10 rounded-lg" />
-          <div className="space-y-2 flex-1">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-3 w-24" />
-          </div>
+          <Skeleton className="h-10 w-10 shrink-0 rounded-lg" />
+          <Skeleton className="h-4 w-36 rounded-md" />
         </div>
       </td>
       <td className="px-6 py-4">
-        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-4 w-28 rounded-md" />
+        <Skeleton className="mt-1.5 h-3 w-24 rounded-md" />
       </td>
       <td className="px-6 py-4">
-        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-4 w-20 rounded-md" />
+        <Skeleton className="mt-1.5 h-3 w-14 rounded-md" />
       </td>
       <td className="px-6 py-4">
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-6 w-20 rounded-full" />
-          <Skeleton className="h-6 w-16 rounded-full" />
+        <div className="flex flex-col items-start gap-1.5">
+          <Skeleton className="h-5 w-20 rounded-full" />
+          <Skeleton className="h-5 w-16 rounded-full" />
+          <Skeleton className="h-5 w-20 rounded-full" />
         </div>
       </td>
       <td className="px-6 py-4">
-        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-4 w-24 rounded-md" />
       </td>
       <td className="px-6 py-4">
-        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-4 w-24 rounded-md" />
       </td>
       <td className="px-6 py-4">
         <div className="flex items-center justify-end gap-2">
-          <Skeleton className="h-9 w-9 rounded-lg" />
-          <Skeleton className="h-9 w-9 rounded-lg" />
+          <Skeleton className="h-8 w-8 rounded-lg" />
+          <Skeleton className="h-8 w-8 rounded-lg" />
         </div>
       </td>
     </tr>
@@ -43,40 +43,39 @@ function TableRowSkeleton() {
 export default function AdminProductsLoading() {
   return (
     <div>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5 sm:mb-8">
-        <div className="space-y-3">
-          <Skeleton className="h-8 w-40" />
-          <Skeleton className="h-5 w-72" />
+      <div className="mb-5 flex flex-col items-start gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-2">
+          <Skeleton className="h-7 w-28 rounded-lg" />
+          <Skeleton className="h-5 w-72 rounded-md" />
         </div>
-        <Skeleton className="h-11 w-36 rounded-xl" />
+        <Skeleton className="h-10 w-36 shrink-0 rounded-xl" />
       </div>
 
       <div className="mb-6 rounded-[1.5rem] border border-gray-200/80 bg-white/90 p-3.5 shadow-sm dark:border-dark-200 dark:bg-dark-100/90">
-        <div className="mb-3 space-y-2">
-          <Skeleton className="h-4 w-36" />
-          <Skeleton className="h-3 w-80 max-w-full" />
-        </div>
-
+        <Skeleton className="mb-3 h-4 w-32 rounded-md" />
         <div className="flex flex-wrap items-end gap-2">
-          <Skeleton className="h-10 min-w-[220px] flex-[2_1_280px] rounded-xl" />
-          <Skeleton className="h-10 min-w-[140px] flex-[1_1_160px] rounded-xl" />
-          <Skeleton className="h-10 min-w-[140px] flex-[1_1_160px] rounded-xl" />
-          <Skeleton className="h-10 min-w-[150px] flex-[1_1_180px] rounded-xl" />
-          <div className="flex flex-none flex-wrap items-center gap-2">
-            <Skeleton className="h-10 w-32 rounded-xl" />
-            <Skeleton className="h-10 w-28 rounded-xl" />
-          </div>
+          <Skeleton className="h-10 min-w-[220px] flex-[2_1_280px] rounded-xl !bg-gray-100 dark:!bg-dark-200" />
+          <Skeleton className="h-10 min-w-[140px] flex-[1_1_160px] rounded-xl !bg-gray-100 dark:!bg-dark-200" />
+          <Skeleton className="h-10 min-w-[160px] flex-[1_1_190px] rounded-xl !bg-gray-100 dark:!bg-dark-200" />
+          <Skeleton className="h-10 min-w-[140px] flex-[1_1_160px] rounded-xl !bg-gray-100 dark:!bg-dark-200" />
+          <Skeleton className="h-10 min-w-[170px] flex-[1_1_190px] rounded-xl !bg-gray-100 dark:!bg-dark-200" />
+          <Skeleton className="h-10 min-w-[150px] flex-[1_1_170px] rounded-xl !bg-gray-100 dark:!bg-dark-200" />
+          <Skeleton className="h-10 min-w-[170px] flex-[1_1_210px] rounded-xl !bg-gray-100 dark:!bg-dark-200" />
+          <Skeleton className="h-10 min-w-[150px] flex-[1_1_180px] rounded-xl !bg-gray-100 dark:!bg-dark-200" />
+          <Skeleton className="h-10 min-w-[150px] flex-[1_1_180px] rounded-xl !bg-gray-100 dark:!bg-dark-200" />
+          <Skeleton className="h-10 w-28 flex-none rounded-xl" />
         </div>
       </div>
 
-      <div className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-dark-200 dark:bg-dark-100">
+        <p className="admin-table-hint">Swipe to see all columns. Actions stay on the right.</p>
+        <div className="admin-table-scroll overflow-x-auto">
+          <table className="admin-table admin-products-table w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-dark-200">
                 {Array.from({ length: 7 }).map((_, index) => (
                   <th key={index} className="px-6 py-4 text-left">
-                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className={`h-4 w-20 rounded-md ${index === 6 ? "ml-auto" : ""}`} />
                   </th>
                 ))}
               </tr>
