@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { formatPrice } from "@/lib/utils";
+import ShippingRatesSkeleton from "@/components/loading/ShippingRatesSkeleton";
 import { HiOutlineTruck, HiCheck, HiX } from "react-icons/hi";
 
 interface ShippingRate {
@@ -98,11 +99,7 @@ export default function AdminShippingPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent" />
-      </div>
-    );
+    return <ShippingRatesSkeleton />;
   }
 
   return (
