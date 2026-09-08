@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/adminSession";
 import { resolveProductColorConfig } from "@/lib/productColors";
 import { PRODUCT_SEARCH_CACHE_TAG } from "@/lib/productSearch";
+import { PRODUCT_CATALOG_CACHE_TAG } from "@/lib/productCatalog";
 import {
   isCategoryValue,
   isValidSubcategoryForCategory,
@@ -162,6 +163,7 @@ export async function POST(request: NextRequest) {
       revalidatePath("/");
       revalidatePath("/products");
       revalidateTag(PRODUCT_SEARCH_CACHE_TAG);
+      revalidateTag(PRODUCT_CATALOG_CACHE_TAG);
 
       return NextResponse.json(hydrateProductImages(product), { status: 201 });
     } catch (error) {
