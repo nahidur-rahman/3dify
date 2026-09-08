@@ -5,12 +5,33 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { Product } from "@/lib/types";
 import { hydrateProductImages } from "@/lib/productImages";
+import { Suspense } from "react";
+import HighlightSectionSkeleton from "@/components/loading/HighlightSectionSkeleton";
 
 export const revalidate = 60;
 
 const HOMEPAGE_HIGHLIGHT_LIMIT = 12;
 
-export default async function HomePage() {
+export default function HomePage() {
+  return (
+    <>
+      <HeroSection />
+      <CategoryShowcase />
+      <Suspense
+        fallback={
+          <>
+            <HighlightSectionSkeleton first />
+            <HighlightSectionSkeleton />
+          </>
+        }
+      >
+        <HomeProductHighlights />
+      </Suspense>
+    </>
+  );
+}
+
+async function HomeProductHighlights() {
   // Fetch featured products and top selling products concurrently
   let featuredProducts: Product[] = [];
   let topSellingProducts: Product[] = [];
@@ -44,12 +65,6 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Hero Banner */}
-      <HeroSection />
-
-      {/* Categories */}
-      <CategoryShowcase />
-
       {/* Featured Products */}
       {featuredProducts.length > 0 && (
         <section className="pb-12 pt-8 mt-8 border-t border-gray-100 dark:border-white/10">
