@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AdminOrderSummary } from "@/lib/adminOrders";
 import { formatPrice } from "@/lib/utils";
+import AdminOrdersTableSkeleton from "@/components/loading/AdminOrdersTableSkeleton";
 import Image from "next/image";
 import {
   HiOutlineCalendar,
@@ -285,9 +286,7 @@ export default function OrdersPageClient({
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center py-20">
-          <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
-        </div>
+        <AdminOrdersTableSkeleton />
       ) : orders.length === 0 ? (
         <div className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 p-12 text-center">
           <HiOutlineShoppingBag className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
