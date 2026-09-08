@@ -5,6 +5,7 @@ import { getCurrentAdmin } from "@/lib/adminSession";
 import { isValidSubcategoryForCategory } from "@/lib/categories";
 import { resolveProductColorConfig } from "@/lib/productColors";
 import { PRODUCT_SEARCH_CACHE_TAG } from "@/lib/productSearch";
+import { PRODUCT_CATALOG_CACHE_TAG } from "@/lib/productCatalog";
 import { productUpdateSchema } from "@/lib/validation";
 import {
   deleteProductImages,
@@ -126,6 +127,7 @@ export async function PUT(
     revalidatePath("/products");
     revalidatePath(`/products/${params.id}`);
     revalidateTag(PRODUCT_SEARCH_CACHE_TAG);
+    revalidateTag(PRODUCT_CATALOG_CACHE_TAG);
 
     return NextResponse.json(hydrateProductImages(product));
   } catch (error) {
@@ -171,6 +173,7 @@ export async function DELETE(
     revalidatePath("/products");
     revalidatePath(`/products/${params.id}`);
     revalidateTag(PRODUCT_SEARCH_CACHE_TAG);
+    revalidateTag(PRODUCT_CATALOG_CACHE_TAG);
 
     return NextResponse.json({ success: true });
   } catch (error) {
