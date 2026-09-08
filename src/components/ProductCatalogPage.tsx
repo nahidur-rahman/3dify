@@ -4,6 +4,7 @@ import ProductGrid from "@/components/ProductGrid";
 import SearchFilter from "@/components/SearchFilter";
 import { buildCatalogUrl, getCategoryPath, type Category } from "@/lib/categories";
 import type { ProductCatalogData } from "@/lib/productCatalog";
+import ProductCatalogFilterSkeleton from "@/components/loading/ProductCatalogFilterSkeleton";
 
 type ProductCatalogPageProps = ProductCatalogData;
 
@@ -21,9 +22,7 @@ export default function ProductCatalogPage({
 
 
       <Suspense
-        fallback={
-          <div className="mb-6 h-12 rounded-xl bg-gray-100 dark:bg-dark-100 animate-pulse" />
-        }
+        fallback={<ProductCatalogFilterSkeleton />}
       >
         <SearchFilter currentCategory={activeCategory} />
       </Suspense>
