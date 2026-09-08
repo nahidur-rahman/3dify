@@ -8,9 +8,13 @@ import { Product } from "@/lib/types";
 
 interface ProductCardProps {
   product: Product;
+  imageSizes?: string;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({
+  product,
+  imageSizes = "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, (max-width: 1279px) 33vw, 292px",
+}: ProductCardProps) {
   const sizeOptionPrices = product.sizeOptions?.map((option) => option.price) ?? [];
   const startingPrice =
     sizeOptionPrices.length > 0 ? Math.min(...sizeOptionPrices) : product.price;
@@ -29,7 +33,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               alt={product.name}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              sizes={imageSizes}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-gray-300 dark:text-dark-300">
