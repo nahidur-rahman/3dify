@@ -2,7 +2,7 @@ import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import type { Prisma } from "@prisma/client";
 import { hydrateProductImages } from "@/lib/productImages";
-import { Product } from "@/lib/types";
+import { Product, ProductCardProduct } from "@/lib/types";
 import {
   categoryByValue,
   type Category,
@@ -10,8 +10,76 @@ import {
   isValidSubcategoryForCategory,
 } from "@/lib/categories";
 import { prisma } from "@/lib/db";
+import { PRODUCT_CATALOG_PAGE_SIZE } from "@/lib/productCatalogConfig";
 
 export const PRODUCT_CATALOG_CACHE_TAG = "product-catalog";
+
+export const productCardSelect = {
+  id: true,
+  name: true,
+  price: true,
+  images: true,
+  sizeOptions: true,
+  discountPercent: true,
+  inStock: true,
+} satisfies Prisma.ProductSelect;
+
+type ProductCardRecord = Prisma.ProductGetPayload<{
+  select: typeof productCardSelect;
+}>;
+
+export function serializeProductCard(
+  product: ProductCardRecord
+): ProductCardProduct {
+  const hydrated = hydrateProductImages(product);
+
+  return {
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    images: hydrated.images,
+    sizeOptions: hydrated.sizeOptions,
+    discountPercent: product.discountPercent,
+    inStock: product.inStock,
+  };
+}
+
+export function buildProductCatalogWhere({
+  category,
+  subcategory,
+  search,
+}: {
+  category: Category | null;
+  subcategory: string;
+  search: string;
+}): Prisma.ProductWhereInput {
+  const where: Prisma.ProductWhereInput = {};
+  if (category) where.category = category;
+  if (subcategory) where.subcategory = subcategory;
+
+  const searchTokens = search.split(/\s+/).filter(Boolean);
+  if (searchTokens.length > 0) {
+    where.AND = searchTokens.map((token) => ({
+      name: { contains: token, mode: "insensitive" },
+    }));
+  }
+
+  return where;
+}
+
+export function getProductCatalogOrderBy(
+  sort: string
+): Prisma.ProductOrderByWithRelationInput[] {
+  if (sort === "price-asc") {
+    return [{ price: "asc" }, { id: "asc" }];
+  }
+
+  if (sort === "price-desc") {
+    return [{ price: "desc" }, { id: "desc" }];
+  }
+
+  return [{ createdAt: "desc" }, { id: "desc" }];
+}
 
 const getProductById = unstable_cache(
   async (id: string): Promise<Product | null> => {
@@ -41,7 +109,8 @@ export interface ProductCatalogSearchParams {
 }
 
 export interface ProductCatalogData {
-  products: Product[];
+  products: ProductCardProduct[];
+  total: number;
   totalPages: number;
   currentPage: number;
   search: string;
@@ -65,38 +134,36 @@ const getCachedCatalogProducts = unstable_cache(
     sort: string,
     page: number
   ) => {
-    const where: Prisma.ProductWhereInput = {};
-    if (category) where.category = category;
-    if (subcategory) where.subcategory = subcategory;
-
-    const searchTokens = search.split(/\s+/).filter(Boolean);
-    if (searchTokens.length > 0) {
-      where.AND = searchTokens.map((token) => ({
-        name: { contains: token, mode: "insensitive" },
-      }));
-    }
-
-    const orderBy: Prisma.ProductOrderByWithRelationInput =
-      sort === "price-asc"
-        ? { price: "asc" }
-        : sort === "price-desc"
-          ? { price: "desc" }
-          : { createdAt: "desc" };
-
-    const limit = 12;
-    const [products, total] = await Promise.all([
+    const where = buildProductCatalogWhere({ category, subcategory, search });
+    const orderBy = getProductCatalogOrderBy(sort);
+    const [initialProducts, total] = await Promise.all([
       prisma.product.findMany({
         where,
+        select: productCardSelect,
         orderBy,
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: (page - 1) * PRODUCT_CATALOG_PAGE_SIZE,
+        take: PRODUCT_CATALOG_PAGE_SIZE,
       }),
       prisma.product.count({ where }),
     ]);
+    const totalPages = Math.ceil(total / PRODUCT_CATALOG_PAGE_SIZE);
+    const currentPage = totalPages > 0 ? Math.min(page, totalPages) : 1;
+    const products =
+      currentPage === page
+        ? initialProducts
+        : await prisma.product.findMany({
+            where,
+            select: productCardSelect,
+            orderBy,
+            skip: (currentPage - 1) * PRODUCT_CATALOG_PAGE_SIZE,
+            take: PRODUCT_CATALOG_PAGE_SIZE,
+          });
 
     return {
-      products: products.map((product) => hydrateProductImages(product)),
-      totalPages: Math.ceil(total / limit),
+      products: products.map(serializeProductCard),
+      total,
+      totalPages,
+      currentPage,
     };
   },
   ["product-catalog"],
@@ -122,7 +189,8 @@ export async function getProductCatalogData(
       : "";
 
   try {
-    const { products, totalPages } = await getCachedCatalogProducts(
+    const { products, total, totalPages, currentPage: resolvedPage } =
+      await getCachedCatalogProducts(
       activeCategory,
       activeSubcategory,
       search.toLowerCase().replace(/\s+/g, " "),
@@ -132,8 +200,9 @@ export async function getProductCatalogData(
 
     return {
       products,
+      total,
       totalPages,
-      currentPage,
+      currentPage: resolvedPage,
       search,
       sort,
       activeCategory,
@@ -145,6 +214,7 @@ export async function getProductCatalogData(
     // cannot populate the shared cache with an empty catalog.
     return {
       products: [],
+      total: 0,
       totalPages: 0,
       currentPage: 1,
       search,
