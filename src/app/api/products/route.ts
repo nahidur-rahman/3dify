@@ -4,7 +4,15 @@ import { prisma } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/adminSession";
 import { resolveProductColorConfig } from "@/lib/productColors";
 import { PRODUCT_SEARCH_CACHE_TAG } from "@/lib/productSearch";
-import { PRODUCT_CATALOG_CACHE_TAG } from "@/lib/productCatalog";
+import {
+  buildProductCatalogWhere,
+  getProductCatalogOrderBy,
+  productCardSelect,
+  PRODUCT_CATALOG_CACHE_TAG,
+  serializeProductCard,
+} from "@/lib/productCatalog";
+import { PRODUCT_CATALOG_PAGE_SIZE } from "@/lib/productCatalogConfig";
+import { parsePage } from "@/lib/pagination";
 import {
   isCategoryValue,
   isValidSubcategoryForCategory,
@@ -25,11 +33,23 @@ export async function GET(request: NextRequest) {
     const categoryParam = searchParams.get("category")?.trim();
     const category = categoryParam && isCategoryValue(categoryParam) ? categoryParam : null;
     const subcategory = searchParams.get("subcategory")?.trim();
-    const search = searchParams.get("search");
-    const sort = searchParams.get("sort");
+    const search = searchParams.get("search")?.trim() || "";
+    const sortParam = searchParams.get("sort")?.trim();
+    const sort =
+      sortParam === "price-asc" || sortParam === "price-desc"
+        ? sortParam
+        : "newest";
     const featured = searchParams.get("featured");
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "12");
+    const cursor = searchParams.get("cursor")?.trim() || "";
+    const page = parsePage(searchParams.get("page"));
+    const requestedLimit = Number.parseInt(
+      searchParams.get("limit") || String(PRODUCT_CATALOG_PAGE_SIZE),
+      10
+    );
+    const limit =
+      Number.isInteger(requestedLimit) && requestedLimit > 0
+        ? Math.min(requestedLimit, 48)
+        : PRODUCT_CATALOG_PAGE_SIZE;
 
     if (categoryParam && !category) {
       return NextResponse.json(
@@ -49,44 +69,32 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Build where clause
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = {};
-    if (category) {
-      where.category = category;
-    }
-    if (subcategory) {
-      where.subcategory = subcategory;
-    }
-    if (search) {
-      where.OR = [
-        { name: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-      ];
-    }
+    const where = buildProductCatalogWhere({
+      category,
+      subcategory: subcategory || "",
+      search: search.toLowerCase().replace(/\s+/g, " "),
+    });
     if (featured === "true") {
       where.featured = true;
     }
 
-    // Build orderBy
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let orderBy: any = { createdAt: "desc" };
-    if (sort === "price-asc") orderBy = { price: "asc" };
-    if (sort === "price-desc") orderBy = { price: "desc" };
-    if (sort === "newest") orderBy = { createdAt: "desc" };
+    const orderBy = getProductCatalogOrderBy(sort);
 
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
+        select: productCardSelect,
         orderBy,
-        skip: (page - 1) * limit,
+        ...(cursor
+          ? { cursor: { id: cursor }, skip: 1 }
+          : { skip: (page - 1) * limit }),
         take: limit,
       }),
       prisma.product.count({ where }),
     ]);
 
     return NextResponse.json({
-      products: products.map((product) => hydrateProductImages(product)),
+      products: products.map(serializeProductCard),
       pagination: {
         page,
         limit,
