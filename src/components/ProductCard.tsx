@@ -4,10 +4,10 @@ import {
   calculateDiscountedPrice,
   formatPrice,
 } from "@/lib/utils";
-import { Product } from "@/lib/types";
+import type { ProductCardProduct } from "@/lib/types";
 
 interface ProductCardProps {
-  product: Product;
+  product: ProductCardProduct;
   imageSizes?: string;
 }
 
