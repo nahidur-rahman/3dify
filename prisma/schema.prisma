@@ -67,6 +67,8 @@ model Product {
   @@index([topSelling, sellCount, updatedAt])
   @@index([createdAt])
   @@index([price])
+  @@index([category, createdAt, id])
+  @@index([category, price, id])
 
   @@map("products")
 }
@@ -125,6 +127,9 @@ model Order {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
+  @@index([status, createdAt, id])
+  @@index([createdAt, id])
+
   @@map("orders")
 }
 
@@ -140,6 +145,8 @@ model OrderItem {
   quantity     Int
   unitPrice    Float
   totalPrice   Float
+
+  @@index([orderId])
 
   @@map("order_items")
 }
