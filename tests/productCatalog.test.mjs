@@ -67,6 +67,7 @@ function createCatalog() {
     "next/cache": nextCache,
     "@/lib/categories": categories,
     "@/lib/productImages": { hydrateProductImages: (product) => ({ ...product, images: ["/test-image.webp"] }) },
+    "@/lib/productCatalogConfig": { PRODUCT_CATALOG_PAGE_SIZE: 12 },
     "@/lib/db": {
       prisma: {
         product: {
