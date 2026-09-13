@@ -1,5 +1,10 @@
 import { OrderStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import {
+  parseAdminPageSize,
+  parsePage,
+  type AdminPageSize,
+} from "@/lib/pagination";
 
 export interface AdminOrderPreviewItem {
   id: string;
@@ -19,13 +24,28 @@ export interface AdminOrderSummary {
   paymentMethod: string;
   status: OrderStatus;
   items: AdminOrderPreviewItem[];
+  itemCount: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface AdminOrdersPagination {
+  page: number;
+  pageSize: AdminPageSize;
+  total: number;
+  totalPages: number;
+}
+
+export interface AdminOrdersPage {
+  orders: AdminOrderSummary[];
+  pagination: AdminOrdersPagination;
 }
 
 interface GetAdminOrdersParams {
   status?: string | null;
   search?: string | null;
+  page?: string | number | null;
+  pageSize?: string | number | null;
 }
 
 const orderSummarySelect = {
@@ -41,6 +61,8 @@ const orderSummarySelect = {
   createdAt: true,
   updatedAt: true,
   items: {
+    take: 3,
+    orderBy: { id: "asc" },
     select: {
       id: true,
       productName: true,
@@ -54,9 +76,13 @@ type OrderSummaryRecord = Prisma.OrderGetPayload<{
   select: typeof orderSummarySelect;
 }>;
 
-function serializeOrderSummary(order: OrderSummaryRecord): AdminOrderSummary {
+function serializeOrderSummary(
+  order: OrderSummaryRecord,
+  itemCount: number
+): AdminOrderSummary {
   return {
     ...order,
+    itemCount,
     createdAt: order.createdAt.toISOString(),
     updatedAt: order.updatedAt.toISOString(),
   };
@@ -85,16 +111,43 @@ function buildAdminOrderWhere({ status, search }: GetAdminOrdersParams): Prisma.
 
 export async function getAdminOrders(
   params: GetAdminOrdersParams = {}
-): Promise<AdminOrderSummary[]> {
-  const orders = await prisma.order.findMany({
-    where: buildAdminOrderWhere(params),
-    select: orderSummarySelect,
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+): Promise<AdminOrdersPage> {
+  const where = buildAdminOrderWhere(params);
+  const requestedPage = parsePage(params.page);
+  const pageSize = parseAdminPageSize(params.pageSize);
+  const findPage = (page: number) =>
+    prisma.order.findMany({
+      where,
+      select: orderSummarySelect,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    });
 
-  return orders.map(serializeOrderSummary);
+  const [initialOrders, total] = await Promise.all([
+    findPage(requestedPage),
+    prisma.order.count({ where }),
+  ]);
+  const totalPages = Math.ceil(total / pageSize);
+  const page = totalPages > 0 ? Math.min(requestedPage, totalPages) : 1;
+  const orders = page === requestedPage ? initialOrders : await findPage(page);
+  const quantityCounts = orders.length
+    ? await prisma.orderItem.groupBy({
+        by: ["orderId"],
+        where: { orderId: { in: orders.map((order) => order.id) } },
+        _sum: { quantity: true },
+      })
+    : [];
+  const quantityByOrderId = new Map(
+    quantityCounts.map((count) => [count.orderId, count._sum.quantity ?? 0])
+  );
+
+  return {
+    orders: orders.map((order) =>
+      serializeOrderSummary(order, quantityByOrderId.get(order.id) ?? 0)
+    ),
+    pagination: { page, pageSize, total, totalPages },
+  };
 }
 
 export async function getAdminOrderStatusCounts() {
