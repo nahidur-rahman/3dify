@@ -41,6 +41,17 @@ export interface Product {
   updatedBy: string | null;
 }
 
+export type ProductCardProduct = Pick<
+  Product,
+  | "id"
+  | "name"
+  | "price"
+  | "images"
+  | "sizeOptions"
+  | "discountPercent"
+  | "inStock"
+>;
+
 export interface Admin {
   id: string;
   email: string;
@@ -50,7 +61,7 @@ export interface Admin {
 }
 
 export interface ProductsResponse {
-  products: Product[];
+  products: ProductCardProduct[];
   pagination: {
     page: number;
     limit: number;
