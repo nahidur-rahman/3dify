@@ -1,9 +1,9 @@
 import Link from "next/link";
 import ProductCard from "./ProductCard";
-import { Product } from "@/lib/types";
+import type { ProductCardProduct } from "@/lib/types";
 
 interface ProductGridProps {
-  products: Product[];
+  products: ProductCardProduct[];
   resetHref?: string;
   variant?: "default" | "storefrontHighlights" | "storefrontCatalog";
 }
