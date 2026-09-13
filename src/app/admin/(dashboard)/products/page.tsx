@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import {
   categoryConfig,
@@ -9,12 +10,20 @@ import {
 } from "@/lib/categories";
 import { formatPrice } from "@/lib/utils";
 import DeleteProductButton from "./DeleteProductButton";
+import AdminProductsPageSizeSelect from "./AdminProductsPageSizeSelect";
 import {
   HiOutlinePlusCircle,
   HiOutlinePencil,
   HiOutlineSearch,
 } from "react-icons/hi";
-import { hydrateProductImages } from "@/lib/productImages";
+import { resolveStorageImageUrl } from "@/lib/productImages";
+import {
+  DEFAULT_ADMIN_PAGE_SIZE,
+  getPaginationItems,
+  getPaginationRange,
+  parseAdminPageSize,
+  parsePage,
+} from "@/lib/pagination";
 
 const statusOptions = [
   { value: "", label: "All statuses" },
@@ -58,10 +67,72 @@ interface ProductsPageSearchParams {
   storefront?: string;
   sales?: string;
   sort?: string;
+  page?: string;
+  pageSize?: string;
+}
+
+interface NormalizedProductFilters {
+  name: string;
+  category: string;
+  subcategory: string;
+  status: string;
+  createdBy: string;
+  updatedBy: string;
+  storefront: string;
+  sales: string;
+  sort: string;
+}
+
+const adminProductRowSelect = {
+  id: true,
+  name: true,
+  images: true,
+  category: true,
+  subcategory: true,
+  price: true,
+  sellCount: true,
+  inStock: true,
+  featured: true,
+  topSelling: true,
+  createdBy: true,
+  updatedBy: true,
+} satisfies Prisma.ProductSelect;
+
+function buildAdminProductsUrl(
+  filters: NormalizedProductFilters,
+  page: number,
+  pageSize: number
+) {
+  const params = new URLSearchParams();
+
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value && !(key === "sort" && value === "newest")) {
+      params.set(key, value);
+    }
+  });
+
+  if (page > 1) params.set("page", String(page));
+  if (pageSize !== DEFAULT_ADMIN_PAGE_SIZE) {
+    params.set("pageSize", String(pageSize));
+  }
+
+  const query = params.toString();
+  return query ? `/admin/products?${query}` : "/admin/products";
 }
 
 function normalizeSearchParam(value?: string) {
   return value?.trim() || "";
+}
+
+function normalizeSelectValue(
+  value: string | undefined,
+  options: ReadonlyArray<{ value: string }>,
+  fallback = ""
+) {
+  const normalized = normalizeSearchParam(value);
+  return options.some((option) => option.value === normalized)
+    ? normalized
+    : fallback;
 }
 
 async function getProducts(searchParams: ProductsPageSearchParams) {
@@ -69,12 +140,17 @@ async function getProducts(searchParams: ProductsPageSearchParams) {
   const categoryParam = normalizeSearchParam(searchParams.category);
   const category = isCategoryValue(categoryParam) ? categoryParam : "";
   const subcategoryParam = normalizeSearchParam(searchParams.subcategory);
-  const status = normalizeSearchParam(searchParams.status);
+  const status = normalizeSelectValue(searchParams.status, statusOptions);
   const createdBy = normalizeSearchParam(searchParams.createdBy);
   const updatedBy = normalizeSearchParam(searchParams.updatedBy);
-  const storefront = normalizeSearchParam(searchParams.storefront);
-  const sales = normalizeSearchParam(searchParams.sales);
-  const sort = normalizeSearchParam(searchParams.sort) || "newest";
+  const storefront = normalizeSelectValue(
+    searchParams.storefront,
+    storefrontOptions
+  );
+  const sales = normalizeSelectValue(searchParams.sales, salesOptions);
+  const sort = normalizeSelectValue(searchParams.sort, sortOptions, "newest");
+  const requestedPage = parsePage(searchParams.page);
+  const pageSize = parseAdminPageSize(searchParams.pageSize);
   const availableSubcategories = category
     ? categorySubcategories[category]
     : categoryConfig.flatMap((categoryItem) => categoryItem.subcategories);
@@ -82,8 +158,7 @@ async function getProducts(searchParams: ProductsPageSearchParams) {
     ? subcategoryParam
     : "";
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const where: any = {};
+  const where: Prisma.ProductWhereInput = {};
 
   if (name) {
     where.name = { contains: name, mode: "insensitive" };
@@ -138,42 +213,78 @@ async function getProducts(searchParams: ProductsPageSearchParams) {
     where.sellCount = 0;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let orderBy: any = { createdAt: "desc" };
-  if (sort === "updated") orderBy = { updatedAt: "desc" };
+  let orderBy: Prisma.ProductOrderByWithRelationInput[] = [
+    { createdAt: "desc" },
+    { id: "desc" },
+  ];
+  if (sort === "updated") {
+    orderBy = [{ updatedAt: "desc" }, { id: "desc" }];
+  }
   if (sort === "top-selling") {
-    orderBy = [{ topSelling: "desc" }, { sellCount: "desc" }, { updatedAt: "desc" }];
+    orderBy = [
+      { topSelling: "desc" },
+      { sellCount: "desc" },
+      { updatedAt: "desc" },
+      { id: "desc" },
+    ];
   }
   if (sort === "best-selling") {
-    orderBy = [{ sellCount: "desc" }, { topSelling: "desc" }, { updatedAt: "desc" }];
+    orderBy = [
+      { sellCount: "desc" },
+      { topSelling: "desc" },
+      { updatedAt: "desc" },
+      { id: "desc" },
+    ];
   }
   if (sort === "lowest-selling") {
-    orderBy = [{ sellCount: "asc" }, { updatedAt: "desc" }];
+    orderBy = [
+      { sellCount: "asc" },
+      { updatedAt: "desc" },
+      { id: "desc" },
+    ];
   }
-  if (sort === "price-asc") orderBy = { price: "asc" };
-  if (sort === "price-desc") orderBy = { price: "desc" };
-  if (sort === "name-asc") orderBy = { name: "asc" };
-  if (sort === "name-desc") orderBy = { name: "desc" };
+  if (sort === "price-asc") orderBy = [{ price: "asc" }, { id: "asc" }];
+  if (sort === "price-desc") orderBy = [{ price: "desc" }, { id: "desc" }];
+  if (sort === "name-asc") orderBy = [{ name: "asc" }, { id: "asc" }];
+  if (sort === "name-desc") orderBy = [{ name: "desc" }, { id: "desc" }];
 
-  try {
-    const products = await prisma.product.findMany({
+  const filters: NormalizedProductFilters = {
+    name,
+    category,
+    subcategory,
+    status,
+    createdBy,
+    updatedBy,
+    storefront,
+    sales,
+    sort,
+  };
+
+  const findPage = (page: number) =>
+    prisma.product.findMany({
       where,
+      select: adminProductRowSelect,
       orderBy,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
     });
 
+  try {
+    const [initialProducts, total] = await Promise.all([
+      findPage(requestedPage),
+      prisma.product.count({ where }),
+    ]);
+    const totalPages = Math.ceil(total / pageSize);
+    const page = totalPages > 0 ? Math.min(requestedPage, totalPages) : 1;
+    const products = page === requestedPage ? initialProducts : await findPage(page);
+
     return {
-      products: products.map((product) => hydrateProductImages(product)),
-      filters: {
-        name,
-        category,
-        subcategory,
-        status,
-        createdBy,
-        updatedBy,
-        storefront,
-        sales,
-        sort,
-      },
+      products: products.map((product) => ({
+        ...product,
+        images: product.images.map(resolveStorageImageUrl),
+      })),
+      filters,
+      pagination: { page, pageSize, total, totalPages },
       hasActiveFilters: Boolean(
         name ||
           category ||
@@ -189,18 +300,19 @@ async function getProducts(searchParams: ProductsPageSearchParams) {
   } catch {
     return {
       products: [],
-      filters: {
-        name: "",
-        category: "",
-        subcategory: "",
-        status: "",
-        createdBy: "",
-        updatedBy: "",
-        storefront: "",
-        sales: "",
-        sort: "newest",
-      },
-      hasActiveFilters: false,
+      filters,
+      pagination: { page: 1, pageSize, total: 0, totalPages: 0 },
+      hasActiveFilters: Boolean(
+        name ||
+          category ||
+          subcategory ||
+          status ||
+          createdBy ||
+          updatedBy ||
+          storefront ||
+          sales ||
+          sort !== "newest"
+      ),
     };
   }
 }
@@ -210,7 +322,8 @@ export default async function AdminProductsPage({
 }: {
   searchParams: ProductsPageSearchParams;
 }) {
-  const { products, filters, hasActiveFilters } = await getProducts(searchParams);
+  const { products, filters, pagination, hasActiveFilters } =
+    await getProducts(searchParams);
   const selectedCategory =
     filters.category && isCategoryValue(filters.category)
       ? filters.category
@@ -236,13 +349,38 @@ export default async function AdminProductsPage({
     filters.storefront,
     filters.sales,
     filters.sort,
+    pagination.pageSize,
   ].join("|");
   const activeSortLabel =
     sortOptions.find((option) => option.value === filters.sort)?.label ||
     sortOptions[0].label;
+  const visibleRange = getPaginationRange(
+    pagination.page,
+    pagination.pageSize,
+    pagination.total
+  );
   const productSummary = hasActiveFilters
-    ? `Showing ${products.length} matching product${products.length === 1 ? "" : "s"} · ${activeSortLabel}`
-    : `Manage your product listings (${products.length} total)`;
+    ? `Showing ${visibleRange.start}–${visibleRange.end} of ${pagination.total} matching products · ${activeSortLabel}`
+    : `Manage products ${visibleRange.start}–${visibleRange.end} of ${pagination.total}`;
+  const clearFiltersUrl = buildAdminProductsUrl(
+    {
+      name: "",
+      category: "",
+      subcategory: "",
+      status: "",
+      createdBy: "",
+      updatedBy: "",
+      storefront: "",
+      sales: "",
+      sort: "newest",
+    },
+    1,
+    pagination.pageSize
+  );
+  const paginationItems = getPaginationItems(
+    pagination.page,
+    pagination.totalPages
+  );
 
   return (
     <div>
@@ -277,6 +415,9 @@ export default async function AdminProductsPage({
           method="get"
           className="flex flex-wrap items-end gap-2"
         >
+          {pagination.pageSize !== DEFAULT_ADMIN_PAGE_SIZE ? (
+            <input type="hidden" name="pageSize" value={pagination.pageSize} />
+          ) : null}
           <label className="relative min-w-[220px] flex-[2_1_280px]">
             <span className="sr-only">Search by product name</span>
             <HiOutlineSearch className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
@@ -417,7 +558,7 @@ export default async function AdminProductsPage({
             </button>
             {hasActiveFilters && (
               <Link
-                href="/admin/products"
+                href={clearFiltersUrl}
                 className="inline-flex items-center rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-sm font-medium text-gray-600 transition-colors hover:border-primary-500 hover:text-primary-500 dark:border-dark-200 dark:bg-dark-100 dark:text-gray-300"
               >
                 Clear filters
@@ -441,7 +582,7 @@ export default async function AdminProductsPage({
           <div className="flex items-center justify-center gap-3">
             {hasActiveFilters ? (
               <Link
-                href="/admin/products"
+                href={clearFiltersUrl}
                 className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-2.5 font-medium text-gray-600 hover:border-primary-500 hover:text-primary-500 dark:border-dark-200 dark:bg-dark-100 dark:text-gray-300"
               >
                 Clear filters
@@ -586,6 +727,84 @@ export default async function AdminProductsPage({
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="flex flex-col gap-3 border-t border-gray-200 px-4 py-3 dark:border-dark-200 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Showing {visibleRange.start}–{visibleRange.end} of {pagination.total}
+              </p>
+              <AdminProductsPageSizeSelect value={pagination.pageSize} />
+            </div>
+
+            {pagination.totalPages > 1 ? (
+              <nav
+                className="flex flex-wrap items-center gap-1.5"
+                aria-label="Admin product pages"
+              >
+                {pagination.page > 1 ? (
+                  <Link
+                    href={buildAdminProductsUrl(
+                      filters,
+                      pagination.page - 1,
+                      pagination.pageSize
+                    )}
+                    className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:border-primary-500 hover:text-primary-600 dark:border-dark-200 dark:text-gray-300"
+                  >
+                    Previous
+                  </Link>
+                ) : (
+                  <span className="cursor-not-allowed rounded-lg border border-gray-100 px-3 py-1.5 text-sm text-gray-300 dark:border-dark-200 dark:text-gray-600">
+                    Previous
+                  </span>
+                )}
+
+                {paginationItems.map((item, index) =>
+                  item === "ellipsis" ? (
+                    <span
+                      key={`ellipsis-${index}`}
+                      className="px-1 text-gray-400"
+                      aria-hidden="true"
+                    >
+                      …
+                    </span>
+                  ) : (
+                    <Link
+                      key={item}
+                      href={buildAdminProductsUrl(
+                        filters,
+                        item,
+                        pagination.pageSize
+                      )}
+                      aria-current={item === pagination.page ? "page" : undefined}
+                      className={`flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-sm font-medium transition-colors ${
+                        item === pagination.page
+                          ? "bg-primary-500 text-white"
+                          : "bg-gray-100 text-gray-600 hover:bg-primary-500/10 hover:text-primary-600 dark:bg-dark-200 dark:text-gray-300"
+                      }`}
+                    >
+                      {item}
+                    </Link>
+                  )
+                )}
+
+                {pagination.page < pagination.totalPages ? (
+                  <Link
+                    href={buildAdminProductsUrl(
+                      filters,
+                      pagination.page + 1,
+                      pagination.pageSize
+                    )}
+                    className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:border-primary-500 hover:text-primary-600 dark:border-dark-200 dark:text-gray-300"
+                  >
+                    Next
+                  </Link>
+                ) : (
+                  <span className="cursor-not-allowed rounded-lg border border-gray-100 px-3 py-1.5 text-sm text-gray-300 dark:border-dark-200 dark:text-gray-600">
+                    Next
+                  </span>
+                )}
+              </nav>
+            ) : null}
           </div>
         </div>
       )}
