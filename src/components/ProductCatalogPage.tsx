@@ -1,8 +1,6 @@
 import { Suspense } from "react";
-import Link from "next/link";
-import ProductGrid from "@/components/ProductGrid";
+import ProductCatalogResults from "@/components/ProductCatalogResults";
 import SearchFilter from "@/components/SearchFilter";
-import { buildCatalogUrl, getCategoryPath, type Category } from "@/lib/categories";
 import type { ProductCatalogData } from "@/lib/productCatalog";
 import ProductCatalogFilterSkeleton from "@/components/loading/ProductCatalogFilterSkeleton";
 
@@ -10,6 +8,7 @@ type ProductCatalogPageProps = ProductCatalogData;
 
 export default function ProductCatalogPage({
   products,
+  total,
   totalPages,
   currentPage,
   search,
@@ -27,35 +26,17 @@ export default function ProductCatalogPage({
         <SearchFilter currentCategory={activeCategory} />
       </Suspense>
 
-      <ProductGrid
-        products={products}
-        resetHref={activeCategory ? getCategoryPath(activeCategory) : "/products"}
-        variant="storefrontCatalog"
+      <ProductCatalogResults
+        key={`${activeCategory || "all"}|${activeSubcategory}|${search}|${sort}|${currentPage}`}
+        initialProducts={products}
+        total={total}
+        totalPages={totalPages}
+        currentPage={currentPage}
+        search={search}
+        sort={sort}
+        activeCategory={activeCategory}
+        activeSubcategory={activeSubcategory}
       />
-
-      {totalPages > 1 && (
-        <div className="mt-8 flex items-center justify-center gap-2">
-          {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
-            <Link
-              key={pageNumber}
-              href={buildCatalogUrl({
-                category: activeCategory as Category | null,
-                search,
-                sort,
-                subcategory: activeSubcategory || null,
-                page: pageNumber.toString(),
-              })}
-              className={`flex h-9 w-9 items-center justify-center rounded-lg font-medium transition-colors ${
-                pageNumber === currentPage
-                  ? "bg-primary-500 text-white"
-                  : "bg-gray-100 dark:bg-dark-100 text-gray-600 dark:text-gray-400 hover:bg-primary-500/10 hover:text-primary-500"
-              }`}
-            >
-              {pageNumber}
-            </Link>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
