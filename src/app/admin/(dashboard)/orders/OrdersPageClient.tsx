@@ -1,8 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { AdminOrderSummary } from "@/lib/adminOrders";
+import type {
+  AdminOrderSummary,
+  AdminOrdersPage as AdminOrdersPageData,
+  AdminOrdersPagination,
+} from "@/lib/adminOrders";
 import { formatPrice } from "@/lib/utils";
+import {
+  ADMIN_PAGE_SIZES,
+  DEFAULT_ADMIN_PAGE_SIZE,
+  getPaginationItems,
+  getPaginationRange,
+  type AdminPageSize,
+} from "@/lib/pagination";
 import AdminOrdersTableSkeleton from "@/components/loading/AdminOrdersTableSkeleton";
 import Image from "next/image";
 import {
@@ -35,7 +46,7 @@ interface OrderItem {
 
 type OrderSummary = AdminOrderSummary;
 
-interface Order extends OrderSummary {
+interface Order extends Omit<OrderSummary, "items" | "itemCount"> {
   customerEmail: string | null;
   shippingCost: number;
   subtotal: number;
@@ -46,8 +57,10 @@ interface Order extends OrderSummary {
 type OrderFilter = Order["status"] | "ALL";
 
 interface OrdersPageClientProps {
-  initialOrders: OrderSummary[];
+  initialOrdersPage: AdminOrdersPageData;
   initialStatusCounts: Record<string, number>;
+  initialActiveStatus: string;
+  initialSearch: string;
 }
 
 const STATUS_LIST = [
@@ -68,46 +81,81 @@ function sortOrdersByNewest<T extends { createdAt: string }>(items: T[]) {
 }
 
 export default function OrdersPageClient({
-  initialOrders,
+  initialOrdersPage,
   initialStatusCounts,
+  initialActiveStatus,
+  initialSearch,
 }: OrdersPageClientProps) {
-  const [orders, setOrders] = useState<OrderSummary[]>(() => sortOrdersByNewest(initialOrders));
+  const [orders, setOrders] = useState<OrderSummary[]>(() =>
+    sortOrdersByNewest(initialOrdersPage.orders)
+  );
+  const [pagination, setPagination] = useState<AdminOrdersPagination>(
+    initialOrdersPage.pagination
+  );
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>(initialStatusCounts);
   const [loading, setLoading] = useState(false);
-  const [activeStatus, setActiveStatus] = useState<OrderFilter>("PENDING");
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [activeStatus, setActiveStatus] = useState<OrderFilter>(
+    initialActiveStatus as OrderFilter
+  );
+  const [search, setSearch] = useState(initialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
+  const [page, setPage] = useState(initialOrdersPage.pagination.page);
+  const [pageSize, setPageSize] = useState<AdminPageSize>(
+    initialOrdersPage.pagination.pageSize
+  );
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [detailsLoadingId, setDetailsLoadingId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const hasHydratedInitialOrders = useRef(false);
+  const ordersRequest = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    if (search.trim() === debouncedSearch) {
+      return;
+    }
+
     const timeoutId = window.setTimeout(() => {
+      setPage(1);
       setDebouncedSearch(search.trim());
     }, 300);
 
     return () => window.clearTimeout(timeoutId);
-  }, [search]);
+  }, [debouncedSearch, search]);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
+    ordersRequest.current?.abort();
+    const controller = new AbortController();
+    ordersRequest.current = controller;
+
     try {
       const params = new URLSearchParams();
       if (activeStatus !== "ALL") params.set("status", activeStatus);
       if (debouncedSearch) params.set("search", debouncedSearch);
+      params.set("page", String(page));
+      params.set("pageSize", String(pageSize));
 
-      const res = await fetch(`/api/admin/orders?${params.toString()}`);
+      const res = await fetch(`/api/admin/orders?${params.toString()}`, {
+        signal: controller.signal,
+      });
       if (res.ok) {
-        const data = await res.json();
+        const data: AdminOrdersPageData = await res.json();
         setOrders(sortOrdersByNewest(data.orders || []));
+        setPagination(data.pagination);
+        if (data.pagination.page !== page) {
+          setPage(data.pagination.page);
+        }
       }
     } catch (err) {
-      console.error("Failed to fetch orders:", err);
+      if ((err as Error).name !== "AbortError") {
+        console.error("Failed to fetch orders:", err);
+      }
     } finally {
-      setLoading(false);
+      if (ordersRequest.current === controller) {
+        setLoading(false);
+      }
     }
-  }, [activeStatus, debouncedSearch]);
+  }, [activeStatus, debouncedSearch, page, pageSize]);
 
   useEffect(() => {
     if (!hasHydratedInitialOrders.current) {
@@ -117,6 +165,30 @@ export default function OrdersPageClient({
 
     void fetchOrders();
   }, [fetchOrders]);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (activeStatus !== "PENDING") params.set("status", activeStatus);
+    if (debouncedSearch) params.set("search", debouncedSearch);
+    if (page > 1) params.set("page", String(page));
+    if (pageSize !== DEFAULT_ADMIN_PAGE_SIZE) {
+      params.set("pageSize", String(pageSize));
+    }
+
+    const query = params.toString();
+    window.history.replaceState(
+      window.history.state,
+      "",
+      query ? `/admin/orders?${query}` : "/admin/orders"
+    );
+  }, [activeStatus, debouncedSearch, page, pageSize]);
+
+  useEffect(
+    () => () => {
+      ordersRequest.current?.abort();
+    },
+    []
+  );
 
   const openOrderDetails = useCallback(async (orderId: string) => {
     setDetailsLoadingId(orderId);
@@ -173,6 +245,10 @@ export default function OrdersPageClient({
             [previousStatus]: Math.max((prev[previousStatus] ?? 0) - 1, 0),
             [updated.status]: (prev[updated.status] ?? 0) + 1,
           }));
+
+          if (activeStatus !== "ALL") {
+            await fetchOrders();
+          }
         }
       }
     } catch (err) {
@@ -218,6 +294,16 @@ export default function OrdersPageClient({
     }
   }
 
+  const visibleRange = getPaginationRange(
+    pagination.page,
+    pagination.pageSize,
+    pagination.total
+  );
+  const paginationItems = getPaginationItems(
+    pagination.page,
+    pagination.totalPages
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -246,7 +332,11 @@ export default function OrdersPageClient({
           {search && (
             <button
               aria-label="Clear order search"
-              onClick={() => setSearch("")}
+              onClick={() => {
+                setSearch("");
+                setDebouncedSearch("");
+                setPage(1);
+              }}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
             >
               <HiX className="w-4 h-4" />
@@ -262,7 +352,11 @@ export default function OrdersPageClient({
             return (
               <button
                 key={status}
-                onClick={() => setActiveStatus(status)}
+                onClick={() => {
+                  setActiveStatus(status);
+                  setPage(1);
+                }}
+                aria-pressed={isActive}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                   isActive
                     ? "bg-primary-500 text-white shadow-md shadow-primary-500/20"
@@ -285,7 +379,7 @@ export default function OrdersPageClient({
         </div>
       </div>
 
-      {loading ? (
+      {loading && orders.length === 0 ? (
         <AdminOrdersTableSkeleton />
       ) : orders.length === 0 ? (
         <div className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 p-12 text-center">
@@ -298,9 +392,19 @@ export default function OrdersPageClient({
           </p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 overflow-hidden shadow-sm">
+        <div
+          className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 overflow-hidden shadow-sm"
+          aria-busy={loading}
+        >
           <p className="admin-table-hint">Swipe to see all columns. Details stay on the right.</p>
-          <div className="admin-table-scroll overflow-x-auto" role="region" aria-label="Orders table" tabIndex={0}>
+          <div
+            className={`admin-table-scroll overflow-x-auto transition-opacity ${
+              loading ? "pointer-events-none opacity-60" : ""
+            }`}
+            role="region"
+            aria-label="Orders table"
+            tabIndex={0}
+          >
             <table className="admin-table w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-dark-200 bg-gray-50/50 dark:bg-dark-200/50 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -314,8 +418,6 @@ export default function OrdersPageClient({
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-dark-200 text-sm">
                 {orders.map((order) => {
-                  const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
-
                   return (
                     <tr
                       key={order.id}
@@ -375,7 +477,7 @@ export default function OrdersPageClient({
                             ))}
                           </div>
                           <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">
-                            {itemCount} {itemCount === 1 ? "item" : "items"}
+                            {order.itemCount} {order.itemCount === 1 ? "item" : "items"}
                           </span>
                         </div>
                       </td>
@@ -422,6 +524,92 @@ export default function OrdersPageClient({
                 })}
               </tbody>
             </table>
+          </div>
+          <div className="flex flex-col gap-3 border-t border-gray-200 px-4 py-3 dark:border-dark-200 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Showing {visibleRange.start}–{visibleRange.end} of {pagination.total}
+              </p>
+              {loading ? (
+                <span className="text-xs font-medium text-primary-600 dark:text-primary-400" role="status">
+                  Refreshing…
+                </span>
+              ) : null}
+              <label className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                Rows
+                <select
+                  aria-label="Orders per page"
+                  value={pageSize}
+                  onChange={(event) => {
+                    setPageSize(Number(event.target.value) as AdminPageSize);
+                    setPage(1);
+                  }}
+                  className="rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-sm text-gray-900 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 dark:border-dark-200 dark:bg-dark-200 dark:text-white"
+                >
+                  {ADMIN_PAGE_SIZES.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            {pagination.totalPages > 1 ? (
+              <nav
+                className="flex flex-wrap items-center gap-1.5"
+                aria-label="Admin order pages"
+              >
+                <button
+                  type="button"
+                  onClick={() => setPage((current) => Math.max(current - 1, 1))}
+                  disabled={page <= 1 || loading}
+                  className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:border-primary-500 hover:text-primary-600 disabled:cursor-not-allowed disabled:opacity-40 dark:border-dark-200 dark:text-gray-300"
+                >
+                  Previous
+                </button>
+
+                {paginationItems.map((item, index) =>
+                  item === "ellipsis" ? (
+                    <span
+                      key={`ellipsis-${index}`}
+                      className="px-1 text-gray-400"
+                      aria-hidden="true"
+                    >
+                      …
+                    </span>
+                  ) : (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => setPage(item)}
+                      disabled={loading}
+                      aria-current={item === page ? "page" : undefined}
+                      className={`flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-sm font-medium transition-colors disabled:cursor-wait ${
+                        item === page
+                          ? "bg-primary-500 text-white"
+                          : "bg-gray-100 text-gray-600 hover:bg-primary-500/10 hover:text-primary-600 dark:bg-dark-200 dark:text-gray-300"
+                      }`}
+                    >
+                      {item}
+                    </button>
+                  )
+                )}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPage((current) =>
+                      Math.min(current + 1, pagination.totalPages)
+                    )
+                  }
+                  disabled={page >= pagination.totalPages || loading}
+                  className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:border-primary-500 hover:text-primary-600 disabled:cursor-not-allowed disabled:opacity-40 dark:border-dark-200 dark:text-gray-300"
+                >
+                  Next
+                </button>
+              </nav>
+            ) : null}
           </div>
         </div>
       )}
