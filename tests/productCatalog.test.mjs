@@ -67,7 +67,7 @@ function createCatalog() {
     "next/cache": nextCache,
     "@/lib/categories": categories,
     "@/lib/productImages": { hydrateProductImages: (product) => ({ ...product, images: ["/test-image.webp"] }) },
-    "@/lib/productCatalogConfig": { PRODUCT_CATALOG_PAGE_SIZE: 12 },
+    "@/lib/productCatalogConfig": { PRODUCT_CATALOG_PAGE_SIZE: 24 },
     "@/lib/db": {
       prisma: {
         product: {
@@ -126,7 +126,7 @@ test("separate catalog navigations reuse database results and hydrated images", 
   assert.equal(first.products.length, 1);
   assert.equal(second.products[0].name, "Revision 1");
   assert.deepEqual(second.products[0].images, ["/test-image.webp"]);
-  assert.equal(second.totalPages, 4);
+  assert.equal(second.totalPages, 2);
   assert.equal(catalog.calls.lists.length, 1);
   assert.equal(catalog.calls.counts.length, 1);
 });
@@ -154,7 +154,7 @@ test("catalog categories, subcategories, searches, sorts, and pages have separat
   assert.equal(catalog.calls.lists.length, variants.length);
   assert.equal(catalog.calls.counts.length, variants.length);
   assert.equal(catalog.calls.lists[2].where.subcategory, "Night Lamps");
-  assert.equal(catalog.calls.lists[6].skip, 12);
+  assert.equal(catalog.calls.lists[6].skip, 24);
 });
 
 test("equivalent normalized searches and default filters reuse an entry", async () => {
