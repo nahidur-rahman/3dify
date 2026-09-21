@@ -15,9 +15,11 @@ import {
   normalizeProductColorOptions,
 } from "@/lib/productColors";
 import {
+  calculateDiscountedPrice,
   categoryLabels,
   categorySubcategories,
   defaultCategory,
+  formatPrice,
 } from "@/lib/utils";
 
 interface ProductFormProps {
@@ -153,6 +155,20 @@ export default function ProductForm({
   const imageLimitReached = hasImageLimit && totalImageCount >= imageLimit;
   const availableSubcategories = categorySubcategories[form.category] || [];
   const hasSelectedColorOptions = form.colorOptions.length > 0;
+  const parsedPrice = Number(form.price);
+  const canSetDiscount =
+    form.price.trim().length > 0 &&
+    Number.isFinite(parsedPrice) &&
+    parsedPrice > 0;
+  const parsedDiscountPercent = Number(form.discountPercent);
+  const discountedPricePreview =
+    canSetDiscount &&
+    form.discountPercent.trim().length > 0 &&
+    Number.isFinite(parsedDiscountPercent) &&
+    parsedDiscountPercent >= 0 &&
+    parsedDiscountPercent <= 100
+      ? calculateDiscountedPrice(parsedPrice, parsedDiscountPercent)
+      : null;
 
   const handleCategoryChange = (nextCategory: Category) => {
     setForm((prev) => ({
@@ -711,8 +727,25 @@ export default function ProductForm({
                 min="0"
                 max="100"
                 step="1"
-                className="number-input-no-spinner w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+                disabled={!canSetDiscount || loading}
+                aria-describedby="discount-price-help"
+                className="number-input-no-spinner w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 dark:border-dark-200 dark:bg-dark dark:text-white dark:disabled:bg-dark-200 dark:disabled:text-gray-500"
               />
+              <div id="discount-price-help" className="mt-1.5 min-h-4">
+                {!canSetDiscount ? (
+                  <p className="text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                    Add a valid product price first to enable the discount field.
+                  </p>
+                ) : discountedPricePreview !== null ? (
+                  <p className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                    Price after discount: {formatPrice(discountedPricePreview)}
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                    The final discounted price is rounded up to the nearest taka.
+                  </p>
+                )}
+              </div>
             </div>
 
             <div>
