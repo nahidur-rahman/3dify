@@ -61,8 +61,11 @@ function loadCart(): CartItem[] {
     if (!stored) return [];
     const items = JSON.parse(stored);
     if (!Array.isArray(items)) return [];
-    // Filter out expired items
-    return items.filter((item) => !isExpired(item));
+    // Filter out expired items and normalize carts saved before whole-taka
+    // discount pricing was introduced.
+    return items
+      .filter((item) => !isExpired(item))
+      .map((item) => ({ ...item, price: Math.ceil(item.price) }));
   } catch {
     return [];
   }
