@@ -48,7 +48,7 @@ export function calculateDiscountedPrice(
 ): number {
   const clampedDiscount = Math.min(100, Math.max(0, discountPercent));
   const discountedPrice = price * (1 - clampedDiscount / 100);
-  return Math.round(discountedPrice * 100) / 100;
+  return Math.ceil(discountedPrice);
 }
 
 export {
