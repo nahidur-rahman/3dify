@@ -231,25 +231,22 @@ export default function CheckoutForm() {
       district: normalizedDistrict ?? form.district,
       postalCode: normalizedPostalCode || undefined,
       notes: form.notes || undefined,
-      items: items.map((item: CartItem) => ({
+      items: items.map((item) => ({
         productId: item.productId,
-        productName: item.name,
-        productImage: item.image || undefined,
         selectedSize: item.selectedSize,
         color: item.color,
         quantity: item.quantity,
-        unitPrice: item.price,
       })),
     };
 
     try {
       const result = await createOrder(orderInput);
 
-      if (result.success && result.orderNumber) {
+      if (result.success && result.orderNumber && result.total !== undefined) {
         saveStoredOrder({
           orderNumber: result.orderNumber,
           customerPhone: form.customerPhone,
-          total: cartTotal + shippingCost,
+          total: result.total,
           createdAt: new Date().toISOString(),
         });
 
