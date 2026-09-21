@@ -8,7 +8,7 @@ import {
   categorySubcategories,
   isCategoryValue,
 } from "@/lib/categories";
-import { formatPrice } from "@/lib/utils";
+import { calculateDiscountedPrice, formatPrice } from "@/lib/utils";
 import DeleteProductButton from "./DeleteProductButton";
 import AdminProductsPageSizeSelect from "./AdminProductsPageSizeSelect";
 import {
@@ -90,6 +90,7 @@ const adminProductRowSelect = {
   category: true,
   subcategory: true,
   price: true,
+  discountPercent: true,
   sellCount: true,
   inStock: true,
   featured: true,
@@ -614,6 +615,9 @@ export default async function AdminProductsPage({
                     Price
                   </th>
                   <th className="text-left px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Sales
+                  </th>
+                  <th className="text-left px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">
                     Status
                   </th>
                   <th className="text-left px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -668,12 +672,36 @@ export default async function AdminProductsPage({
                       </div>
                     </td>
                     <td className="px-6 py-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">
+                            {formatPrice(product.price)}
+                          </span>
+                          {product.discountPercent > 0 ? (
+                            <span className="inline-flex whitespace-nowrap rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-600 dark:bg-rose-500/10 dark:text-rose-400">
+                              -{product.discountPercent}%
+                            </span>
+                          ) : null}
+                        </div>
+                        {product.discountPercent > 0 ? (
+                          <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                            After discount {formatPrice(
+                              calculateDiscountedPrice(
+                                product.price,
+                                product.discountPercent
+                              )
+                            )}
+                          </p>
+                        ) : null}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
                       <div className="space-y-0.5">
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">
-                          {formatPrice(product.price)}
+                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                          {product.sellCount.toLocaleString("en-BD")}
                         </span>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Sold {product.sellCount}
+                          {product.sellCount === 1 ? "unit sold" : "units sold"}
                         </p>
                       </div>
                     </td>
