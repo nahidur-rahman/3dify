@@ -685,7 +685,8 @@ export default async function AdminProductsPage({
                         </div>
                         {product.discountPercent > 0 ? (
                           <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                            After discount {formatPrice(
+                            {/* After discount: */}
+                            {formatPrice(
                               calculateDiscountedPrice(
                                 product.price,
                                 product.discountPercent
@@ -701,7 +702,7 @@ export default async function AdminProductsPage({
                           {product.sellCount.toLocaleString("en-BD")}
                         </span>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {product.sellCount === 1 ? "unit sold" : "units sold"}
+                          {product.sellCount === 1 ? "unit" : "units"}
                         </p>
                       </div>
                     </td>
