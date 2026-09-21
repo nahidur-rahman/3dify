@@ -503,8 +503,8 @@ export default function ProductForm({
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 required
-                rows={2}
-                className="w-full min-h-[5rem] resize-y rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+                rows={5}
+                className="w-full min-h-[10rem] resize-y rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
                 placeholder="Describe your product..."
               />
             </div>
