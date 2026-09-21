@@ -18,6 +18,10 @@ function TableRowSkeleton() {
         <Skeleton className="mt-1.5 h-3 w-14 rounded-md" />
       </td>
       <td className="px-6 py-4">
+        <Skeleton className="h-4 w-10 rounded-md" />
+        <Skeleton className="mt-1.5 h-3 w-16 rounded-md" />
+      </td>
+      <td className="px-6 py-4">
         <div className="flex flex-col items-start gap-1.5">
           <Skeleton className="h-5 w-20 rounded-full" />
           <Skeleton className="h-5 w-16 rounded-full" />
@@ -73,9 +77,9 @@ export default function AdminProductsLoading() {
           <table className="admin-table admin-products-table w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-dark-200">
-                {Array.from({ length: 7 }).map((_, index) => (
+                {Array.from({ length: 8 }).map((_, index) => (
                   <th key={index} className="px-6 py-4 text-left">
-                    <Skeleton className={`h-4 w-20 rounded-md ${index === 6 ? "ml-auto" : ""}`} />
+                    <Skeleton className={`h-4 w-20 rounded-md ${index === 7 ? "ml-auto" : ""}`} />
                   </th>
                 ))}
               </tr>
