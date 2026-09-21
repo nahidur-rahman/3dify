@@ -8,6 +8,8 @@ import {
 import { buildOrderAddress } from "@/lib/orderAddress";
 import { z } from "zod";
 import { getShippingCost } from "@/lib/shipping";
+import { resolveStorageImageUrl } from "@/lib/productImages";
+import { calculateDiscountedPrice } from "@/lib/utils";
 
 // --- Validation schema ---
 
@@ -38,12 +40,9 @@ const BD_PHONE_REGEX = /^01[3-9]\d{8}$/;
 
 const OrderItemSchema = z.object({
   productId: z.string().min(1),
-  productName: z.string().min(1),
-  productImage: z.string().optional(),
-  selectedSize: z.string().optional(),
-  color: z.string().optional(),
+  selectedSize: z.string().trim().min(1).optional(),
+  color: z.string().trim().min(1).optional(),
   quantity: z.number().int().min(1),
-  unitPrice: z.number().min(0),
 });
 
 const CreateOrderSchema = z.object({
@@ -90,8 +89,33 @@ export interface OrderResult {
   success: boolean;
   orderNumber?: string;
   orderId?: string;
+  total?: number;
   error?: string;
   fieldErrors?: Record<string, string[]>;
+}
+
+class OrderItemUnavailableError extends Error {}
+
+function parseSizeOptions(value: unknown) {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((option) => {
+    if (!option || typeof option !== "object") return [];
+
+    const label = (option as { label?: unknown }).label;
+    const price = (option as { price?: unknown }).price;
+
+    return typeof label === "string" && typeof price === "number"
+      ? [{ label, price }]
+      : [];
+  });
+}
+
+function getOrderProductImage(images: string[]) {
+  const image = images.find((value) => value.trim().length > 0);
+  if (!image) return null;
+
+  return /^https?:\/\//i.test(image) ? image : resolveStorageImageUrl(image);
 }
 
 // --- Generate human-readable order number ---
@@ -144,18 +168,98 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderResult>
   }
 
   try {
-    // Calculate costs
+    // Resolve shipping before opening the transaction. Product pricing is
+    // resolved from the database inside the transaction and never trusted
+    // from the browser cart.
     const shippingMethod = getShippingMethodForDistrict(district);
     const shippingCost = await getShippingCost(shippingMethod);
-    const subtotal = data.items.reduce(
-      (sum, item) => sum + item.unitPrice * item.quantity,
-      0
-    );
-    const total = subtotal + shippingCost;
     const sellCountUpdates = aggregateSellCounts(data.items);
 
     // Create the order and update product sales atomically.
-    const order = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
+      const products = await tx.product.findMany({
+        where: {
+          id: { in: Array.from(new Set(data.items.map((item) => item.productId))) },
+        },
+        select: {
+          id: true,
+          name: true,
+          images: true,
+          price: true,
+          discountPercent: true,
+          inStock: true,
+          sizeMode: true,
+          sizeOptions: true,
+          color: true,
+          colorMode: true,
+          colorOptions: true,
+        },
+      });
+      const productsById = new Map(products.map((product) => [product.id, product]));
+      const resolvedItems = data.items.map((item) => {
+        const product = productsById.get(item.productId);
+
+        if (!product || !product.inStock) {
+          throw new OrderItemUnavailableError(
+            "A product in your cart is no longer available. Please update your cart and try again."
+          );
+        }
+
+        let basePrice = product.price;
+        let selectedSize: string | null = null;
+
+        if (product.sizeMode === "OPTIONS") {
+          const selectedOption = parseSizeOptions(product.sizeOptions).find(
+            (option) => option.label === item.selectedSize
+          );
+
+          if (!selectedOption) {
+            throw new OrderItemUnavailableError(
+              `The selected size for "${product.name}" is no longer available. Please update your cart.`
+            );
+          }
+
+          basePrice = selectedOption.price;
+          selectedSize = selectedOption.label;
+        }
+
+        let color = product.color.trim() || null;
+
+        if (product.colorMode === "OPTIONS") {
+          const selectedColor = product.colorOptions.find(
+            (option) => option === item.color
+          );
+
+          if (!selectedColor) {
+            throw new OrderItemUnavailableError(
+              `The selected color for "${product.name}" is no longer available. Please update your cart.`
+            );
+          }
+
+          color = selectedColor;
+        }
+
+        const unitPrice = calculateDiscountedPrice(
+          basePrice,
+          product.discountPercent
+        );
+
+        return {
+          productId: product.id,
+          productName: product.name,
+          productImage: getOrderProductImage(product.images),
+          selectedSize,
+          color,
+          quantity: item.quantity,
+          unitPrice,
+          totalPrice: unitPrice * item.quantity,
+        };
+      });
+      const subtotal = resolvedItems.reduce(
+        (sum, item) => sum + item.totalPrice,
+        0
+      );
+      const total = subtotal + shippingCost;
       const createdOrder = await tx.order.create({
         data: {
           orderNumber: generateOrderNumber(),
@@ -176,16 +280,7 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderResult>
           paymentMethod: "COD",
           notes: data.notes || null,
           items: {
-            create: data.items.map((item) => ({
-              productId: item.productId,
-              productName: item.productName,
-              productImage: item.productImage || null,
-              selectedSize: item.selectedSize || null,
-              color: item.color || null,
-              quantity: item.quantity,
-              unitPrice: item.unitPrice,
-              totalPrice: item.unitPrice * item.quantity,
-            })),
+            create: resolvedItems,
           },
         },
       });
@@ -203,15 +298,23 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderResult>
         )
       );
 
-      return createdOrder;
+      return { order: createdOrder, total };
     });
 
     return {
       success: true,
-      orderNumber: order.orderNumber,
-      orderId: order.id,
+      orderNumber: result.order.orderNumber,
+      orderId: result.order.id,
+      total: result.total,
     };
   } catch (err) {
+    if (err instanceof OrderItemUnavailableError) {
+      return {
+        success: false,
+        error: err.message,
+      };
+    }
+
     console.error("Failed to create order:", err);
 
     if (err instanceof Error && err.message === "Shipping rate unavailable") {
