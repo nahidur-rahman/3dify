@@ -1,6 +1,6 @@
 # 3Dify BD Category Refactor TODO
 
-Updated on May 31, 2026.
+Updated on September 27, 2026.
 
 This document is the source of truth for the category refactor. It captures the locked taxonomy, the approved data shape, the migration notes, and the implementation checklist with clear done vs not-done status.
 
@@ -30,7 +30,7 @@ This document is the source of truth for the category refactor. It captures the 
 | Collectibles & Figures | `COLLECTIBLES_AND_FIGURES` | `collectibles-figures` |
 | Gaming & Pop Culture | `GAMING_AND_POP_CULTURE` | `gaming-pop-culture` |
 | Cosplay, Props & Model Kits | `COSPLAY_PROPS_AND_MODEL_KITS` | `cosplay-props-model-kits` |
-| Custom & Personalized | `CUSTOM_AND_PERSONALIZED` | `custom-personalized` |
+| Keychains | `KEYCHAINS` | `keychains` |
 | Pet Accessories | `PET_ACCESSORIES` | `pet-accessories` |
 
 ## 3) Suggested Category Tree
@@ -91,12 +91,11 @@ This document is the source of truth for the category refactor. It captures the 
 - Model Kits
 - Assembly Kits
 
-### Custom & Personalized
-- Nameplates
-- Custom Gifts
-- Business Branding
-- Memorial Pieces
-- One-off Commissions
+### Keychains
+- Figure Keychains
+- Design Keychains
+- Name Keychains
+- Custom Keychains
 
 ### Pet Accessories
 - Pet Tags
@@ -118,7 +117,7 @@ Safe mappings:
 
 - [x] `FIGURINE` -> `COLLECTIBLES_AND_FIGURES`
 - [x] `HOME_DECOR` -> `HOME_DECOR`
-- [x] `CUSTOM` -> `CUSTOM_AND_PERSONALIZED`
+- [x] `CUSTOM` -> `CUSTOM_AND_PERSONALIZED` -> `KEYCHAINS`
 
 Manual review required:
 
