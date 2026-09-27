@@ -21,7 +21,7 @@ DELETE FROM "products"
 WHERE ("name" = 'Dragon Figurine' AND "category" = 'FIGURINE')
    OR ("name" = 'Geometric Phone Case' AND "category" = 'PHONE_CASE')
    OR ("name" = 'Modern Vase' AND "category" = 'HOME_DECOR')
-   OR ("name" = 'Custom Name Plate' AND "category" = 'CUSTOM')
+   OR ("name" IN ('Custom Name Plate', 'Custom Name Keychain') AND "category"::text IN ('CUSTOM', 'CUSTOM_AND_PERSONALIZED', 'KEYCHAINS'))
    OR ("name" = 'Iron Man Helmet' AND "category" = 'FIGURINE')
    OR ("name" = 'Hexagonal Wall Art Set' AND "category" = 'HOME_DECOR');
 
@@ -115,16 +115,16 @@ VALUES
   'admin'
 ),
 (
-  'prod_custom_name_plate',
-  'Custom Name Plate',
-  'Personalized 3D printed name plate for your desk or door. Choose your font, color, and size. Makes a great gift!',
+  'prod_custom_name_keychain',
+  'Custom Name Keychain',
+  'A personalized 3D printed name keychain. Choose your name, font, and color for a practical custom gift.',
   600,
-  ARRAY['/placeholder/nameplate.jpg']::text[],
-  'CUSTOM',
+  ARRAY['/placeholder/name-keychain.jpg']::text[],
+  'KEYCHAINS',
   'Any Color',
-  '20x5x2 cm',
+  'Multiple sizes available',
   'OPTIONS',
-  '[{"label":"Small","price":500},{"label":"Medium","price":600},{"label":"Large","price":750}]'::jsonb,
+  '[{"label":"Small","price":400},{"label":"Medium","price":500},{"label":"Large","price":600}]'::jsonb,
   80,
   40,
   5,
