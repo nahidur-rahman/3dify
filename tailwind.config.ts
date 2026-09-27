@@ -43,6 +43,9 @@ const config: Config = {
       fontFamily: {
         sans: ["Outfit", "system-ui", "sans-serif"],
       },
+      screens: {
+        xs: "540px",
+      },
     },
   },
   plugins: [],
