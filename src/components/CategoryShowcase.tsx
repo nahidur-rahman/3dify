@@ -8,9 +8,9 @@ import {
   HiOutlineCube,
   HiOutlineDesktopComputer,
   HiOutlineFilm,
-  HiOutlineGift,
   HiOutlineHeart,
   HiOutlineHome,
+  HiOutlineKey,
   HiOutlineLightBulb,
   HiOutlinePuzzle,
   HiOutlineSparkles,
@@ -32,7 +32,7 @@ const categoryIcons: Record<Category, IconType> = {
   COLLECTIBLES_AND_FIGURES: HiOutlineCube,
   GAMING_AND_POP_CULTURE: HiOutlineFilm,
   COSPLAY_PROPS_AND_MODEL_KITS: HiOutlineSparkles,
-  CUSTOM_AND_PERSONALIZED: HiOutlineGift,
+  KEYCHAINS: HiOutlineKey,
   PET_ACCESSORIES: HiOutlineHeart,
 };
 
@@ -195,4 +195,3 @@ export default function CategoryShowcase() {
     </section>
   );
 }
-
