@@ -13,7 +13,7 @@ const footerCategoryValues: Category[] = [
   "HOME_DECOR",
   "DESK_ACCESSORIES",
   "COLLECTIBLES_AND_FIGURES",
-  "CUSTOM_AND_PERSONALIZED",
+  "KEYCHAINS",
 ];
 
 export default function Footer() {
