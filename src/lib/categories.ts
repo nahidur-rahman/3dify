@@ -127,9 +127,9 @@ export const categoryConfig = [
     slug: "keychains",
     description: "3D printed keychains featuring mini figures, decorative designs, personalized names, and custom creations.",
     subcategories: [
+      "Name Keychains",
       "Figure Keychains",
       "Design Keychains",
-      "Name Keychains",
       "Custom Keychains",
     ],
   },
