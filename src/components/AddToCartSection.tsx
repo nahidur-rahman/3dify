@@ -6,6 +6,7 @@ import { useCart } from "@/contexts/CartContext";
 import { Product } from "@/lib/types";
 import { getProductColorSwatch } from "@/lib/productColors";
 import { calculateDiscountedPrice, formatPrice } from "@/lib/utils";
+import { META_CURRENCY, trackMetaEvent } from "@/lib/metaPixel";
 import { HiMinus, HiPlus, HiShoppingCart } from "react-icons/hi";
 
 interface AddToCartSectionProps {
@@ -37,7 +38,19 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
   const baseUnitPrice = selectedSizeOption?.price ?? product.price;
   const unitPrice = calculateDiscountedPrice(baseUnitPrice, discountPercent);
 
+  function trackAddToCart() {
+    trackMetaEvent("AddToCart", {
+      content_ids: [product.id],
+      content_type: "product",
+      content_name: product.name,
+      contents: [{ id: product.id, quantity }],
+      value: unitPrice * quantity,
+      currency: META_CURRENCY,
+    });
+  }
+
   function handleAddToCart() {
+    trackAddToCart();
     addToCart({
       productId: product.id,
       name: product.name,
@@ -52,6 +65,7 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
   }
 
   function handleBuyNow() {
+    trackAddToCart();
     addToCart({
       productId: product.id,
       name: product.name,
