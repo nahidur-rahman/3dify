@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/contexts/CartContext";
+import MetaPixel from "@/components/MetaPixel";
 
 const outfit = Outfit({ subsets: ["latin"] });
 const metadataBase = (() => {
@@ -13,6 +14,9 @@ const metadataBase = (() => {
     return new URL("http://localhost:3000");
   }
 })();
+const metaDomainVerification = (
+  process.env.NEXT_PUBLIC_META_DOMAIN_VERIFICATION || ""
+).trim();
 
 export const metadata: Metadata = {
   metadataBase,
@@ -42,6 +46,14 @@ export const metadata: Metadata = {
     "pet accessories",
     "custom 3D models",
   ],
+  openGraph: {
+    type: "website",
+    siteName: "3Dify BD",
+    locale: "en_US",
+  },
+  ...(metaDomainVerification
+    ? { other: { "facebook-domain-verification": metaDomainVerification } }
+    : {}),
 };
 
 export default function RootLayout({
@@ -64,6 +76,7 @@ export default function RootLayout({
         <CartProvider>
           {children}
         </CartProvider>
+        <MetaPixel />
       </body>
     </html>
   );
