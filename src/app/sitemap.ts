@@ -34,6 +34,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.7,
     },
+    {
+      url: new URL("/privacy", siteUrl).toString(),
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
     ...categoryConfig.map((category) => ({
       url: new URL(getCategoryPath(category), siteUrl).toString(),
       lastModified: now,
