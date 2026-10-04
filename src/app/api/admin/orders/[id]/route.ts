@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { OrderStatus } from "@prisma/client";
+import {
+  META_CURRENCY,
+  buildOrderUserData,
+  sendMetaEvents,
+} from "@/lib/metaConversions";
+
+const ORDER_OUTCOME_EVENTS: Partial<Record<OrderStatus, string>> = {
+  DELIVERED: "OrderDelivered",
+  CANCELLED: "OrderCancelled",
+};
 
 interface RouteParams {
   params: { id: string };
@@ -44,11 +54,45 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });
     }
 
+    const existingOrder = await prisma.order.findUnique({
+      where: { id: params.id },
+      select: { status: true },
+    });
+
+    if (!existingOrder) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
     const updatedOrder = await prisma.order.update({
       where: { id: params.id },
       data: { status: status as OrderStatus },
       include: { items: true },
     });
+
+    // Tell Meta how COD orders actually end, so ads optimize for buyers who
+    // accept delivery rather than for anyone who places an order.
+    const outcomeEventName = ORDER_OUTCOME_EVENTS[updatedOrder.status];
+
+    if (outcomeEventName && existingOrder.status !== updatedOrder.status) {
+      await sendMetaEvents([
+        {
+          event_name: outcomeEventName,
+          event_time: Math.floor(Date.now() / 1000),
+          event_id: `${outcomeEventName}-${updatedOrder.orderNumber}`,
+          action_source: "system_generated",
+          user_data: buildOrderUserData(updatedOrder),
+          custom_data: {
+            value: updatedOrder.total,
+            currency: META_CURRENCY,
+            order_id: updatedOrder.orderNumber,
+            content_type: "product",
+            content_ids: Array.from(
+              new Set(updatedOrder.items.map((item) => item.productId))
+            ),
+          },
+        },
+      ]);
+    }
 
     return NextResponse.json(updatedOrder);
   } catch (err) {
