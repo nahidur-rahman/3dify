@@ -12,6 +12,11 @@ import {
 import { normalizeOrderPostalCode } from "@/lib/orderAddress";
 import { saveStoredOrder } from "@/lib/localOrderHistory";
 import { formatPrice } from "@/lib/utils";
+import {
+  META_CURRENCY,
+  getPurchaseEventId,
+  trackMetaEvent,
+} from "@/lib/metaPixel";
 import Image from "next/image";
 import {
   HiChevronDown,
@@ -54,6 +59,16 @@ function validateEmail(email: string): string | null {
   return null;
 }
 
+function buildMetaCartParams(items: CartItem[]) {
+  return {
+    content_ids: Array.from(new Set(items.map((item) => item.productId))),
+    content_type: "product",
+    contents: items.map((item) => ({ id: item.productId, quantity: item.quantity })),
+    num_items: items.reduce((sum, item) => sum + item.quantity, 0),
+    currency: META_CURRENCY,
+  };
+}
+
 interface ShippingOption {
   method: "INSIDE_DHAKA" | "OUTSIDE_DHAKA";
   label: string;
@@ -64,6 +79,7 @@ export default function CheckoutForm() {
   const router = useRouter();
   const { items, cartTotal, clearCart } = useCart();
   const districtPickerRef = useRef<HTMLDivElement>(null);
+  const hasTrackedCheckout = useRef(false);
 
   const [shippingRates, setShippingRates] = useState<ShippingOption[]>([]);
 
@@ -98,6 +114,17 @@ export default function CheckoutForm() {
         setShippingRates([]);
       });
   }, []);
+
+  // Track checkout start once, after the cart has hydrated from storage
+  useEffect(() => {
+    if (hasTrackedCheckout.current || items.length === 0) return;
+    hasTrackedCheckout.current = true;
+
+    trackMetaEvent("InitiateCheckout", {
+      ...buildMetaCartParams(items),
+      value: cartTotal,
+    });
+  }, [items, cartTotal]);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -249,6 +276,15 @@ export default function CheckoutForm() {
           total: result.total,
           createdAt: new Date().toISOString(),
         });
+
+        trackMetaEvent(
+          "Purchase",
+          { ...buildMetaCartParams(items), value: result.total },
+          {
+            eventId: getPurchaseEventId(result.orderNumber),
+            orderNumber: result.orderNumber,
+          }
+        );
 
         clearCart();
         router.push(`/checkout/confirmation?order=${result.orderNumber}`);
