@@ -251,7 +251,7 @@ export default function CheckoutForm() {
         });
 
         clearCart();
-        router.push(`/checkout/confirmation?order=${result.orderNumber}`);
+        router.push(`/checkout/confirmation?order=${encodeURIComponent(result.orderNumber)}&phone=${encodeURIComponent(form.customerPhone)}`);
       } else {
         if (result.fieldErrors) setErrors(result.fieldErrors);
         setGlobalError(result.error || "Something went wrong.");
