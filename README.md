@@ -89,6 +89,50 @@ Notes:
 - PRODUCT_IMAGE_LIMIT is optional. Set it to a positive integer to cap total images per product; leave it blank for unlimited uploads.
 - When the cap is set, the admin product form warns and skips any extra selected files beyond the limit.
 
+## Order emails (Resend)
+
+Every successful checkout sends a customer receipt and a separate admin notification
+after the order and its items commit to the database. Both messages use HTML and
+plain text, saved product prices, BDT totals, delivery details, and Bangladesh time.
+The customer receipt links to order tracking; the admin notification links to the
+order in the dashboard. New orders are described as received and awaiting review.
+
+Configure these server environment variables in `.env` and your hosting dashboard:
+
+```env
+RESEND_API_KEY=your-resend-api-key
+ORDER_EMAIL_FROM="3DifyBD Orders <orders@mail.3difybd.com>"
+ORDER_ADMIN_EMAIL=3difybd@gmail.com
+ORDER_EMAIL_REPLY_TO=3difybd@gmail.com
+NEXT_PUBLIC_SITE_URL=https://3difybd.com
+```
+
+`ORDER_ADMIN_EMAIL` is independent of the admin login/seed `ADMIN_EMAIL`.
+Customer replies go to `ORDER_EMAIL_REPLY_TO` (defaults to `ORDER_ADMIN_EMAIL`);
+admin replies go to the customer's email. To change the sender later, set
+`ORDER_EMAIL_FROM` to an address on a domain verified in Resend. Sending from a
+verified domain does not create a mailbox; the reply-to address must receive mail.
+Use your deployed site's URL in production and localhost during local development.
+Restart the development server or redeploy after changing environment variables.
+Never put the Resend key in a `NEXT_PUBLIC_` variable or commit it to Git.
+
+The service uses Resend's batch REST endpoint through native server-side `fetch`,
+so it adds no dependencies or database migrations. It awaits delivery submission
+and retries temporary network/API failures up to three times, with a four-second
+timeout per request and short backoff. An order-specific idempotency key prevents
+duplicate emails during those retries. Invalid credentials/configuration and quota
+errors are logged without rolling back the saved order. If all attempts fail,
+there is no background retry queue: check server logs and Resend before resending.
+API acceptance does not guarantee inbox delivery; check Resend's delivery/bounce
+events for final delivery status. The checkout page allows 30 seconds on hosts
+that honor Next.js `maxDuration`.
+
+Run the email and checkout regression tests with:
+
+```bash
+node --test tests/orderEmails.test.mjs tests/pricing.test.mjs
+```
+
 ## Local development
 
 Install dependencies:
