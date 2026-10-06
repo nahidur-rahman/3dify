@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { getDashboardAnalytics } from "@/lib/adminAnalytics";
+import AdminDashboardCharts from "@/components/AdminDashboardCharts";
 import {
   HiOutlineCube,
   HiOutlineStar,
@@ -32,7 +34,7 @@ async function getStats() {
 }
 
 export default async function AdminDashboardPage() {
-  const stats = await getStats();
+  const [stats, analytics] = await Promise.all([getStats(), getDashboardAnalytics()]);
 
   const statCards = [
     {
@@ -115,6 +117,8 @@ export default async function AdminDashboardPage() {
           </div>
         ))}
       </div>
+
+      <AdminDashboardCharts analytics={analytics} />
 
       {/* Quick Actions */}
       <div className="bg-white dark:bg-dark-100 rounded-2xl border border-gray-200 dark:border-dark-200 p-3 sm:p-6 shadow-sm">
