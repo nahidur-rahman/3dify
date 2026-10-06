@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import CheckoutForm from "@/components/CheckoutForm";
 
+// Allow the order transaction plus bounded Resend retries on serverless hosts.
+export const maxDuration = 30;
+
 export const metadata: Metadata = {
   title: "Checkout",
   description: "Complete your order at 3Dify BD.",
