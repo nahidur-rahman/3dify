@@ -34,6 +34,21 @@ export default function AdminDashboardLoading() {
         ))}
       </div>
 
+      <div className="mb-5 grid grid-cols-1 gap-4 sm:mb-8 sm:gap-6 xl:grid-cols-2">
+        {Array.from({ length: 2 }).map((_, index) => (
+          <div key={index} className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-dark-200 dark:bg-dark-100 sm:p-5">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-11 w-64 max-w-full rounded-xl" />
+            </div>
+            <Skeleton className="mb-3 h-12 w-40" />
+            <Skeleton className="mb-2 h-9 w-full rounded-lg" />
+            <Skeleton className="h-40 w-full rounded-xl sm:h-44" />
+            <Skeleton className="mt-1 h-4 w-full" />
+          </div>
+        ))}
+      </div>
+
       <div className="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm dark:border-dark-200 dark:bg-dark-100 sm:p-6">
         <Skeleton className="h-6 w-32 mb-4" />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
