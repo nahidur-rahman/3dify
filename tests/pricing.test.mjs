@@ -92,6 +92,7 @@ test("checkout ignores browser prices and stores the current rounded database pr
       resolveStorageImageUrl: (image) => `https://example.com/${image}`,
     },
     "@/lib/utils": { calculateDiscountedPrice },
+    "@/lib/orderEmails": { sendOrderEmails: async () => ({ success: true }) },
   });
 
   const result = await createOrder({
