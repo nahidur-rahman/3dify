@@ -8,11 +8,13 @@ export const metadata: Metadata = {
 };
 
 interface ConfirmationPageProps {
-  searchParams: { order?: string };
+  searchParams: { order?: string; phone?: string };
 }
 
 export default function ConfirmationPage({ searchParams }: ConfirmationPageProps) {
   const orderNumber = searchParams.order || "N/A";
+  const phone = searchParams.phone || "";
+  const trackingUrl = `/track-order?order=${encodeURIComponent(orderNumber)}${phone ? `&phone=${encodeURIComponent(phone)}` : ""}`;
 
   return (
     <div className="mx-auto max-w-2xl px-3 py-8 text-center sm:px-6 sm:py-16 lg:px-8">
@@ -69,7 +71,7 @@ export default function ConfirmationPage({ searchParams }: ConfirmationPageProps
       <div className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:justify-center sm:gap-3">
         {orderNumber !== "N/A" && (
           <Link
-            href={`/track-order?order=${orderNumber}`}
+            href={trackingUrl}
             className="col-span-2 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-emerald-700 hover:shadow-lg hover:shadow-emerald-600/25 sm:col-auto sm:px-6 sm:py-3.5 sm:text-base"
           >
             <HiOutlineSearch className="h-5 w-5" />
