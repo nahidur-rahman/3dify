@@ -10,6 +10,7 @@ import { z } from "zod";
 import { getShippingCost } from "@/lib/shipping";
 import { resolveStorageImageUrl } from "@/lib/productImages";
 import { calculateDiscountedPrice } from "@/lib/utils";
+import { sendOrderEmails } from "@/lib/orderEmails";
 
 // --- Validation schema ---
 
@@ -106,7 +107,7 @@ function parseSizeOptions(value: unknown) {
     const price = (option as { price?: unknown }).price;
 
     return typeof label === "string" && typeof price === "number"
-      ? [{ label, price }]
+      ? [{ label: label.trim(), price }]
       : [];
   });
 }
@@ -226,9 +227,9 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderResult>
         let color = product.color.trim() || null;
 
         if (product.colorMode === "OPTIONS") {
-          const selectedColor = product.colorOptions.find(
-            (option) => option === item.color
-          );
+          const selectedColor = product.colorOptions
+            .map((option) => option.trim())
+            .find((option) => option === item.color);
 
           if (!selectedColor) {
             throw new OrderItemUnavailableError(
@@ -261,6 +262,7 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderResult>
       );
       const total = subtotal + shippingCost;
       const createdOrder = await tx.order.create({
+        include: { items: true },
         data: {
           orderNumber: generateOrderNumber(),
           customerName: data.customerName,
@@ -300,6 +302,14 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderResult>
 
       return { order: createdOrder, total };
     });
+
+    // A saved order remains successful even when the email provider is unavailable.
+    // Keep email work outside the transaction and await it before returning.
+    try {
+      await sendOrderEmails(result.order);
+    } catch {
+      console.error("Order emails failed after saving order", { orderId: result.order.id });
+    }
 
     return {
       success: true,
