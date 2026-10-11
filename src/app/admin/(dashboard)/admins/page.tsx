@@ -48,103 +48,98 @@ export default async function AdminsPage() {
         </div>
       </div>
 
-      <div
-        className={canCreateAdmins ? "grid gap-8 xl:grid-cols-[375px_minmax(0,1fr)]" : "space-y-8"}
-      >
-        {canCreateAdmins && <AdminForm />}
-
-        <Card className="h-fit min-w-0">
-          <CardHeader>
-            <CardTitle>Current Admins</CardTitle>
-          </CardHeader>
-          <CardContent className="p-3 sm:p-6">
-            {admins.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-gray-200 dark:border-dark-200 px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                No admins found.
-              </div>
-            ) : (
-              <div>
-              <p className="admin-table-hint">Swipe to see all account details.</p>
-              <div className="admin-table-scroll overflow-x-auto" role="region" aria-label="Administrators table" tabIndex={0}>
-              <table className="admin-table admin-accounts-table w-full min-w-[820px] table-fixed">
-                <thead>
-                  <tr className="border-b border-gray-200 text-left text-sm text-gray-500 dark:border-dark-200 dark:text-gray-400">
-                    <th className="w-[14%] px-4 py-3 font-medium">Username</th>
-                    <th className="w-[16%] px-4 py-3 font-medium">Name</th>
-                    <th className={showRoleColumn ? "w-[24%] px-4 py-3 font-medium" : "w-[34%] px-4 py-3 font-medium"}>
-                      Email
-                    </th>
-                    {showRoleColumn && <th className="w-[10%] px-4 py-3 font-medium">Role</th>}
-                    <th className="w-[16%] px-4 py-3 font-medium">
-                      Created
-                    </th>
-                    <th className="w-[20%] px-4 py-3 font-medium text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {admins.map((admin) => (
-                    <tr
-                      key={admin.id}
-                      className="group border-b border-gray-100 dark:border-dark-200 last:border-0"
-                    >
-                      <td className="px-4 py-4">
-                        {isSuperAdmin && admin.id === currentAdmin?.id ? (
-                          <span className="inline-flex max-w-full truncate rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold tracking-[0.12em] text-amber-600 dark:text-amber-300">
-                            {admin.username}
-                          </span>
-                        ) : (
-                          <div className="truncate font-medium text-gray-900 dark:text-white">
-                            {admin.username}
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-4 py-4">
+      <Card className="h-fit min-w-0">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <CardTitle>Current Admins</CardTitle>
+          {canCreateAdmins && <AdminForm />}
+        </CardHeader>
+        <CardContent className="p-3 sm:p-6">
+          {admins.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-gray-200 dark:border-dark-200 px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+              No admins found.
+            </div>
+          ) : (
+            <div>
+            <p className="admin-table-hint">Swipe to see all account details.</p>
+            <div className="admin-table-scroll overflow-x-auto" role="region" aria-label="Administrators table" tabIndex={0}>
+            <table className="admin-table admin-accounts-table w-full min-w-[820px] table-fixed">
+              <thead>
+                <tr className="border-b border-gray-200 text-left text-sm text-gray-500 dark:border-dark-200 dark:text-gray-400">
+                  <th className="w-[14%] px-4 py-3 font-medium">Username</th>
+                  <th className="w-[16%] px-4 py-3 font-medium">Name</th>
+                  <th className={showRoleColumn ? "w-[24%] px-4 py-3 font-medium" : "w-[34%] px-4 py-3 font-medium"}>
+                    Email
+                  </th>
+                  {showRoleColumn && <th className="w-[10%] px-4 py-3 font-medium">Role</th>}
+                  <th className="w-[16%] px-4 py-3 font-medium">
+                    Created
+                  </th>
+                  <th className="w-[20%] px-4 py-3 font-medium text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {admins.map((admin) => (
+                  <tr
+                    key={admin.id}
+                    className="group border-b border-gray-100 dark:border-dark-200 last:border-0"
+                  >
+                    <td className="px-4 py-4">
+                      {isSuperAdmin && admin.id === currentAdmin?.id ? (
+                        <span className="inline-flex max-w-full truncate rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold tracking-[0.12em] text-amber-600 dark:text-amber-300">
+                          {admin.username}
+                        </span>
+                      ) : (
                         <div className="truncate font-medium text-gray-900 dark:text-white">
-                          {admin.name}
+                          {admin.username}
                         </div>
-                      </td>
+                      )}
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="truncate font-medium text-gray-900 dark:text-white">
+                        {admin.name}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
+                      <span title={admin.email} className="block truncate">
+                        {admin.email}
+                      </span>
+                    </td>
+                    {showRoleColumn && (
                       <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
-                        <span title={admin.email} className="block truncate">
-                          {admin.email}
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold tracking-[0.16em] ${
+                            admin.role === "SUPER"
+                              ? "bg-amber-500/10 text-amber-600 dark:text-amber-300"
+                              : "bg-slate-500/10 text-slate-600 dark:text-slate-300"
+                          }`}
+                        >
+                          {admin.role}
                         </span>
                       </td>
-                      {showRoleColumn && (
-                        <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
-                          <span
-                            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold tracking-[0.16em] ${
-                              admin.role === "SUPER"
-                                ? "bg-amber-500/10 text-amber-600 dark:text-amber-300"
-                                : "bg-slate-500/10 text-slate-600 dark:text-slate-300"
-                            }`}
-                          >
-                            {admin.role}
-                          </span>
-                        </td>
-                      )}
-                      <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
-                        {admin.createdAt.toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </td>
-                      <td className="px-4 py-4 text-right">
-                        {admin.id === currentAdmin?.id ? (
-                          <ChangeAdminPasswordButton adminUsername={admin.username} />
-                        ) : canDeleteAdmins ? (
-                          <DeleteAdminButton adminId={admin.id} adminUsername={admin.username} />
-                        ) : null}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                    )}
+                    <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
+                      {admin.createdAt.toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </td>
+                    <td className="px-4 py-4 text-right">
+                      {admin.id === currentAdmin?.id ? (
+                        <ChangeAdminPasswordButton adminUsername={admin.username} />
+                      ) : canDeleteAdmins ? (
+                        <DeleteAdminButton adminId={admin.id} adminUsername={admin.username} />
+                      ) : null}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
