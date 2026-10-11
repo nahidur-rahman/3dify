@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { HiOutlineCheck, HiOutlineEye, HiOutlineEyeOff, HiOutlineKey, HiOutlineX } from "react-icons/hi";
 import Button from "@/components/ui/Button";
@@ -22,6 +22,9 @@ export default function ChangeAdminPasswordButton({ adminUsername }: { adminUser
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [secondsRemaining, setSecondsRemaining] = useState(15);
+  const logoutStarted = useRef(false);
   const [form, setForm] = useState(emptyForm);
   const [visible, setVisible] = useState({ currentPassword: false, newPassword: false, confirmNewPassword: false });
   const [supportsTextMask, setSupportsTextMask] = useState(false);
@@ -42,14 +45,49 @@ export default function ChangeAdminPasswordButton({ adminUsername }: { adminUser
     setForm(emptyForm);
     setVisible({ currentPassword: false, newPassword: false, confirmNewPassword: false });
   };
+  const handleLogout = useCallback(async () => {
+    // A dismissal and the timer can fire together; send only one logout request.
+    if (logoutStarted.current) return;
+    logoutStarted.current = true;
+    setLoggingOut(true);
+    setError("");
+    try {
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      if (!response.ok) throw new Error("Logout failed");
+      // Reload the login page so cached admin pages are discarded after the cookie is cleared.
+      window.location.replace("/admin/login");
+    } catch {
+      logoutStarted.current = false;
+      setLoggingOut(false);
+      setError("Your password was updated, but logout failed. Click Okay to try again.");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!success) return;
+    const logoutAt = Date.now() + 15_000;
+    const timeout = window.setTimeout(() => { void handleLogout(); }, 15_000);
+    const countdown = window.setInterval(() => {
+      setSecondsRemaining(Math.max(0, Math.ceil((logoutAt - Date.now()) / 1000)));
+    }, 1000);
+    return () => {
+      window.clearTimeout(timeout);
+      window.clearInterval(countdown);
+    };
+  }, [success, handleLogout]);
+
   const handleClose = useCallback(() => {
-    if (loading) return;
+    if (loading || loggingOut) return;
+    if (success) {
+      void handleLogout();
+      return;
+    }
     setOpen(false);
     setForm(emptyForm);
     setVisible({ currentPassword: false, newPassword: false, confirmNewPassword: false });
     setError("");
     setSuccess(false);
-  }, [loading]);
+  }, [loading, loggingOut, success, handleLogout]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -82,6 +120,7 @@ export default function ChangeAdminPasswordButton({ adminUsername }: { adminUser
         return;
       }
       resetFields();
+      setSecondsRemaining(15);
       setSuccess(true);
     } catch {
       setError("Unable to connect. Please try again.");
@@ -99,10 +138,12 @@ export default function ChangeAdminPasswordButton({ adminUsername }: { adminUser
       <Modal
         open={open}
         onClose={handleClose}
-        closeDisabled={loading}
+        closeDisabled={loading || loggingOut}
         title="Change password"
         footer={success ? (
-          <Button onClick={handleClose}>Done</Button>
+          <Button onClick={handleClose} disabled={loggingOut}>
+            {loggingOut ? "Logging out..." : "Okay"}
+          </Button>
         ) : (
           <>
             <Button variant="outline" onClick={handleClose} disabled={loading}>Cancel</Button>
@@ -113,9 +154,19 @@ export default function ChangeAdminPasswordButton({ adminUsername }: { adminUser
         )}
       >
         {success ? (
-          <p role="status" className="rounded-xl bg-green-50 p-4 text-sm text-green-700 dark:bg-green-500/10 dark:text-green-400">
-            Your password has been updated. Use your new password the next time you sign in.
-          </p>
+          <div className="space-y-4">
+            <div role="status" className="space-y-2 rounded-xl bg-green-50 p-4 text-sm text-green-700 dark:bg-green-500/10 dark:text-green-400">
+              <p>Your password has been updated successfully.</p>
+              <p>This session will be logged out. Please sign in again using your new password.</p>
+            </div>
+            {error ? (
+              <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-600 dark:bg-red-500/10 dark:text-red-400">{error}</p>
+            ) : (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {loggingOut ? "Logging out..." : `Click Okay or close this modal to log out now. You will be logged out automatically in ${secondsRemaining} ${secondsRemaining === 1 ? "second" : "seconds"}.`}
+              </p>
+            )}
+          </div>
         ) : (
           <form id={formId} onSubmit={handleSubmit} autoComplete="off" aria-busy={loading} className="space-y-5 text-left">
             <p className="text-sm text-gray-500 dark:text-gray-400">
