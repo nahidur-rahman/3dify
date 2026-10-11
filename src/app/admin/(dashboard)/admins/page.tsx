@@ -1,12 +1,13 @@
 import { prisma } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/adminSession";
+import { redirect } from "next/navigation";
 import AdminForm from "@/components/AdminForm";
 import ChangeAdminPasswordButton from "@/components/ChangeAdminPasswordButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import DeleteAdminButton from "./DeleteAdminButton";
 
-async function getAdmins() {
-  return prisma.admin.findMany({
+async function getAdmins(currentAdminId: string) {
+  const admins = await prisma.admin.findMany({
     select: {
       id: true,
       username: true,
@@ -17,10 +18,18 @@ async function getAdmins() {
     },
     orderBy: { createdAt: "desc" },
   });
+
+  // Redact on the server so other accounts never receive SUPER admin emails.
+  return admins.map((admin) => ({
+    ...admin,
+    email: admin.role === "SUPER" && admin.id !== currentAdminId ? null : admin.email,
+  }));
 }
 
 export default async function AdminsPage() {
-  const [currentAdmin, admins] = await Promise.all([getCurrentAdmin(), getAdmins()]);
+  const currentAdmin = await getCurrentAdmin();
+  if (!currentAdmin) redirect("/admin/login");
+  const admins = await getAdmins(currentAdmin.id);
 
   const adminUsername = currentAdmin?.username || "Admin";
   const adminRole = currentAdmin?.role === "SUPER" ? "SUPER" : "ADMIN";
@@ -100,8 +109,8 @@ export default async function AdminsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
-                      <span title={admin.email} className="block truncate">
-                        {admin.email}
+                      <span title={admin.email ?? undefined} className="block truncate">
+                        {admin.email ?? ""}
                       </span>
                     </td>
                     {showRoleColumn && (
