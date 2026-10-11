@@ -35,18 +35,18 @@ const subcategorySchema = z.preprocess(
     .nullable()
 );
 
-export const PASSWORD_MIN_LENGTH = 8;
+export const PASSWORD_MIN_LENGTH = 12;
 export const STRONG_PASSWORD_MESSAGE =
-  "Use minimum 8 characters including 1 uppercase, 1 lowercase, 1 number, and 1 symbol";
+  "Use minimum 12 characters including atleast 1 uppercase, 1 lowercase, 1 number, and 1 symbol";
 
 const STRONG_PASSWORD_REGEX =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9\s]).{8,}$/;
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9\s]).+$/;
 
 const passwordRequirementDefinitions = [
   {
     key: "length",
-    label: "8+",
-    message: "minimum 8 characters",
+    label: `${PASSWORD_MIN_LENGTH}+`,
+    message: `minimum ${PASSWORD_MIN_LENGTH} characters`,
     test: (password: string) => password.length >= PASSWORD_MIN_LENGTH,
   },
   {
@@ -104,21 +104,21 @@ export function getStrongPasswordWarning(password: string) {
 
   if (lengthMissing) {
     if (missingRequirements.length === 0) {
-      return "Use minimum 8 characters";
+      return `Use minimum ${PASSWORD_MIN_LENGTH} characters`;
     }
 
-    return `Use minimum 8 characters including ${formatMissingRequirements(missingRequirements)}`;
+    return `Use minimum ${PASSWORD_MIN_LENGTH} characters including atleast ${formatMissingRequirements(missingRequirements)}`;
   }
 
   if (missingRequirements.length === 0) {
     return "";
   }
 
-  return `Use ${formatMissingRequirements(missingRequirements)}`;
+  return `Use atleast ${formatMissingRequirements(missingRequirements)}`;
 }
 
 export function isStrongPassword(password: string) {
-  return STRONG_PASSWORD_REGEX.test(password);
+  return password.length >= PASSWORD_MIN_LENGTH && STRONG_PASSWORD_REGEX.test(password);
 }
 
 export const loginSchema = z.object({
@@ -133,12 +133,31 @@ export const adminCreateSchema = z
     email: z.string().trim().email("Invalid email address"),
     password: z
       .string()
+      .min(PASSWORD_MIN_LENGTH, STRONG_PASSWORD_MESSAGE)
       .regex(STRONG_PASSWORD_REGEX, STRONG_PASSWORD_MESSAGE),
-    confirmPassword: z.string().min(8, "Confirm your password"),
+    confirmPassword: z.string().min(PASSWORD_MIN_LENGTH, "Confirm your password"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
+  });
+
+export const adminPasswordChangeSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Enter your current password").max(1024),
+    newPassword: z
+      .string()
+      .min(PASSWORD_MIN_LENGTH, STRONG_PASSWORD_MESSAGE)
+      .max(72, "New password must be 72 bytes or fewer")
+      .regex(STRONG_PASSWORD_REGEX, STRONG_PASSWORD_MESSAGE)
+      .refine((password) => new TextEncoder().encode(password).length <= 72, {
+        message: "New password must be 72 bytes or fewer",
+      }),
+    confirmNewPassword: z.string().min(PASSWORD_MIN_LENGTH, "Confirm your new password").max(72),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "New passwords do not match",
+    path: ["confirmNewPassword"],
   });
 
 const productSchemaBase = z.object({
