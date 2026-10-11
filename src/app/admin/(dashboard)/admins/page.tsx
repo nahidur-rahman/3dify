@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/adminSession";
 import AdminForm from "@/components/AdminForm";
+import ChangeAdminPasswordButton from "@/components/ChangeAdminPasswordButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import DeleteAdminButton from "./DeleteAdminButton";
 
@@ -65,21 +66,19 @@ export default async function AdminsPage() {
               <div>
               <p className="admin-table-hint">Swipe to see all account details.</p>
               <div className="admin-table-scroll overflow-x-auto" role="region" aria-label="Administrators table" tabIndex={0}>
-              <table className="admin-table admin-accounts-table w-full table-fixed">
+              <table className="admin-table admin-accounts-table w-full min-w-[820px] table-fixed">
                 <thead>
                   <tr className="border-b border-gray-200 text-left text-sm text-gray-500 dark:border-dark-200 dark:text-gray-400">
-                    <th className="w-[16%] px-4 py-3 font-medium">Username</th>
-                    <th className="w-[18%] px-4 py-3 font-medium">Name</th>
-                    <th className={showRoleColumn ? "w-[30%] px-4 py-3 font-medium" : "w-[40%] px-4 py-3 font-medium"}>
+                    <th className="w-[14%] px-4 py-3 font-medium">Username</th>
+                    <th className="w-[16%] px-4 py-3 font-medium">Name</th>
+                    <th className={showRoleColumn ? "w-[24%] px-4 py-3 font-medium" : "w-[34%] px-4 py-3 font-medium"}>
                       Email
                     </th>
                     {showRoleColumn && <th className="w-[10%] px-4 py-3 font-medium">Role</th>}
-                    <th className={canDeleteAdmins ? "w-[16%] px-4 py-3 font-medium" : "w-[22%] px-4 py-3 font-medium"}>
+                    <th className="w-[16%] px-4 py-3 font-medium">
                       Created
                     </th>
-                    {canDeleteAdmins && (
-                      <th className="w-[10%] px-4 py-3 font-medium text-right">Actions</th>
-                    )}
+                    <th className="w-[20%] px-4 py-3 font-medium text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -129,13 +128,13 @@ export default async function AdminsPage() {
                           day: "numeric",
                         })}
                       </td>
-                      {canDeleteAdmins && (
-                        <td className="px-4 py-4 text-right">
-                          {admin.id !== currentAdmin?.id && (
-                            <DeleteAdminButton adminId={admin.id} adminUsername={admin.username} />
-                          )}
-                        </td>
-                      )}
+                      <td className="px-4 py-4 text-right">
+                        {admin.id === currentAdmin?.id ? (
+                          <ChangeAdminPasswordButton adminUsername={admin.username} />
+                        ) : canDeleteAdmins ? (
+                          <DeleteAdminButton adminId={admin.id} adminUsername={admin.username} />
+                        ) : null}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
