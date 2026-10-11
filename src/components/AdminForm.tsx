@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import {
   getStrongPasswordWarning,
   isStrongPassword,
+  PASSWORD_MIN_LENGTH,
   STRONG_PASSWORD_MESSAGE,
 } from "@/lib/validation";
 
@@ -195,7 +196,7 @@ export default function AdminForm() {
                 value={form.password}
                 onChange={handleChange("password")}
                 required
-                minLength={8}
+                minLength={PASSWORD_MIN_LENGTH}
                 autoComplete="off"
                 autoCapitalize="none"
                 autoCorrect="off"
@@ -203,7 +204,7 @@ export default function AdminForm() {
                 data-lpignore="true"
                 data-1p-ignore="true"
                 data-form-type="other"
-                placeholder="At least 8 characters"
+                placeholder={`At least ${PASSWORD_MIN_LENGTH} characters`}
                 className={`pr-12 ${
                   showPassword ? "[-webkit-text-security:none]" : "[-webkit-text-security:disc]"
                 }`}
@@ -241,7 +242,7 @@ export default function AdminForm() {
                 value={form.confirmPassword}
                 onChange={handleChange("confirmPassword")}
                 required
-                minLength={8}
+                minLength={PASSWORD_MIN_LENGTH}
                 autoComplete="off"
                 autoCapitalize="none"
                 autoCorrect="off"
