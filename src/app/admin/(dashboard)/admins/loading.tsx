@@ -1,34 +1,16 @@
 import Skeleton from "@/components/ui/Skeleton";
 
-function CreateAdminSkeleton() {
-  return (
-    <div className="rounded-2xl border border-gray-200 bg-white dark:border-dark-200 dark:bg-dark-100">
-      <div className="p-6 pb-2">
-        <Skeleton className="h-6 w-32" />
-      </div>
-      <div className="space-y-5 p-6">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div key={index} className="space-y-1.5">
-            <Skeleton className="h-4 w-24 rounded-md" />
-            <Skeleton className="h-12 w-full rounded-xl" />
-          </div>
-        ))}
-        <Skeleton className="h-11 w-full rounded-xl" />
-      </div>
-    </div>
-  );
-}
-
 function AdminTableSkeleton() {
   return (
     <div className="h-fit min-w-0 rounded-2xl border border-gray-200 bg-white dark:border-dark-200 dark:bg-dark-100">
-      <div className="p-6 pb-2">
+      <div className="flex flex-col gap-3 p-6 pb-2 sm:flex-row sm:items-center sm:justify-between">
         <Skeleton className="h-6 w-36" />
+        <Skeleton className="h-11 w-full rounded-xl sm:w-36" />
       </div>
       <div className="p-3 sm:p-6">
         <p className="admin-table-hint">Swipe to see all account details.</p>
         <div className="admin-table-scroll overflow-x-auto">
-          <table className="admin-table admin-accounts-table w-full table-fixed">
+          <table className="admin-table admin-accounts-table w-full min-w-[820px] table-fixed">
             <thead>
               <tr className="border-b border-gray-200 dark:border-dark-200">
                 {Array.from({ length: 6 }).map((_, index) => (
@@ -72,10 +54,7 @@ export default function AdminsLoading() {
         <Skeleton className="h-9 w-56 rounded-full" />
       </div>
 
-      <div className="grid gap-8 xl:grid-cols-[375px_minmax(0,1fr)]">
-        <CreateAdminSkeleton />
-        <AdminTableSkeleton />
-      </div>
+      <AdminTableSkeleton />
     </div>
   );
 }
