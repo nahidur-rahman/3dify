@@ -8,21 +8,22 @@ export interface AdminPayload {
 export const ADMIN_TOKEN_COOKIE = "admin-token";
 export const ADMIN_AUTH_METHOD = "password+email-otp";
 
-const DEFAULT_ADMIN_TOKEN_VALIDITY = "3d";
+const DEFAULT_ADMIN_TOKEN_VALIDITY = "14d";
+const DEFAULT_ADMIN_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24 * 14;
 
 function parseAdminTokenValidity(value: string | undefined) {
   if (!value) {
-    return { duration: DEFAULT_ADMIN_TOKEN_VALIDITY, maxAgeSeconds: 60 * 60 * 24 * 3 };
+    return { duration: DEFAULT_ADMIN_TOKEN_VALIDITY, maxAgeSeconds: DEFAULT_ADMIN_TOKEN_MAX_AGE_SECONDS };
   }
 
   const parsed = /^(\d+)([smhd])$/i.exec(value.trim());
   if (!parsed) {
-    return { duration: DEFAULT_ADMIN_TOKEN_VALIDITY, maxAgeSeconds: 60 * 60 * 24 * 3 };
+    return { duration: DEFAULT_ADMIN_TOKEN_VALIDITY, maxAgeSeconds: DEFAULT_ADMIN_TOKEN_MAX_AGE_SECONDS };
   }
 
   const amount = Number(parsed[1]);
   if (!Number.isInteger(amount) || amount <= 0) {
-    return { duration: DEFAULT_ADMIN_TOKEN_VALIDITY, maxAgeSeconds: 60 * 60 * 24 * 3 };
+    return { duration: DEFAULT_ADMIN_TOKEN_VALIDITY, maxAgeSeconds: DEFAULT_ADMIN_TOKEN_MAX_AGE_SECONDS };
   }
 
   const unit = parsed[2].toLowerCase();
