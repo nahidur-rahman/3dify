@@ -182,6 +182,8 @@ Open http://localhost:3000
 
 ## Deployment (Vercel)
 
+Admin sign-in requires password plus a single-use email OTP. See [admin OTP deployment and cleanup setup](docs/admin-otp-login.md) before deploying this change.
+
 1. Create Supabase project and get DATABASE_URL, DIRECT_URL, SUPABASE_URL, and SUPABASE_SERVICE_ROLE_KEY.
 2. Create the Storage bucket defined by SUPABASE_STORAGE_BUCKET (default: product-images).
 3. Set all environment variables in Vercel.
