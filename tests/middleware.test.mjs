@@ -27,6 +27,8 @@ function loadTypeScript(relativePath, dependencies = {}) {
     URL,
     URLSearchParams,
     Headers,
+    TextEncoder,
+    process: { env: { JWT_SECRET: "middleware-regression-test-secret" } },
     require: (name) => {
       assert.ok(name in dependencies, `Unexpected dependency: ${name}`);
       return dependencies[name];
@@ -36,11 +38,12 @@ function loadTypeScript(relativePath, dependencies = {}) {
 }
 
 const categories = loadTypeScript("../src/lib/categories.ts");
+const authConfig = loadTypeScript("../src/lib/authConfig.ts");
 const { middleware, config } = loadTypeScript("../middleware.ts", {
   "next/server": nextServer,
   jose: { jwtVerify },
   "@/lib/categories": categories,
-  "@/lib/authConfig": { ADMIN_TOKEN_COOKIE: cookieName, JWT_SECRET: secret },
+  "@/lib/authConfig": authConfig,
 });
 const matches = getMiddlewareRouteMatcher(getMiddlewareMatchers(config.matcher, {}));
 
@@ -105,7 +108,7 @@ test("invalid admin tokens are cleared and cannot access admin pages", async () 
 });
 
 test("valid admin tokens preserve identity forwarding and login redirection", async () => {
-  const token = await new SignJWT({ id: "admin-1", email: "admin@example.com", username: "Admin" })
+  const token = await new SignJWT({ id: "admin-1", email: "admin@example.com", username: "Admin", authMethod: authConfig.ADMIN_AUTH_METHOD })
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("5m")
     .sign(secret);
@@ -116,4 +119,12 @@ test("valid admin tokens preserve identity forwarding and login redirection", as
   assert.equal(response.headers.get("x-middleware-request-x-admin-username"), "Admin");
   const login = await middleware(request("/admin/login", token));
   assert.equal(login.headers.get("location"), "https://example.com/admin");
+});
+
+test("a signed password-only session cannot bypass OTP on admin pages", async () => {
+  const token = await new SignJWT({ id: "admin-1", email: "admin@example.com", username: "Admin" })
+    .setProtectedHeader({ alg: "HS256" }).setExpirationTime("5m").sign(secret);
+  const response = await middleware(request("/admin", token));
+  assert.equal(response.headers.get("location"), "https://example.com/admin/login");
+  assert.equal(response.cookies.get(cookieName)?.value, "");
 });
