@@ -12,14 +12,25 @@ let sent;
 let deliver;
 let otp;
 let prisma;
+let queries;
+let beforeQuery;
 
 // Run the application's actual parameterized SQL and migration in an isolated PostgreSQL engine.
 // This small adapter maps only Prisma's model operations; no authentication logic is reimplemented.
 function adapter(db) {
   const tagged = (strings) => strings.reduce((text, part, i) => text + (i ? `$${i}` : "") + part, "");
   return {
-    $queryRaw: async (strings, ...values) => (await db.query(tagged(strings), values)).rows,
-    $executeRaw: async (strings, ...values) => (await db.query(tagged(strings), values)).affectedRows,
+    $queryRaw: async (strings, ...values) => {
+      const sql = tagged(strings);
+      queries.push(sql);
+      if (beforeQuery) await beforeQuery(sql);
+      return (await db.query(sql, values)).rows;
+    },
+    $executeRaw: async (strings, ...values) => {
+      const sql = tagged(strings);
+      queries.push(sql);
+      return (await db.query(sql, values)).affectedRows;
+    },
     $transaction: (fn) => pg.transaction((tx) => fn(adapter(tx))),
     adminLoginChallenge: {
       findUnique: async ({ where, include }) => {
@@ -69,6 +80,8 @@ before(async () => {
 });
 after(async () => { await pg?.close(); });
 beforeEach(async () => {
+  queries = [];
+  beforeQuery = null;
   sent = [];
   deliver = async () => true;
   await pg.exec('TRUNCATE admin_login_challenges, admin_auth_rate_limits, admins CASCADE');
@@ -119,12 +132,85 @@ test("concurrent verification requests issue exactly one successful result", asy
   assert.equal((await challengeRows()).length, 0);
 });
 
-test("the fifth incorrect guess destroys the code, even when guesses are concurrent", async () => {
+test("the configured guess limit destroys the code, even when guesses share a stale attempts snapshot", async () => {
   const { token } = await issue();
   const results = await Promise.all(Array.from({ length: 8 }, () => otp.verifyAdminOtp(token, wrongCode(sent[0][1]))));
   assert.equal(results.some((result) => result.ok), false);
   assert.equal((await challengeRows()).length, 0);
   assert.equal((await otp.verifyAdminOtp(token, sent[0][1])).ok, false);
+});
+
+test("authentication operations have bounded database round trips", async () => {
+  assert.equal((await otp.readAdminPasswordAttempt(admin.email, "bounded-source")).admin.id, admin.id);
+  assert.equal(queries.length, 1, "password budgets, cleanup and admin lookup must share one statement");
+  queries = [];
+  const result = await issue();
+  assert.equal(queries.length, 2, "issuance and delivery activation must need only two statements");
+  queries = [];
+  assert.ok(await otp.getAdminOtpStatus(result.token));
+  assert.equal(queries.length, 1);
+  queries = [];
+  assert.equal((await otp.verifyAdminOtp(result.token, wrongCode(sent[0][1]))).ok, false);
+  assert.equal(queries.length, 2);
+  queries = [];
+  assert.equal((await otp.verifyAdminOtp(result.token, sent[0][1])).ok, true);
+  assert.equal(queries.length, 2);
+});
+
+test("a challenge replaced after preload cannot be consumed using the old code", async () => {
+  const first = await issue();
+  const oldCode = sent[0][1];
+  let replacement;
+  beforeQuery = async (sql) => {
+    if (!sql.includes("locked_challenge AS MATERIALIZED")) return;
+    beforeQuery = null;
+    await clearCooldown();
+    replacement = await issue();
+  };
+  assert.equal((await otp.verifyAdminOtp(first.token, oldCode)).ok, false);
+  assert.equal((await challengeRows()).length, 1);
+  assert.equal((await otp.verifyAdminOtp(replacement.token, sent[1][1])).ok, true);
+});
+
+test("credential changes between preload and row locking cannot create a session", async () => {
+  const result = await issue();
+  beforeQuery = async (sql) => {
+    if (!sql.includes("locked_challenge AS MATERIALIZED")) return;
+    beforeQuery = null;
+    await pg.query("UPDATE admins SET password = $1", ["new-password-hash"]);
+  };
+  assert.equal((await otp.verifyAdminOtp(result.token, sent[0][1])).ok, false);
+  assert.equal((await otp.verifyAdminOtp(result.token, sent[0][1])).ok, false);
+});
+
+test("expiry between preload and consumption is rejected and destroys the old code", async () => {
+  const result = await issue();
+  beforeQuery = async (sql) => {
+    if (!sql.includes("locked_challenge AS MATERIALIZED")) return;
+    beforeQuery = null;
+    await pg.exec("UPDATE admin_login_challenges SET \"expiresAt\" = timezone('UTC', clock_timestamp()) - interval '1 millisecond'");
+  };
+  assert.equal((await otp.verifyAdminOtp(result.token, sent[0][1])).ok, false);
+  assert.equal((await challengeRows()).length, 0);
+});
+
+test("repeated cooldown rejections do not consume the longer send budget", async () => {
+  const result = await issue();
+  for (let i = 0; i < 10; i++) assert.equal((await otp.issueAdminOtp({ token: result.token })).status, 429);
+  const budget = (await pg.query("SELECT count FROM admin_auth_rate_limits WHERE \"windowEndsAt\" > timezone('UTC', clock_timestamp()) + interval '2 minutes'")).rows;
+  assert.equal(budget.length, 1);
+  assert.equal(budget[0].count, 1);
+  assert.equal(sent.length, 1);
+});
+
+test("counter rollover and cleanup do not delete the two active password budget rows", async () => {
+  await otp.readAdminPasswordAttempt(admin.email, "rollover-source");
+  await pg.exec("UPDATE admin_auth_rate_limits SET \"windowEndsAt\" = timezone('UTC', clock_timestamp()) - interval '1 second'");
+  await pg.query("INSERT INTO admin_auth_rate_limits VALUES ($1, 1, timezone('UTC', clock_timestamp()) - interval '1 second')", ["unrelated-expired-key"]);
+  assert.equal((await otp.readAdminPasswordAttempt(admin.email, "rollover-source")).ok, true);
+  const rows = (await pg.query("SELECT * FROM admin_auth_rate_limits")).rows;
+  assert.equal(rows.length, 2);
+  assert.ok(rows.every((row) => row.count === 1 && row.windowEndsAt > new Date()));
 });
 
 test("expired codes are rejected and deleted using the database clock", async () => {
