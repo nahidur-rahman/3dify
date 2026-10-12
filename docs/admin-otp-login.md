@@ -18,6 +18,7 @@ Admin login now requires the account password followed by an eight-digit email c
 - Limits are persisted in PostgreSQL: 10 password submissions per email per 15 minutes, 100 per source IP per 15 minutes, one code per admin per minute, and five codes per admin per 15 minutes. Account limits apply regardless of IP headers. Configure the reverse proxy to overwrite `X-Forwarded-For`; without one, the shared `unknown` source uses the same conservative source limit.
 - Delivery is awaited with a five-second timeout per attempt and at most one retry for temporary failures. Retries use the same code and provider idempotency key. A failed or ambiguous provider response after that budget destroys the pending code; the administrator can retry after the cooldown. OTPs, passwords, browser secrets, and provider bodies are never logged by this flow.
 - The session JWT includes the completed authentication method. Both API session reads and middleware reject legacy sessions and restrict JWT verification to HS256.
+- Admin session tokens and their cookies expire after 14 days by default (`ADMIN_TOKEN_VALIDITY="14d"`). Set this variable in your hosting dashboard as well. The change applies to newly issued tokens; existing tokens keep their original expiry. OTP codes still expire after five minutes.
 
 ## Login performance
 
