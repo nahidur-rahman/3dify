@@ -122,8 +122,8 @@ export function isStrongPassword(password: string) {
 }
 
 export const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string().trim().max(254).email("Invalid email address"),
+  password: z.string().min(1, "Enter your password").max(1024),
 });
 
 export const adminCreateSchema = z
