@@ -6,6 +6,7 @@ export interface AdminPayload {
 }
 
 export const ADMIN_TOKEN_COOKIE = "admin-token";
+export const ADMIN_AUTH_METHOD = "password+email-otp";
 
 const DEFAULT_ADMIN_TOKEN_VALIDITY = "3d";
 
@@ -43,6 +44,21 @@ const adminTokenValidity = parseAdminTokenValidity(process.env.ADMIN_TOKEN_VALID
 export const ADMIN_TOKEN_VALIDITY = adminTokenValidity.duration;
 export const ADMIN_TOKEN_MAX_AGE_SECONDS = adminTokenValidity.maxAgeSeconds;
 
-export const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "fallback-secret-do-not-use-in-production"
-);
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret || new TextEncoder().encode(jwtSecret).length < 32) {
+  throw new Error("JWT_SECRET must be configured with at least 32 bytes");
+}
+export const JWT_SECRET = new TextEncoder().encode(jwtSecret);
+
+export function readAdminTokenPayload(payload: Record<string, unknown>): AdminPayload | null {
+  if (payload.authMethod !== ADMIN_AUTH_METHOD || typeof payload.exp !== "number"
+    || typeof payload.id !== "string" || !payload.id
+    || typeof payload.email !== "string" || !payload.email
+    || typeof payload.username !== "string" || !payload.username) return null;
+  return {
+    id: payload.id,
+    email: payload.email,
+    username: payload.username,
+    ...(typeof payload.name === "string" ? { name: payload.name } : {}),
+  };
+}
