@@ -7,7 +7,7 @@ Admin login now requires the account password followed by an eight-digit email c
 1. Apply the committed migration with `npx prisma migrate deploy`, then generate the client with `npx prisma generate` before building. The application fails closed if its authentication tables are missing.
 2. Keep `JWT_SECRET` private and use at least 32 random bytes. The previous public fallback secret has been removed. Existing password-only sessions are deliberately rejected; admins must sign in again.
 3. Set `ADMIN_OTP_FROM` to a single email address or `Name <email>` and verify its domain in Resend (for the example sender, `mail.3difybd.com`). Ensure the existing API key can send from this domain. Password verification never creates an authenticated session, including when Resend fails.
-4. Set `NEXT_PUBLIC_SITE_URL` to the actual production origin (for example `https://3difybd.com`). Authentication mutations require JSON and reject mismatched browser origins.
+4. Set `NEXT_PUBLIC_SITE_URL=https://www.3difybd.com` in the hosting project's **Production** environment, then rebuild/redeploy. Use the exact origin shown in the admin page's browser address, including `www`. This setting is independent of the database and of your local `.env`. Next.js inlines `NEXT_PUBLIC_` variables at build time, so updating a setting without rebuilding does not update an existing deployment. Authentication mutations require JSON and reject mismatched browser origins. Production also rejects missing, HTTP, or localhost site URL configuration.
 5. Run `prisma/admin-auth-cleanup.sql` once in the Supabase SQL Editor to enable a database cleanup job every minute. If hosting PostgreSQL elsewhere, schedule the two DELETE statements with your database scheduler. Exact expiry is enforced during verification using the database clock, independently of the job. Expired digests are also removed on authentication requests; scheduled deletion removes idle records within one minute of expiry.
 
 ## Security behavior
@@ -49,3 +49,9 @@ Run the test files with `node --test`, `npx tsc --noEmit`, `npm run lint`, and `
 On Windows, stop the development server before regenerating Prisma if its query-engine DLL is locked. A running dev server can also lock `.next/trace`; production builds should run with that server stopped or from an isolated checkout.
 
 Before production rollout, confirm delivery to an administrator's mailbox with the deployed sender domain and run the migration and cleanup scheduler. Automated tests stub delivery and never send live verification emails.
+
+## Production origin troubleshooting
+
+`403 Invalid request origin.` occurs before credentials and database access. The allowed browser origin comes from the deployed `NEXT_PUBLIC_SITE_URL`. For `https://www.3difybd.com/admin/login`, configure `https://www.3difybd.com` rather than `http://localhost:3000` or `https://3difybd.com`, and redeploy with the new setting. Changing the local `.env` does not change the live hosting environment. The apex and `www` domains are different origins; serve admin login consistently on the configured domain.
+
+An empty JSON login request from the configured origin should return `400 Enter a valid email and password.` rather than an origin error. This checks deployment configuration without sending credentials, accessing accounts, or sending OTP emails. Untrusted origins must continue to return 403. Do not fix an origin mismatch by disabling the origin checks or allowing every host.
