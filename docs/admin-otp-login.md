@@ -12,12 +12,34 @@ Admin login now requires the account password followed by an eight-digit email c
 
 ## Security behavior
 
-- A code expires exactly five minutes after challenge creation and is deleted on success, cancellation, or the fifth incorrect guess. A new challenge replaces the old one, including its browser secret. Resending does not extend or preserve the old code.
+- A code expires exactly five minutes after challenge creation and is deleted on success, cancellation, or the configured guess limit (currently three incorrect guesses). A new challenge replaces the old one, including its browser secret. Resending does not extend or preserve the old code.
 - Codes use cryptographically secure randomness and keyed SHA-256 digests bound to the challenge. Database records contain neither plaintext codes nor plaintext browser secrets. The browser secret is held in an HttpOnly cookie restricted to `/api/auth`, with Secure in production and SameSite Strict.
-- Verification and resend use database transactions and row locks in a consistent order. Only one concurrent verification can consume a code. Pending challenges are bound to the current password hash and email; changing either makes them unusable. Deleting an admin cascades to the challenge.
+- Verification and resend use atomic PostgreSQL statements and row locks in a consistent order: admin first, then challenge. Verification rechecks the account and challenge after loading their digests, uses the locked row's attempt count, and checks expiry after acquiring the locks. Only a successful deletion can authorize a session. Pending challenges are bound to the current password hash and email; changing either makes them unusable. Deleting an admin cascades to the challenge.
 - Limits are persisted in PostgreSQL: 10 password submissions per email per 15 minutes, 100 per source IP per 15 minutes, one code per admin per minute, and five codes per admin per 15 minutes. Account limits apply regardless of IP headers. Configure the reverse proxy to overwrite `X-Forwarded-For`; without one, the shared `unknown` source uses the same conservative source limit.
 - Delivery is awaited with a five-second timeout per attempt and at most one retry for temporary failures. Retries use the same code and provider idempotency key. A failed or ambiguous provider response after that budget destroys the pending code; the administrator can retry after the cooldown. OTPs, passwords, browser secrets, and provider bodies are never logged by this flow.
 - The session JWT includes the completed authentication method. Both API session reads and middleware reject legacy sessions and restrict JWT verification to HS256.
+
+## Login performance
+
+Password rate limits, the account lookup, and bounded cleanup share one database statement. Counter keys are locked in sorted order; cleanup runs after those locks and skips contended records. Cleanup excludes the current counter keys, and counter windows reset atomically when expired. Bcrypt remains at cost 12, including equivalent work for unknown accounts.
+
+For valid credentials, challenge creation, cooldown, and send budgets are handled by one atomic statement. Resend consumes the longer send budget only when the cooldown permits a send. Email delivery is still awaited, followed by one activation statement that also returns the database time. A correct-password request therefore uses three database round trips plus bcrypt and Resend. OTP verification uses two database statements; restoring a valid pending challenge uses one. These changes require no new migration.
+
+Local development measurements on October 12, 2026: wrong-credentials HTTP responses measured 3.36–4.51 seconds before optimization. Warm requests improved from 3.36–3.55 seconds to 0.83–0.84 seconds; the first request after recompilation took 2.39 seconds. These figures include local-server and network costs and are not a production latency guarantee.
+
+An additional before/after profile used the connected database inside rolled-back transactions, with email delivery mocked:
+
+| Stage | Before | After | Database statements before → after |
+| --- | --- | --- | --- |
+| Password check, including bcrypt | 1.44 s | 0.46 s | 5 → 1 |
+| OTP creation and activation, excluding email delivery | 2.43 s | 0.49 s | 10 → 2 |
+| Restore pending OTP | 1.21 s | 0.24 s | 5 → 1 |
+| Wrong OTP | 1.21 s | 0.49 s | 5 → 2 |
+| Correct OTP | 1.21 s | 0.49 s | 5 → 2 |
+
+The transaction profile excludes its outer transaction setup/commit and normal dashboard rendering. Inbox arrival and successful login response time still depend on Resend and database proximity. No real emails were sent by these benchmarks, and their database changes were rolled back.
+
+Separate-connection PostgreSQL checks in a temporary schema also verified rejection when a correct OTP expires during an observed row-lock wait, and when a password change commits while verification is waiting. The temporary schema was removed afterward. The committed regression tests also cover stale snapshots, simultaneous guesses, replacement challenges, cooldown budgets, and query-count bounds.
 
 ## Verification
 
