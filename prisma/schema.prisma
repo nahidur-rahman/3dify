@@ -81,8 +81,36 @@ model Admin {
   name      String
   role      AdminRole @default(ADMIN)
   createdAt DateTime  @default(now())
+  loginChallenge AdminLoginChallenge?
 
   @@map("admins")
+}
+
+// Only keyed digests are persisted; the OTP and browser secret are never stored.
+model AdminLoginChallenge {
+  id               String   @id
+  adminId          String   @unique
+  admin            Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  tokenHash        String   @unique
+  otpHash          String
+  credentialDigest String
+  attempts         Int      @default(0)
+  delivered        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  expiresAt        DateTime
+
+  @@index([expiresAt])
+  @@map("admin_login_challenges")
+}
+
+// Shared by all server instances, including serverless workers.
+model AdminAuthRateLimit {
+  key          String   @id
+  count        Int
+  windowEndsAt DateTime
+
+  @@index([windowEndsAt])
+  @@map("admin_auth_rate_limits")
 }
 
 enum OrderStatus {
