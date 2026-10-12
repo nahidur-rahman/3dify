@@ -1,10 +1,9 @@
 import { NextRequest } from "next/server";
-import { prisma } from "@/lib/db";
 import { compare } from "bcryptjs";
 import { setAdminOtpCookie } from "@/lib/auth";
 import { loginSchema } from "@/lib/validation";
 import { adminAuthSource, authResponse, checkAdminAuthRequest, readAdminAuthJson } from "@/lib/adminAuthRequest";
-import { issueAdminOtp, limitAdminPasswordAttempts } from "@/lib/adminOtp";
+import { issueAdminOtp, readAdminPasswordAttempt } from "@/lib/adminOtp";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -19,11 +18,11 @@ export async function POST(request: NextRequest) {
 
     const { email, password } = parsed.data;
 
-    const limited = await limitAdminPasswordAttempts(email, adminAuthSource(request));
-    if (limited) return authResponse({ error: limited.error }, limited.status, limited.retryAfter);
+    const attempt = await readAdminPasswordAttempt(email, adminAuthSource(request));
+    if (!attempt.ok) return authResponse({ error: attempt.error }, attempt.status, attempt.retryAfter);
 
     // Preserve the email matching rules of existing accounts. Unknown accounts still perform bcrypt work.
-    const admin = await prisma.admin.findUnique({ where: { email } });
+    const admin = attempt.admin;
     const passwordMatches = await compare(password, admin?.password || DUMMY_PASSWORD_HASH);
     if (!admin || !passwordMatches) return authResponse({ error: "Invalid email or password" }, 401);
 
