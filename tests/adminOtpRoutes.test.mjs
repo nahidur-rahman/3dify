@@ -44,7 +44,11 @@ function harness({ passwordMatches = true, missingAdmin = false, verifyResult, i
       return missingAdmin ? null : { id: "admin-1", email: "admin@example.com", password: "hash", username: "owner", name: "Owner" };
     } } } },
     "@/lib/adminOtp": {
-      limitAdminPasswordAttempts: async (...args) => { calls.push(["limit", ...args]); return null; },
+      readAdminPasswordAttempt: async (...args) => {
+        calls.push(["limit", ...args]);
+        const admin = await dependencies["@/lib/db"].prisma.admin.findUnique();
+        return { ok: true, admin };
+      },
       issueAdminOtp: async (...args) => { calls.push(["issue", ...args]); return result; },
       verifyAdminOtp: async (...args) => { calls.push(["verify", ...args]); return verifyResult || { ok: true, admin: { id: "admin-1", email: "admin@example.com", username: "owner" } }; },
       getAdminOtpStatus: async () => ({ email: result.email, expiresAt: result.expiresAt, resendAvailableAt: result.resendAvailableAt, serverTime: result.serverTime }),
