@@ -14,10 +14,23 @@ export function authResponse(body: object, status = 200, retryAfter?: number) {
 // JSON plus origin checks prevent login CSRF and cross-site challenge manipulation.
 export function checkAdminAuthRequest(request: NextRequest): NextResponse | null {
   const origin = request.headers.get("origin");
-  const configuredOrigin = process.env.NEXT_PUBLIC_SITE_URL;
+  const configuredOrigin = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   let trustedOrigin = request.nextUrl.origin;
-  if (process.env.NODE_ENV === "production" && configuredOrigin) {
-    try { trustedOrigin = new URL(configuredOrigin).origin; } catch { return authResponse({ error: "Authentication is unavailable." }, 503); }
+  if (process.env.NODE_ENV === "production") {
+    try {
+      if (!configuredOrigin) throw new Error("Missing site URL");
+      const site = new URL(configuredOrigin);
+      const hostname = site.hostname.replace(/\.$/, "");
+      const isLocal = hostname === "localhost" || hostname.endsWith(".localhost")
+        || hostname === "[::1]" || hostname === "0.0.0.0" || hostname.startsWith("127.");
+      if (site.protocol !== "https:" || site.username || site.password || isLocal) {
+        throw new Error("Invalid production site URL");
+      }
+      trustedOrigin = site.origin;
+    } catch {
+      console.error("Admin authentication requires NEXT_PUBLIC_SITE_URL to be a public HTTPS URL in production.");
+      return authResponse({ error: "Authentication is unavailable. Check the production site URL configuration." }, 503);
+    }
   }
   if ((origin && origin !== trustedOrigin) || request.headers.get("sec-fetch-site") === "cross-site") {
     return authResponse({ error: "Invalid request origin." }, 403);
