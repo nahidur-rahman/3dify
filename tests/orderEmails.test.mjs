@@ -24,7 +24,9 @@ function loadTypeScript(path, dependencies = {}, globals = {}) {
   return exports;
 }
 
-const templates = loadTypeScript("../src/lib/orderEmailTemplates.ts");
+const keychain = loadTypeScript("../src/lib/nameKeychain.ts");
+const keychainCheckout = loadTypeScript("../src/lib/keychainCheckout.ts", { zod: require("zod"), "@/lib/nameKeychain": keychain });
+const templates = loadTypeScript("../src/lib/orderEmailTemplates.ts", { "@/lib/nameKeychain": keychain });
 const config = {
   from: "3DifyBD Orders <orders@mail.3difybd.com>",
   adminEmail: "3difybd@gmail.com",
@@ -221,6 +223,8 @@ function checkout(emailSender, options = {}) {
     } },
   };
   const { createOrder } = loadTypeScript("../src/lib/orders.ts", {
+    "@/lib/keychainCheckout": keychainCheckout,
+    "@/lib/nameKeychain": keychain,
     "@/lib/db": { prisma: { $transaction: async (callback) => {
       const result = await callback(tx);
       if (options.rollback) throw new Error("Transaction rolled back");
