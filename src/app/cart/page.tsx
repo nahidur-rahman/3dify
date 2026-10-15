@@ -1,5 +1,8 @@
 "use client";
 
+import { getCartKey } from "@/lib/cart";
+import CustomizationSummary from "@/components/CustomizationSummary";
+
 import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
@@ -58,7 +61,7 @@ export default function CartPage() {
         {/* Cart Items */}
         <div className="lg:col-span-2 space-y-4">
           {items.map((item) => {
-            const itemKey = `${item.productId}__${item.selectedSize || "default"}__${item.color || "default"}`;
+            const itemKey = getCartKey(item);
             return (
               <div
                 key={itemKey}
@@ -90,6 +93,7 @@ export default function CartPage() {
                     >
                       {item.name}
                     </Link>
+                    <CustomizationSummary customization={item.customization} />
                     <div className="flex flex-wrap gap-2 mt-1">
                       {item.selectedSize && (
                         <span className="inline-block rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-dark-200 dark:text-gray-400">
@@ -113,8 +117,8 @@ export default function CartPage() {
                       <button
                         onClick={() =>
                           item.quantity <= 1
-                            ? removeFromCart(item.productId, item.selectedSize, item.color)
-                            : updateQuantity(item.productId, item.quantity - 1, item.selectedSize, item.color)
+                            ? removeFromCart(item)
+                            : updateQuantity(item, item.quantity - 1)
                         }
                         className="flex h-9 w-9 items-center justify-center text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
                       >
@@ -124,7 +128,7 @@ export default function CartPage() {
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() => updateQuantity(item.productId, item.quantity + 1, item.selectedSize, item.color)}
+                        onClick={() => updateQuantity(item, item.quantity + 1)}
                         className="flex h-9 w-9 items-center justify-center text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
                       >
                         <HiPlus className="h-4 w-4" />
@@ -137,7 +141,7 @@ export default function CartPage() {
                         {formatPrice(item.price * item.quantity)}
                       </span>
                       <button
-                        onClick={() => removeFromCart(item.productId, item.selectedSize, item.color)}
+                        onClick={() => removeFromCart(item)}
                         className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400"
                         aria-label={`Remove ${item.name}`}
                       >
