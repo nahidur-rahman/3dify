@@ -1,7 +1,8 @@
 import { createHash } from "crypto";
 import { getSupabaseAdmin, productImageBucket } from "@/lib/supabaseAdmin";
 import { normalizeProductColorOptions } from "@/lib/productColors";
-import type { Product, ProductSizeOption } from "@/lib/types";
+import type { Product, ProductSizeOption, TextDesign } from "@/lib/types";
+import { parseTextDesigns } from "@/lib/nameKeychain";
 
 const PRODUCT_FOLDER_PREFIX = "products";
 const DRAFT_FOLDER_PREFIX = "draft";
@@ -104,6 +105,7 @@ export function hydrateProductImages(item: {
   images: string[];
   sizeOptions?: unknown;
   colorOptions?: unknown;
+  textDesigns?: unknown;
 }): Product {
   return {
     ...item,
@@ -112,6 +114,9 @@ export function hydrateProductImages(item: {
     ),
     sizeOptions: normalizeSizeOptions(item.sizeOptions),
     colorOptions: normalizeProductColorOptions(item.colorOptions),
+    textDesigns: parseTextDesigns(item.textDesigns).map((design) => ({
+      ...design, image: resolveStorageImageUrl(design.image),
+    })),
   } as Product;
 }
 
@@ -131,6 +136,23 @@ export async function getImageSignatures(imageUrls: string[]) {
 
 export function normalizeProductImages(imageRefs: string[]) {
   return uniqueStrings(imageRefs.map((imageRef) => normalizeStoragePath(imageRef)));
+}
+
+export function productMediaRefs(product: { images: string[]; textDesigns?: unknown }) {
+  return normalizeProductImages([...product.images, ...parseTextDesigns(product.textDesigns).map((design) => design.image)]);
+}
+
+export async function finalizeProductMedia(
+  images: string[],
+  designs: TextDesign[],
+  productId: string,
+  existingRefs: string[] = []
+) {
+  const refs = productMediaRefs({ images, textDesigns: designs });
+  const finalized = await moveDraftImagesToProductFolder(refs, productId, existingRefs);
+  const mapping = new Map(refs.map((ref, index) => [ref, finalized[index]]));
+  const resolve = (ref: string) => mapping.get(normalizeProductImages([ref])[0])!;
+  return { images: images.map(resolve), textDesigns: designs.map((design) => ({ ...design, image: resolve(design.image) })) };
 }
 
 export function getProductFolderPath(folderKey: string) {
@@ -217,7 +239,8 @@ export async function deleteProductImages(imageUrls: string[]) {
 
 export async function moveDraftImagesToProductFolder(
   imageUrls: string[],
-  productId: string
+  productId: string,
+  existingImageRefs: string[] = []
 ) {
   const targetFolder = getProductFolderPath(productId);
   const supabase = getSupabaseAdmin();
@@ -227,6 +250,7 @@ export async function moveDraftImagesToProductFolder(
   const nextPaths = [...sourcePaths];
   const draftSourcePaths = sourcePaths.filter(isDraftStoragePath);
   const copiedPaths: string[] = [];
+  const existingPaths = new Set(normalizeProductImages(existingImageRefs));
 
   try {
     for (let i = 0; i < sourcePaths.length; i += 1) {
@@ -242,6 +266,12 @@ export async function moveDraftImagesToProductFolder(
       }
 
       const destinationPath = `${targetFolder}/${fileName}`;
+
+      // Content-addressed uploads may reuse an image already saved on this product.
+      if (existingPaths.has(destinationPath)) {
+        nextPaths[i] = destinationPath;
+        continue;
+      }
 
       const { error: copyError } = await supabase
         .storage.from(productImageBucket)
