@@ -1,4 +1,5 @@
 import type { ColorMode } from "@/lib/types";
+import { isNameKeychain } from "@/lib/nameKeychain";
 
 export const PRODUCT_COLOR_OPTIONS = [
   "Black",
@@ -145,6 +146,22 @@ export function resolveProductColorConfig(input: {
       colorOptions,
     }),
   };
+}
+
+export function resolveProductCustomizationConfig<T extends {
+  category: string; subcategory?: string | null; colorMode: ColorMode;
+  color: string; colorOptions: string[]; baseColor: string; textColor: string;
+  baseColorOptions: string[]; textColorOptions: string[]; textDesigns: unknown[];
+}>(input: T) {
+  if (!isNameKeychain(input)) {
+    return { ...input, ...resolveProductColorConfig(input), baseColor: "", textColor: "",
+      baseColorOptions: [], textColorOptions: [], textDesigns: [] };
+  }
+  const options = input.colorMode === "OPTIONS";
+  const baseColorOptions = options ? normalizeProductColorOptions(input.baseColorOptions) : [];
+  const textColorOptions = options ? normalizeProductColorOptions(input.textColorOptions) : [];
+  return { ...input, baseColorOptions, textColorOptions, colorOptions: [],
+    color: `Base: ${options ? baseColorOptions.join(", ") : input.baseColor}; Text: ${options ? textColorOptions.join(", ") : input.textColor}`.slice(0, 200) };
 }
 
 export function getProductColorSwatch(colorName: string) {
