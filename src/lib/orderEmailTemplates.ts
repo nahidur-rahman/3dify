@@ -1,4 +1,5 @@
 import type { Order, OrderItem } from "@prisma/client";
+import { customizationDetails } from "@/lib/nameKeychain";
 
 export type EmailOrder = Pick<
   Order,
@@ -6,7 +7,7 @@ export type EmailOrder = Pick<
   | "address" | "shippingMethod" | "shippingCost" | "subtotal" | "total"
   | "paymentMethod" | "notes" | "createdAt"
 > & {
-  items: Pick<OrderItem, "productName" | "selectedSize" | "color" | "quantity" | "unitPrice" | "totalPrice">[];
+  items: (Pick<OrderItem, "productName" | "selectedSize" | "color" | "quantity" | "unitPrice" | "totalPrice"> & { customization?: unknown })[];
 };
 
 export interface OrderEmailConfig {
@@ -46,7 +47,7 @@ export function buildOrderEmails(order: EmailOrder, config: OrderEmailConfig): O
   const shipping = order.shippingMethod === "INSIDE_DHAKA" ? "Inside Dhaka" : "Outside Dhaka";
   const payment = order.paymentMethod === "COD" ? "Cash on Delivery" : order.paymentMethod;
   const itemRows = order.items.map((item) => {
-    const variants = [item.selectedSize && `Size: ${item.selectedSize}`, item.color && `Color: ${item.color}`]
+    const variants = [item.selectedSize && `Size: ${item.selectedSize}`, item.color && `Color: ${item.color}`, ...customizationDetails(item.customization)]
       .filter(Boolean).join(" · ");
     return `<tr>
       <td style="padding:12px 8px;border-bottom:1px solid #e5e7eb;overflow-wrap:anywhere">${escapeHtml(item.productName)}${variants ? `<br><span style="font-size:12px;color:#6b7280">${escapeHtml(variants)}</span>` : ""}<br><span style="font-size:12px;color:#6b7280">${money(item.unitPrice)} each</span></td>
@@ -67,6 +68,7 @@ export function buildOrderEmails(order: EmailOrder, config: OrderEmailConfig): O
     item.productName,
     item.selectedSize ? `Size: ${item.selectedSize}` : null,
     item.color ? `Color: ${item.color}` : null,
+    ...customizationDetails(item.customization),
     `Quantity: ${item.quantity} | Unit price: ${money(item.unitPrice)} | Amount: ${money(item.totalPrice)}`,
   ].filter(Boolean).join("\n")).join("\n\n");
   const deliveryHtml = detail("Customer", order.customerName)
