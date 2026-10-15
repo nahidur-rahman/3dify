@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/contexts/CartContext";
-import { Product } from "@/lib/types";
+import { Product, NameKeychainCustomization } from "@/lib/types";
+import NameKeychainOptions from "@/components/NameKeychainOptions";
+import { isNameKeychain } from "@/lib/nameKeychain";
 import { getProductColorSwatch } from "@/lib/productColors";
 import { calculateDiscountedPrice, formatPrice } from "@/lib/utils";
 import { HiMinus, HiPlus, HiShoppingCart } from "react-icons/hi";
@@ -15,6 +17,12 @@ interface AddToCartSectionProps {
 export default function AddToCartSection({ product }: AddToCartSectionProps) {
   const router = useRouter();
   const { addToCart, openDrawer } = useCart();
+  const nameKeychain = isNameKeychain(product);
+  const [customization, setCustomization] = useState<NameKeychainCustomization>({
+    printedName: "",
+    baseColor: product.colorMode === "OPTIONS" ? product.baseColorOptions?.[0] || "" : product.baseColor || "As shown",
+    textColor: product.colorMode === "OPTIONS" ? product.textColorOptions?.[0] || "" : product.textColor || "As shown",
+  });
 
   const discountPercent = product.discountPercent ?? 0;
   const hasSizeOptions =
@@ -37,7 +45,7 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
   const baseUnitPrice = selectedSizeOption?.price ?? product.price;
   const unitPrice = calculateDiscountedPrice(baseUnitPrice, discountPercent);
 
-  function handleAddToCart() {
+  function handlePurchase(buyNow: boolean) {
     addToCart({
       productId: product.id,
       name: product.name,
@@ -45,28 +53,20 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
       price: unitPrice,
       quantity,
       selectedSize,
-      color: selectedColor,
+      color: nameKeychain ? undefined : selectedColor,
+      ...(nameKeychain ? { customization: { ...customization, printedName: customization.printedName.trim(), notes: customization.notes?.trim() || undefined } } : {}),
     });
     setQuantity(1);
-    openDrawer();
-  }
-
-  function handleBuyNow() {
-    addToCart({
-      productId: product.id,
-      name: product.name,
-      image: product.images[0] || "",
-      price: unitPrice,
-      quantity,
-      selectedSize,
-      color: selectedColor,
-    });
-    setQuantity(1);
-    router.push("/checkout");
+    if (buyNow) router.push("/checkout");
+    else openDrawer();
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <form className="flex flex-col gap-5" onSubmit={(event) => {
+      event.preventDefault();
+      const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+      handlePurchase(submitter?.value === "buy");
+    }}>
       <div className="flex items-baseline gap-3">
         <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
           {formatPrice(unitPrice)}
@@ -119,7 +119,7 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
         </div>
       )}
 
-      {hasColorOptions ? (
+      {nameKeychain ? <NameKeychainOptions product={product} value={customization} onChange={setCustomization} /> : hasColorOptions ? (
         <div>
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
             Color
@@ -197,8 +197,8 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
       {/* Action buttons */}
       <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-3">
         <button
-          type="button"
-          onClick={handleAddToCart}
+          type="submit"
+          value="cart"
           disabled={!product.inStock}
           className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary-500 px-4 py-3 font-semibold text-white transition-all duration-200 hover:bg-primary-600 hover:shadow-lg hover:shadow-primary-500/25 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
         >
@@ -207,8 +207,8 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
           <span className="sm:hidden">Add</span>
         </button>
         <button
-          type="button"
-          onClick={handleBuyNow}
+          type="submit"
+          value="buy"
           disabled={!product.inStock}
           className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-primary-500 px-4 py-3 font-semibold text-primary-600 transition-all duration-200 hover:bg-primary-50 hover:shadow-lg hover:-translate-y-0.5 dark:text-primary-400 dark:hover:bg-primary-900/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
         >
@@ -216,6 +216,6 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
           <span className="sm:hidden">Buy</span>
         </button>
       </div>
-    </div>
+    </form>
   );
 }
