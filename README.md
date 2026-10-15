@@ -89,6 +89,22 @@ Notes:
 - PRODUCT_IMAGE_LIMIT is optional. Set it to a positive integer to cap total images per product; leave it blank for unlimited uploads.
 - When the cap is set, the admin product form warns and skips any extra selected files beyond the limit.
 
+## Name keychain customization
+
+Products in **Keychains → Name Keychains** support up to 10 labeled text-design
+images, fixed base/text colors or separate base/text color choices. Design images
+use a separate uploader and a 1 MB per-image limit; compact thumbnails around
+600 × 200 px are recommended. Customers choose a design, enter the name to print
+(up to 80 characters), and optionally add design instructions (up to 500 characters).
+Their choices appear in cart, checkout, tracking, admin order details and order emails.
+
+Apply the new database migration **before** deploying this code, regenerate Prisma,
+and restart the application. Existing name keychains inherit their previous color
+as the base and use `As shown` for text until updated by an admin. Existing orders
+are preserved. See the [implementation plan and rollout checks](docs/name-keychain-customization-plan.md).
+
+Run customization regression tests with `node --test tests/nameKeychain.test.mjs`.
+
 ## Order emails (Resend)
 
 Every successful checkout sends a customer receipt and a separate admin notification
