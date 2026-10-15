@@ -1,5 +1,7 @@
 "use client";
 
+import CustomizationSummary from "@/components/CustomizationSummary";
+
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { formatPrice } from "@/lib/utils";
@@ -22,6 +24,7 @@ interface OrderItem {
   productName: string;
   productImage: string | null;
   selectedSize: string | null;
+  customization?: unknown;
   color: string | null;
   quantity: number;
   unitPrice: number;
@@ -333,6 +336,7 @@ function TrackOrderContent() {
                       <h4 className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white">
                         {item.productName}
                       </h4>
+                      <CustomizationSummary customization={item.customization} />
                       <div className="mt-0.5 flex flex-wrap gap-x-2 text-[11px] text-gray-500 dark:text-gray-400 sm:text-xs">
                         {item.selectedSize && <span>Size: {item.selectedSize}</span>}
                         {item.color && <span>• Color: {item.color}</span>}
