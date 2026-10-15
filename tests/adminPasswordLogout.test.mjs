@@ -29,7 +29,8 @@ function loadTypeScript(relativePath, dependencies = {}, globals = {}) {
 const validation = loadTypeScript("../src/lib/validation.ts", {
   zod: require("zod"),
   "@/lib/categories": loadTypeScript("../src/lib/categories.ts"),
-  "@/lib/productColors": loadTypeScript("../src/lib/productColors.ts"),
+  "@/lib/productColors": loadTypeScript("../src/lib/productColors.ts", { "@/lib/nameKeychain": loadTypeScript("../src/lib/nameKeychain.ts") }),
+  "@/lib/nameKeychain": loadTypeScript("../src/lib/nameKeychain.ts"),
 });
 
 // Run the actual component's hooks and event handlers with a virtual clock.
