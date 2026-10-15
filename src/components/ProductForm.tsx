@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import TextDesignEditor, { type EditableTextDesign } from "@/components/TextDesignEditor";
+import { isNameKeychain } from "@/lib/nameKeychain";
 import {
   Category,
   ColorMode,
@@ -97,6 +99,8 @@ export default function ProductForm({
   const [imageLimitWarning, setImageLimitWarning] = useState("");
   const [imageUploading, setImageUploading] = useState(false);
   const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
+  const pendingImagesRef = useRef(pendingImages);
+  const [textDesigns, setTextDesigns] = useState<EditableTextDesign[]>(product?.textDesigns || []);
   const [existingImageHashes, setExistingImageHashes] = useState(
     existingImageSignatures
   );
@@ -105,7 +109,8 @@ export default function ProductForm({
   );
 
   const cleanupUploadedImages = async (imageUrls: string[]) => {
-    if (mode !== "create" || imageUrls.length === 0) return;
+    imageUrls = imageUrls.filter((url) => mode === "create" || url.includes("/products/draft-"));
+    if (imageUrls.length === 0) return;
 
     try {
       await fetch("/api/upload", {
@@ -136,6 +141,10 @@ export default function ProductForm({
     color: product?.color || "",
     colorMode: (product?.colorMode || "FIXED") as ColorMode,
     colorOptions: initialColorOptions,
+    baseColor: product?.baseColor || "",
+    textColor: product?.textColor || "",
+    baseColorOptions: product?.baseColorOptions || [] as string[],
+    textColorOptions: product?.textColorOptions || [] as string[],
     size: product?.size || "",
     sizeMode: (product?.sizeMode || "FIXED") as SizeMode,
     sizeOptions: initialSizeOptions,
@@ -145,6 +154,8 @@ export default function ProductForm({
     featured: product?.featured || false,
     topSelling: product?.topSelling || false,
   });
+
+  const nameKeychain = isNameKeychain(form);
 
   const hasImageLimit = typeof imageLimit === "number" && imageLimit > 0;
   const uniqueExistingImageCount = new Set(form.images).size;
@@ -183,10 +194,14 @@ export default function ProductForm({
   };
 
   useEffect(() => {
-    return () => {
-      pendingImages.forEach((image) => URL.revokeObjectURL(image.previewUrl));
-    };
+    pendingImagesRef.current = pendingImages;
   }, [pendingImages]);
+
+  useEffect(() => {
+    return () => {
+      pendingImagesRef.current.forEach((image) => URL.revokeObjectURL(image.previewUrl));
+    };
+  }, []);
 
   const updateSizeOption = (
     sizeOptionId: string,
@@ -381,6 +396,22 @@ export default function ProductForm({
         images.push(...uploadedImages);
       }
       const uniqueImages = Array.from(new Set(images));
+      let savedTextDesigns = nameKeychain ? textDesigns.map(({ id, label, image }) => ({ id, label: label.trim(), image })) : [];
+      const pendingDesigns = nameKeychain ? textDesigns.filter((design) => design.file) : [];
+      if (pendingDesigns.length) {
+        const designData = new FormData();
+        pendingDesigns.forEach((design) => designData.append("files", design.file!));
+        designData.append("purpose", "text-design");
+        designData.append("folderKey", `draft-${crypto.randomUUID()}`);
+        const response = await fetch("/api/upload", { method: "POST", body: designData });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Design upload failed");
+        const urls: string[] = result.urls;
+        uploadedImages.push(...urls);
+        if (urls.length !== pendingDesigns.length) throw new Error("Design upload incomplete. Please retry.");
+        const replacements = new Map(pendingDesigns.map((design, index) => [design.id, urls[index]]));
+        savedTextDesigns = savedTextDesigns.map((design) => ({ ...design, image: replacements.get(design.id) || design.image }));
+      }
       const resolvedPrice = Number(form.price);
       const resolvedDiscountPercent = form.discountPercent.trim()
         ? Number(form.discountPercent)
@@ -405,6 +436,7 @@ export default function ProductForm({
           price: resolvedPrice,
           color: resolvedColor,
           colorOptions: resolvedColorOptions,
+          textDesigns: savedTextDesigns,
           discountPercent: resolvedDiscountPercent,
           sizeOptions:
             form.sizeMode === "OPTIONS"
@@ -417,11 +449,11 @@ export default function ProductForm({
       });
 
       const responseText = await res.text();
-      let data: { error?: string } = {};
+      let data: { error?: string; details?: { fieldErrors?: Record<string, string[]> } } = {};
 
       if (responseText) {
         try {
-          data = JSON.parse(responseText) as { error?: string };
+          data = JSON.parse(responseText);
         } catch {
           data = {};
         }
@@ -429,7 +461,7 @@ export default function ProductForm({
 
       if (!res.ok) {
         await cleanupUploadedImages(uploadedImages);
-        setError(data.error || "Something went wrong");
+        setError(Object.values(data.details?.fieldErrors || {}).flat().join(". ") || data.error || "Something went wrong");
         return;
       }
 
@@ -439,9 +471,9 @@ export default function ProductForm({
 
       router.push("/admin/products");
       router.refresh();
-    } catch {
+    } catch (submitError) {
       await cleanupUploadedImages(uploadedImages);
-      setError("Something went wrong. Please try again.");
+      setError(submitError instanceof Error ? submitError.message : "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -767,7 +799,33 @@ export default function ProductForm({
               </select>
             </div>
 
-            {form.colorMode === "FIXED" ? (
+            {nameKeychain ? (
+              <div className="space-y-4 sm:col-span-2">
+                {(["base", "text"] as const).map((part) => {
+                  const field = `${part}Color` as const;
+                  const optionsField = `${part}ColorOptions` as const;
+                  return (
+                    <fieldset key={part} className="space-y-2">
+                      <legend className="text-xs font-semibold capitalize text-gray-700 dark:text-gray-300">{part} color *</legend>
+                      {form.colorMode === "FIXED" ? (
+                        <input aria-label={`${part} color`} required maxLength={200} value={form[field]} onChange={(event) => setForm({ ...form, [field]: event.target.value })} placeholder={part === "base" ? "e.g., Black" : "e.g., White"} className="w-full rounded-xl border border-gray-200 bg-transparent px-3 py-2 text-sm text-gray-900 dark:border-dark-200 dark:text-white" />
+                      ) : (
+                        <>
+                          <div className="grid grid-cols-3 gap-2">
+                            {Array.from(new Set([...PRODUCT_COLOR_OPTIONS, ...form[optionsField]])).map((color) => (
+                              <label key={color} className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
+                                <input type="checkbox" checked={form[optionsField].includes(color)} onChange={() => setForm((prev) => ({ ...prev, [optionsField]: prev[optionsField].includes(color) ? prev[optionsField].filter((value) => value !== color) : [...prev[optionsField], color] }))} />{color}
+                              </label>
+                            ))}
+                          </div>
+                          {!form[optionsField].length && <p className="text-xs text-amber-600">Select at least one {part} color.</p>}
+                        </>
+                      )}
+                    </fieldset>
+                  );
+                })}
+              </div>
+            ) : form.colorMode === "FIXED" ? (
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
                   Color *
@@ -964,10 +1022,14 @@ export default function ProductForm({
         </section>
       </div>
 
+      <section hidden={!nameKeychain} className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-dark-200 dark:bg-dark-100 xl:col-span-2">
+        <TextDesignEditor designs={textDesigns} onChange={setTextDesigns} disabled={loading || !nameKeychain} />
+      </section>
+
       <div className="flex flex-col gap-2 pt-1 sm:flex-row xl:col-span-2">
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || imageUploading}
           className="rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 px-5 py-2 font-semibold text-sm text-white transition-all hover:from-primary-600 hover:to-primary-700 disabled:opacity-50"
         >
           {loading
