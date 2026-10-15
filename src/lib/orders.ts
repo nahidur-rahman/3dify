@@ -11,6 +11,8 @@ import { getShippingCost } from "@/lib/shipping";
 import { resolveStorageImageUrl } from "@/lib/productImages";
 import { calculateDiscountedPrice } from "@/lib/utils";
 import { sendOrderEmails } from "@/lib/orderEmails";
+import { checkoutCustomizationSchema, KeychainSelectionError, resolveCheckoutCustomization } from "@/lib/keychainCheckout";
+import { isNameKeychain } from "@/lib/nameKeychain";
 
 // --- Validation schema ---
 
@@ -43,6 +45,7 @@ const OrderItemSchema = z.object({
   productId: z.string().min(1),
   selectedSize: z.string().trim().min(1).optional(),
   color: z.string().trim().min(1).optional(),
+  customization: checkoutCustomizationSchema.optional(),
   quantity: z.number().int().min(1),
 });
 
@@ -154,7 +157,8 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderResult>
       if (!fieldErrors[key]) fieldErrors[key] = [];
       fieldErrors[key].push(issue.message);
     }
-    return { success: false, error: "Please fix the errors below.", fieldErrors };
+    const itemIssue = parsed.error.issues.find((issue) => issue.path[0] === "items");
+    return { success: false, error: itemIssue ? `Please update your cart: ${itemIssue.message}` : "Please fix the errors below.", fieldErrors };
   }
 
   const data = parsed.data;
@@ -194,6 +198,13 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderResult>
           color: true,
           colorMode: true,
           colorOptions: true,
+          category: true,
+          subcategory: true,
+          baseColor: true,
+          textColor: true,
+          baseColorOptions: true,
+          textColorOptions: true,
+          textDesigns: true,
         },
       });
       const productsById = new Map(products.map((product) => [product.id, product]));
@@ -224,9 +235,17 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderResult>
           selectedSize = selectedOption.label;
         }
 
-        let color = product.color.trim() || null;
+        const nameKeychain = isNameKeychain(product);
+        let customization;
+        try {
+          customization = resolveCheckoutCustomization(product, item.customization);
+        } catch (error) {
+          if (error instanceof KeychainSelectionError) throw new OrderItemUnavailableError(error.message);
+          throw error;
+        }
+        let color = nameKeychain ? null : product.color.trim() || null;
 
-        if (product.colorMode === "OPTIONS") {
+        if (!nameKeychain && product.colorMode === "OPTIONS") {
           const selectedColor = product.colorOptions
             .map((option) => option.trim())
             .find((option) => option === item.color);
@@ -251,6 +270,7 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderResult>
           productImage: getOrderProductImage(product.images),
           selectedSize,
           color,
+          ...(customization ? { customization: { ...customization } } : {}),
           quantity: item.quantity,
           unitPrice,
           totalPrice: unitPrice * item.quantity,
