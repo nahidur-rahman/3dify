@@ -15,6 +15,21 @@ export interface ProductSizeOption {
 
 export type ProductColorOption = string;
 
+export interface TextDesign {
+  id: string;
+  label: string;
+  image: string;
+}
+
+export interface NameKeychainCustomization {
+  printedName: string;
+  baseColor: string;
+  textColor: string;
+  designId?: string;
+  designLabel?: string;
+  notes?: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -26,6 +41,11 @@ export interface Product {
   color: string;
   colorMode?: ColorMode;
   colorOptions?: ProductColorOption[];
+  baseColor?: string;
+  textColor?: string;
+  baseColorOptions?: string[];
+  textColorOptions?: string[];
+  textDesigns?: TextDesign[];
   size: string;
   sizeMode?: SizeMode;
   sizeOptions?: ProductSizeOption[];
