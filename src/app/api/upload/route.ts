@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
+import { TEXT_DESIGN_LIMIT, TEXT_DESIGN_MAX_BYTES, TEXT_DESIGN_IMAGE_TYPES } from "@/lib/nameKeychain";
 import {
   deleteProductImages,
   createDraftFolderKey,
@@ -45,7 +46,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No files provided" }, { status: 400 });
     }
 
-    const imageLimit = getProductImageLimit();
+    const isTextDesign = formData.get("purpose") === "text-design";
+    const imageLimit = isTextDesign ? TEXT_DESIGN_LIMIT : getProductImageLimit();
     if (imageLimit !== null && files.length > imageLimit) {
       return NextResponse.json(
         {
@@ -53,6 +55,10 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 }
       );
+    }
+
+    if (isTextDesign && files.some((file) => !TEXT_DESIGN_IMAGE_TYPES.includes(file.type) || file.size > TEXT_DESIGN_MAX_BYTES)) {
+      return NextResponse.json({ error: "Text designs must be PNG, JPEG, WebP or AVIF images, up to 1 MB each." }, { status: 400 });
     }
 
     const folderKey =
