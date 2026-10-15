@@ -76,6 +76,8 @@ test("checkout ignores browser prices and stores the current rounded database pr
   };
 
   const { createOrder } = loadTypeScript("../src/lib/orders.ts", {
+    "@/lib/nameKeychain": loadTypeScript("../src/lib/nameKeychain.ts"),
+    "@/lib/keychainCheckout": loadTypeScript("../src/lib/keychainCheckout.ts", { zod: require("zod"), "@/lib/nameKeychain": loadTypeScript("../src/lib/nameKeychain.ts") }),
     "@/lib/db": {
       prisma: {
         $transaction: async (callback) => callback(transactionClient),
