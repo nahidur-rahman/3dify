@@ -1,5 +1,8 @@
 "use client";
 
+import { getCartKey } from "@/lib/cart";
+import CustomizationSummary from "@/components/CustomizationSummary";
+
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart, type CartItem } from "@/contexts/CartContext";
@@ -235,6 +238,7 @@ export default function CheckoutForm() {
         productId: item.productId,
         selectedSize: item.selectedSize,
         color: item.color,
+        customization: item.customization,
         quantity: item.quantity,
       })),
     };
@@ -290,7 +294,7 @@ export default function CheckoutForm() {
           {/* Items */}
           <div className="space-y-3 max-h-72 overflow-y-auto mb-4 px-1 pt-4 pb-2">
             {items.map((item: CartItem) => {
-              const itemKey = `${item.productId}__${item.selectedSize || "default"}__${item.color || "default"}`;
+              const itemKey = getCartKey(item);
               return (
                 <div key={itemKey} className="flex items-center gap-3">
                   <div className="relative h-14 w-14 flex-shrink-0 overflow-visible rounded-lg bg-gray-100 dark:bg-dark-200">
@@ -315,6 +319,7 @@ export default function CheckoutForm() {
                     <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                       {item.name}
                     </p>
+                    <CustomizationSummary customization={item.customization} />
                     {item.selectedSize && (
                       <p className="text-xs text-gray-500 dark:text-gray-400">
                         {item.selectedSize}
