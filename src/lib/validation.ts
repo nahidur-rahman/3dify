@@ -3,6 +3,7 @@ import {
   isValidSubcategoryForCategory,
 } from "@/lib/categories";
 import { normalizeProductColorOptions } from "@/lib/productColors";
+import { isNameKeychain, TEXT_DESIGN_LIMIT } from "@/lib/nameKeychain";
 import { z } from "zod";
 
 const sizeOptionSchema = z.object({
@@ -170,6 +171,15 @@ const productSchemaBase = z.object({
   color: z.string().trim().max(200, "Color summary must be 200 characters or fewer").default(""),
   colorMode: z.enum(["FIXED", "OPTIONS"]).default("FIXED"),
   colorOptions: z.array(colorOptionSchema).default([]),
+  baseColor: z.string().trim().max(200).default(""),
+  textColor: z.string().trim().max(200).default(""),
+  baseColorOptions: z.array(colorOptionSchema).max(50).default([]),
+  textColorOptions: z.array(colorOptionSchema).max(50).default([]),
+  textDesigns: z.array(z.object({
+    id: z.string().trim().min(1).max(100).regex(/^[a-zA-Z0-9_-]+$/),
+    label: z.string().trim().min(1, "Design label is required").max(80),
+    image: z.string().url().refine((value) => /^https?:\/\//i.test(value), "Use an HTTP image URL"),
+  })).max(TEXT_DESIGN_LIMIT, "Maximum 10 text designs per product").default([]),
   size: z.string().min(1, "Size is required"),
   sizeMode: z.enum(["FIXED", "OPTIONS"]).default("FIXED"),
   sizeOptions: z.array(sizeOptionSchema).default([]),
@@ -187,19 +197,34 @@ function addSubcategoryValidation(
     colorMode?: "FIXED" | "OPTIONS";
     color?: string;
     colorOptions?: string[];
+    baseColor?: string;
+    textColor?: string;
+    baseColorOptions?: string[];
+    textColorOptions?: string[];
+    textDesigns?: { id: string }[];
   },
   ctx: z.RefinementCtx
 ) {
-  if (!data.subcategory || !data.category) {
-    return;
-  }
-
-  if (!isValidSubcategoryForCategory(data.category, data.subcategory)) {
+  if (data.category && data.subcategory && !isValidSubcategoryForCategory(data.category, data.subcategory)) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: "Subcategory must match the selected category",
       path: ["subcategory"],
     });
+  }
+
+  if (isNameKeychain(data)) {
+    for (const part of ["base", "text"] as const) {
+      const path = data.colorMode === "OPTIONS" ? `${part}ColorOptions` as const : `${part}Color` as const;
+      const value = data[path];
+      if (Array.isArray(value) ? normalizeProductColorOptions(value).length === 0 : !value?.trim()) {
+        ctx.addIssue({ code: "custom", message: `Provide ${part} ${data.colorMode === "OPTIONS" ? "color options" : "color"}`, path: [path] });
+      }
+    }
+    if (new Set(data.textDesigns?.map((design) => design.id)).size !== (data.textDesigns?.length ?? 0)) {
+      ctx.addIssue({ code: "custom", message: "Design IDs must be unique", path: ["textDesigns"] });
+    }
+    return;
   }
 
   if (data.colorMode === "OPTIONS") {
