@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/adminSession";
-import { resolveProductColorConfig } from "@/lib/productColors";
+import { resolveProductCustomizationConfig } from "@/lib/productColors";
 import { PRODUCT_SEARCH_CACHE_TAG } from "@/lib/productSearch";
 import {
   buildProductCatalogWhere,
@@ -22,7 +22,8 @@ import {
   deleteProductImages,
   getProductImageLimit,
   hydrateProductImages,
-  moveDraftImagesToProductFolder,
+  finalizeProductMedia,
+  productMediaRefs,
   normalizeProductImages,
 } from "@/lib/productImages";
 
@@ -120,10 +121,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const parsed = productSchema.safeParse({
-      ...body,
-      ...resolveProductColorConfig(body),
-    });
+    const parsed = productSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid input", details: parsed.error.flatten() },
@@ -131,11 +129,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const productData = resolveProductCustomizationConfig(parsed.data);
+
     const normalizedImages = normalizeProductImages(parsed.data.images);
     const imageLimit = getProductImageLimit();
 
     if (imageLimit !== null && normalizedImages.length > imageLimit) {
-      await deleteProductImages(normalizedImages);
       return NextResponse.json(
         {
           error: `Image limit reached. Maximum ${imageLimit} images per product.`,
@@ -146,24 +145,23 @@ export async function POST(request: NextRequest) {
 
     const created = await prisma.product.create({
       data: {
-        ...parsed.data,
+        ...productData,
         images: [],
+        textDesigns: [],
         createdBy: admin.username,
         updatedBy: admin.username,
       },
     });
 
+    let finalizedMedia: Awaited<ReturnType<typeof finalizeProductMedia>> | undefined;
     try {
-      const finalizedImages = await moveDraftImagesToProductFolder(
-        normalizedImages,
-        created.id
-      );
+      finalizedMedia = await finalizeProductMedia(normalizedImages, productData.textDesigns, created.id);
 
       const product = await prisma.product.update({
         where: { id: created.id },
         data: {
-          ...parsed.data,
-          images: finalizedImages,
+          ...productData,
+          ...finalizedMedia,
           updatedBy: admin.username,
         },
       });
@@ -176,6 +174,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(hydrateProductImages(product), { status: 201 });
     } catch (error) {
       await prisma.product.delete({ where: { id: created.id } });
+      if (finalizedMedia) await deleteProductImages(productMediaRefs(finalizedMedia)).catch(console.error);
       throw error;
     }
   } catch (error) {
