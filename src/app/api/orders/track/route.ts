@@ -77,6 +77,7 @@ export async function GET(req: NextRequest) {
           productImage: i.productImage,
           selectedSize: i.selectedSize,
           color: i.color,
+          customization: i.customization,
           quantity: i.quantity,
           unitPrice: i.unitPrice,
           totalPrice: i.totalPrice,
