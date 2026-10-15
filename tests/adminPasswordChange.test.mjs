@@ -30,7 +30,8 @@ function loadTypeScript(relativePath, dependencies = {}) {
 const validation = loadTypeScript("../src/lib/validation.ts", {
   zod: require("zod"),
   "@/lib/categories": loadTypeScript("../src/lib/categories.ts"),
-  "@/lib/productColors": loadTypeScript("../src/lib/productColors.ts"),
+  "@/lib/productColors": loadTypeScript("../src/lib/productColors.ts", { "@/lib/nameKeychain": loadTypeScript("../src/lib/nameKeychain.ts") }),
+  "@/lib/nameKeychain": loadTypeScript("../src/lib/nameKeychain.ts"),
 });
 const oldPassword = "OldPassword1!";
 const newPassword = "NewPassword2!";
