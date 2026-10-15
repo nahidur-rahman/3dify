@@ -2,16 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentAdmin } from "@/lib/adminSession";
-import { isValidSubcategoryForCategory } from "@/lib/categories";
-import { resolveProductColorConfig } from "@/lib/productColors";
+import { resolveProductCustomizationConfig } from "@/lib/productColors";
 import { PRODUCT_SEARCH_CACHE_TAG } from "@/lib/productSearch";
 import { PRODUCT_CATALOG_CACHE_TAG } from "@/lib/productCatalog";
-import { productUpdateSchema } from "@/lib/validation";
+import { productSchema } from "@/lib/validation";
 import {
   deleteProductImages,
   hydrateProductImages,
   getProductImageLimit,
-  moveDraftImagesToProductFolder,
+  finalizeProductMedia,
+  productMediaRefs,
   normalizeProductImages,
 } from "@/lib/productImages";
 
@@ -44,6 +44,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  let unsavedMedia: string[] = [];
   try {
     const admin = await getCurrentAdmin();
     if (!admin) {
@@ -51,16 +52,6 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const parsed = productUpdateSchema.safeParse({
-      ...body,
-      ...resolveProductColorConfig(body),
-    });
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: "Invalid input", details: parsed.error.flatten() },
-        { status: 400 }
-      );
-    }
     const existing = await prisma.product.findUnique({
       where: { id: params.id },
     });
@@ -69,34 +60,16 @@ export async function PUT(
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    const nextCategory = parsed.data.category ?? existing.category;
-    const nextSubcategory = Object.prototype.hasOwnProperty.call(
-      parsed.data,
-      "subcategory"
-    )
-      ? parsed.data.subcategory ?? null
-      : existing.subcategory;
-
-    if (
-      nextSubcategory &&
-      !isValidSubcategoryForCategory(nextCategory, nextSubcategory)
-    ) {
-      return NextResponse.json(
-        { error: "Invalid subcategory for the selected category" },
-        { status: 400 }
-      );
+    const parsed = productSchema.safeParse({ ...hydrateProductImages(existing), ...body });
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid input", details: parsed.error.flatten() }, { status: 400 });
     }
-
-    const updateData = { ...parsed.data, updatedBy: admin.username };
-    if (updateData.images) {
+    const updateData = { ...resolveProductCustomizationConfig(parsed.data), updatedBy: admin.username };
+    {
       const normalizedImages = normalizeProductImages(updateData.images);
       const imageLimit = getProductImageLimit();
 
       if (imageLimit !== null && normalizedImages.length > imageLimit) {
-        const removedImages = normalizedImages.filter(
-          (url) => !existing.images.includes(url)
-        );
-        await deleteProductImages(removedImages);
         return NextResponse.json(
           {
             error: `Image limit reached. Maximum ${imageLimit} images per product.`,
@@ -105,23 +78,20 @@ export async function PUT(
         );
       }
 
-      updateData.images = await moveDraftImagesToProductFolder(
-        normalizedImages,
-        params.id
-      );
+      Object.assign(updateData, await finalizeProductMedia(normalizedImages, updateData.textDesigns, params.id, productMediaRefs(existing)));
+      const existingMedia = new Set(productMediaRefs(existing));
+      unsavedMedia = productMediaRefs(updateData).filter((ref) => !existingMedia.has(ref));
     }
 
     const product = await prisma.product.update({
       where: { id: params.id },
       data: updateData,
     });
+    unsavedMedia = [];
 
-    if (updateData.images) {
-      const removedImages = existing.images.filter(
-        (url) => !updateData.images?.includes(url)
-      );
-      await deleteProductImages(removedImages);
-    }
+    const retainedMedia = new Set(productMediaRefs(updateData));
+    const removedMedia = productMediaRefs(existing).filter((ref) => !retainedMedia.has(ref));
+    await deleteProductImages(removedMedia).catch((error) => console.error("Product media cleanup failed:", error));
 
     revalidatePath("/");
     revalidatePath("/products");
@@ -131,6 +101,7 @@ export async function PUT(
 
     return NextResponse.json(hydrateProductImages(product));
   } catch (error) {
+    await deleteProductImages(unsavedMedia).catch((cleanupError) => console.error("Unsaved media cleanup failed:", cleanupError));
     console.error("Update product error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
@@ -160,7 +131,7 @@ export async function DELETE(
 
     
     try {
-      await deleteProductImages(existing.images);
+      await deleteProductImages(productMediaRefs(existing));
     } catch (cleanupError) {
       console.error(
         `Delete product image cleanup error for ${params.id}:`,
