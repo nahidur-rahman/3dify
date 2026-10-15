@@ -8,10 +8,11 @@ import {
   useCallback,
   ReactNode,
 } from "react";
+import { getCartKey, type CartIdentity } from "@/lib/cart";
 
 // --- Types ---
 
-export interface CartItem {
+export interface CartItem extends CartIdentity {
   productId: string;
   name: string;
   image: string;
@@ -25,8 +26,8 @@ export interface CartItem {
 interface CartContextType {
   items: CartItem[];
   addToCart: (item: CartItem) => void;
-  removeFromCart: (productId: string, selectedSize?: string, color?: string) => void;
-  updateQuantity: (productId: string, quantity: number, selectedSize?: string, color?: string) => void;
+  removeFromCart: (item: CartIdentity) => void;
+  updateQuantity: (item: CartIdentity, quantity: number) => void;
   clearCart: () => void;
   cartCount: number;
   cartTotal: number;
@@ -41,10 +42,6 @@ const CART_EXPIRATION_DAYS = 30;
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 // --- Helpers ---
-
-function getCartKey(item: { productId: string; selectedSize?: string; color?: string }): string {
-  return `${item.productId}__${item.selectedSize || "default"}__${item.color || "default"}`;
-}
 
 function isExpired(item: CartItem): boolean {
   if (!item.addedAt) return false; // Old items without timestamp are kept
@@ -121,20 +118,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const removeFromCart = useCallback(
-    (productId: string, selectedSize?: string, color?: string) => {
+    (item: CartIdentity) => {
       setItems((prev) =>
-        prev.filter((i) => getCartKey(i) !== getCartKey({ productId, selectedSize, color }))
+        prev.filter((i) => getCartKey(i) !== getCartKey(item))
       );
     },
     []
   );
 
   const updateQuantity = useCallback(
-    (productId: string, quantity: number, selectedSize?: string, color?: string) => {
+    (item: CartIdentity, quantity: number) => {
       if (quantity < 1) return;
       setItems((prev) =>
         prev.map((i) =>
-          getCartKey(i) === getCartKey({ productId, selectedSize, color })
+          getCartKey(i) === getCartKey(item)
             ? { ...i, quantity }
             : i
         )
