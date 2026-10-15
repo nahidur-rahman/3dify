@@ -1,5 +1,8 @@
 "use client";
 
+import { getCartKey } from "@/lib/cart";
+import CustomizationSummary from "@/components/CustomizationSummary";
+
 import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
@@ -92,7 +95,7 @@ export default function CartDrawer() {
           ) : (
             <div className="space-y-4">
               {items.map((item) => {
-                const itemKey = `${item.productId}__${item.selectedSize || "default"}__${item.color || "default"}`;
+                const itemKey = getCartKey(item);
                 return (
                   <div
                     key={itemKey}
@@ -121,6 +124,7 @@ export default function CartDrawer() {
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                           {item.name}
                         </h3>
+                        <CustomizationSummary customization={item.customization} />
                         <div className="flex flex-wrap gap-1.5 mt-1">
                           {item.selectedSize && (
                             <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -141,8 +145,8 @@ export default function CartDrawer() {
                           <button
                             onClick={() =>
                               item.quantity <= 1
-                                ? removeFromCart(item.productId, item.selectedSize, item.color)
-                                : updateQuantity(item.productId, item.quantity - 1, item.selectedSize, item.color)
+                                ? removeFromCart(item)
+                                : updateQuantity(item, item.quantity - 1)
                             }
                             className="flex h-10 w-10 items-center justify-center text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
                           >
@@ -153,7 +157,7 @@ export default function CartDrawer() {
                           </span>
                           <button
                             onClick={() =>
-                              updateQuantity(item.productId, item.quantity + 1, item.selectedSize, item.color)
+                              updateQuantity(item, item.quantity + 1)
                             }
                             className="flex h-10 w-10 items-center justify-center text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
                           >
@@ -167,7 +171,7 @@ export default function CartDrawer() {
                             {formatPrice(item.price * item.quantity)}
                           </span>
                           <button
-                            onClick={() => removeFromCart(item.productId, item.selectedSize, item.color)}
+                            onClick={() => removeFromCart(item)}
                             className="text-gray-400 transition-colors hover:text-red-500 dark:hover:text-red-400"
                             aria-label={`Remove ${item.name}`}
                           >
