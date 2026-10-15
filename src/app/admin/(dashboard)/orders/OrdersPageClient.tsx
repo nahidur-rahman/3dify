@@ -1,5 +1,7 @@
 "use client";
 
+import CustomizationSummary from "@/components/CustomizationSummary";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import type {
   AdminOrderSummary,
@@ -38,6 +40,7 @@ interface OrderItem {
   productName: string;
   productImage: string | null;
   selectedSize: string | null;
+  customization?: unknown;
   color: string | null;
   quantity: number;
   unitPrice: number;
@@ -718,10 +721,11 @@ export default function OrdersPageClient({
                             </div>
                           )}
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
                             {item.productName}
                           </h4>
+                          <CustomizationSummary customization={item.customization} />
                           <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                             {item.selectedSize && <span>Size: {item.selectedSize}</span>}
                             {item.color && <span>• Color: {item.color}</span>}
