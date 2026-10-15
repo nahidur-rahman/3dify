@@ -47,6 +47,11 @@ model Product {
   color            String
   colorMode        ColorMode @default(FIXED)
   colorOptions     String[]  @default([])
+  baseColor        String    @default("")
+  textColor        String    @default("")
+  baseColorOptions String[]  @default([])
+  textColorOptions String[]  @default([])
+  textDesigns      Json      @default("[]")
   size             String
   sizeMode         SizeMode @default(FIXED)
   sizeOptions      Json?
@@ -170,6 +175,7 @@ model OrderItem {
   productImage String?
   selectedSize String?
   color        String?
+  customization Json?
   quantity     Int
   unitPrice    Float
   totalPrice   Float
