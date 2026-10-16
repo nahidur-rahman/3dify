@@ -6,7 +6,7 @@ import { HiLightningBolt, HiHeart, HiCube, HiChat } from "react-icons/hi";
 export const metadata: Metadata = {
   title: "About Us",
   description:
-    "Learn about 3Dify BD and our made-to-order 3D printed home decor, desk accessories, collectibles, personalized gifts, and custom commissions in Bangladesh.",
+    "Learn about 3Dify and our made-to-order 3D printed home decor, desk accessories, collectibles, personalized gifts, and custom commissions in Bangladesh.",
 };
 
 const features = [
@@ -54,8 +54,8 @@ export default function AboutPage() {
           </span>
         </h1>
         <p className="mt-4 text-base leading-relaxed text-gray-600 dark:text-gray-400 sm:text-lg">
-          3Dify BD is a startup born out of passion for 3D printing technology. Based
-          in Bangladesh, we create premium 3D printed products across home decor,
+          3Dify is a startup born out of passion for 3D printing technology. Based
+          in Dhaka, Bangladesh, we create premium 3D printed products across home decor,
           desk accessories, collectibles, cosplay props, personalized gifts, pet
           accessories, and custom commissions. Every product is printed to order
           with care and precision.
@@ -82,7 +82,7 @@ export default function AboutPage() {
         <h2 className="mb-8 text-center text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
           Why Choose{" "}
           <span className="bg-gradient-to-r from-primary-500 to-primary-400 bg-clip-text text-transparent">
-            3Dify BD
+            3Dify
           </span>
           ?
         </h2>
