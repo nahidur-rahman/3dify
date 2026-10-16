@@ -32,7 +32,7 @@ const features = [
     icon: HiChat,
     title: "Direct Communication",
     description:
-      "No middleman - chat with us directly on WhatsApp or Messenger to discuss your order.",
+      "Chat with us directly on WhatsApp or Messenger to discuss your product customization.",
   },
 ];
 
