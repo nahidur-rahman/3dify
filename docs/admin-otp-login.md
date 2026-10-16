@@ -1,6 +1,6 @@
 # Admin email OTP login
 
-Admin login now requires the account password followed by an eight-digit email code. The backend sends it through the existing `RESEND_API_KEY`, using the required server-side `ADMIN_OTP_FROM` environment variable. Set `ADMIN_OTP_FROM="3DifyBD OTP <otp@mail.3difybd.com>"` in `.env` and your hosting dashboard. Missing or invalid sender configuration prevents email delivery; there is no hardcoded fallback.
+Admin login now requires the account password followed by an eight-digit email code. The backend sends it through the existing `RESEND_API_KEY`, using the required server-side `ADMIN_OTP_FROM` environment variable. Set `ADMIN_OTP_FROM="3Dify OTP <otp@mail.3difybd.com>"` in `.env` and your hosting dashboard. Missing or invalid sender configuration prevents email delivery; there is no hardcoded fallback.
 
 ## Deployment
 
