@@ -17,7 +17,7 @@ interface CategoryProductsPageProps {
 export function createCategoryMetadata(category: Category) {
   return async function generateMetadata(): Promise<Metadata> {
     const selectedCategory = categoryByValue[category];
-    const description = `Browse ${selectedCategory.seoName} from 3Dify BD. ${selectedCategory.description}`;
+    const description = `Browse ${selectedCategory.seoName} from 3Dify. ${selectedCategory.description}`;
 
     return {
       title: selectedCategory.label,
@@ -31,7 +31,7 @@ export function createCategoryMetadata(category: Category) {
         canonical: getCategoryPath(category),
       },
       openGraph: {
-        title: `${selectedCategory.label} | 3Dify BD`,
+        title: `${selectedCategory.label} | 3Dify`,
         description,
         url: getCategoryPath(category),
         type: "website",
