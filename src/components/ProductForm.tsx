@@ -87,6 +87,51 @@ async function getFileSignature(file: File) {
   }
 }
 
+function AdminColorOptions({ label, selected, onToggle, emptyMessage, className = "" }: {
+  label: string;
+  selected: string[];
+  onToggle: (color: string) => void;
+  emptyMessage: string;
+  className?: string;
+}) {
+  const colors = Array.from(new Set([...PRODUCT_COLOR_OPTIONS, ...selected]));
+
+  return (
+    <fieldset className={`min-w-0 rounded-xl border border-dashed border-gray-200/80 bg-gray-50/60 p-2 dark:border-dark-200 dark:bg-dark-200/30 ${className}`}>
+      <legend className="sr-only">{label}</legend>
+      <div className="mb-1.5 flex items-center justify-between gap-2">
+        <span className="text-[11px] font-semibold text-gray-700 dark:text-gray-300">{label}</span>
+        <span className="text-[10px] text-gray-500 dark:text-gray-400">{selected.length} selected</span>
+      </div>
+      <div
+        className="grid gap-1.5"
+        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, max(4.25rem, calc((100% - 1.875rem) / 6))), 1fr))" }}
+      >
+        {colors.map((color) => {
+          const isSelected = selected.includes(color);
+          return (
+            <label
+              key={color}
+              className={`flex min-h-8 min-w-0 cursor-pointer items-center gap-1.5 rounded-lg border px-1.5 py-1 text-[11px] leading-4 transition-colors focus-within:ring-2 focus-within:ring-primary-500/50 ${isSelected
+                ? "border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300"
+                : "border-gray-200 bg-white text-gray-700 hover:border-primary-300 dark:border-dark-200 dark:bg-dark dark:text-gray-300 dark:hover:border-primary-600"}`}
+            >
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={() => onToggle(color)}
+                className="h-3.5 w-3.5 shrink-0 rounded border-gray-300 accent-primary-500"
+              />
+              <span className="min-w-0 break-words">{color}</span>
+            </label>
+          );
+        })}
+      </div>
+      {!selected.length && <p className="mt-1.5 text-[10px] text-amber-600 dark:text-amber-400">{emptyMessage}</p>}
+    </fieldset>
+  );
+}
+
 export default function ProductForm({
   product,
   mode,
@@ -165,7 +210,6 @@ export default function ProductForm({
     : null;
   const imageLimitReached = hasImageLimit && totalImageCount >= imageLimit;
   const availableSubcategories = categorySubcategories[form.category] || [];
-  const hasSelectedColorOptions = form.colorOptions.length > 0;
   const parsedPrice = Number(form.price);
   const canSetDiscount =
     form.price.trim().length > 0 &&
@@ -780,111 +824,81 @@ export default function ProductForm({
               </div>
             </div>
 
-            <div>
-              <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                Color Mode
-              </label>
-              <select
-                value={form.colorMode}
-                onChange={(e) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    colorMode: e.target.value as ColorMode,
-                  }))
-                }
-                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
-              >
-                <option value="FIXED">Fixed color</option>
-                <option value="OPTIONS">Color options</option>
-              </select>
-            </div>
-
-            {nameKeychain ? (
-              <div className="space-y-4 sm:col-span-2">
-                {(["base", "text"] as const).map((part) => {
-                  const field = `${part}Color` as const;
-                  const optionsField = `${part}ColorOptions` as const;
-                  return (
-                    <fieldset key={part} className="space-y-2">
-                      <legend className="text-xs font-semibold capitalize text-gray-700 dark:text-gray-300">{part} color *</legend>
-                      {form.colorMode === "FIXED" ? (
-                        <input aria-label={`${part} color`} required maxLength={200} value={form[field]} onChange={(event) => setForm({ ...form, [field]: event.target.value })} placeholder={part === "base" ? "e.g., Black" : "e.g., White"} className="w-full rounded-xl border border-gray-200 bg-transparent px-3 py-2 text-sm text-gray-900 dark:border-dark-200 dark:text-white" />
-                      ) : (
-                        <>
-                          <div className="grid grid-cols-3 gap-2">
-                            {Array.from(new Set([...PRODUCT_COLOR_OPTIONS, ...form[optionsField]])).map((color) => (
-                              <label key={color} className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
-                                <input type="checkbox" checked={form[optionsField].includes(color)} onChange={() => setForm((prev) => ({ ...prev, [optionsField]: prev[optionsField].includes(color) ? prev[optionsField].filter((value) => value !== color) : [...prev[optionsField], color] }))} />{color}
-                              </label>
-                            ))}
-                          </div>
-                          {!form[optionsField].length && <p className="text-xs text-amber-600">Select at least one {part} color.</p>}
-                        </>
-                      )}
-                    </fieldset>
-                  );
-                })}
-              </div>
-            ) : form.colorMode === "FIXED" ? (
-              <div>
+            <div className={nameKeychain ? "grid gap-3 sm:col-span-2 sm:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,1fr)]" : "contents"}>
+              <div className={nameKeychain && form.colorMode === "OPTIONS" ? "min-w-0 sm:col-span-2" : "min-w-0"}>
                 <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                  Color *
+                  Color Mode
                 </label>
-                <input
-                  type="text"
-                  value={form.color}
-                  onChange={(e) => setForm({ ...form, color: e.target.value })}
-                  required
-                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
-                  placeholder="e.g., Matte Black"
-                />
+                <select
+                  value={form.colorMode}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      colorMode: e.target.value as ColorMode,
+                    }))
+                  }
+                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+                >
+                  <option value="FIXED">Fixed color</option>
+                  <option value="OPTIONS">Color options</option>
+                </select>
               </div>
-            ) : (
-              <div className="sm:col-span-2 space-y-2.5 rounded-xl border border-dashed border-gray-200/80 bg-gray-50/60 p-3 dark:border-dark-200 dark:bg-dark-200/30">
-                <div className="flex items-center justify-between gap-4">
-                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                    Available Colors
-                  </label>
-                  <span className="text-[11px] text-gray-500 dark:text-gray-400">
-                    {form.colorOptions.length} selected
-                  </span>
-                </div>
 
-                <div className="grid gap-2 sm:grid-cols-3">
-                  {PRODUCT_COLOR_OPTIONS.map((colorOption) => {
-                    const isSelected = form.colorOptions.includes(colorOption);
+              {nameKeychain ? (
+                <div className={form.colorMode === "FIXED" ? "contents" : "space-y-4 sm:col-span-3"}>
+                  {(["base", "text"] as const).map((part) => {
+                    const field = `${part}Color` as const;
+                    const optionsField = `${part}ColorOptions` as const;
+
+                    if (form.colorMode === "OPTIONS") {
+                      return (
+                        <AdminColorOptions
+                          key={part}
+                          label={`${part === "base" ? "Base" : "Text"} Color *`}
+                          selected={form[optionsField]}
+                          onToggle={(color) => setForm((prev) => ({
+                            ...prev,
+                            [optionsField]: prev[optionsField].includes(color)
+                              ? prev[optionsField].filter((value) => value !== color)
+                              : [...prev[optionsField], color],
+                          }))}
+                          emptyMessage={`Select at least one ${part} color.`}
+                        />
+                      );
+                    }
 
                     return (
-                      <label
-                        key={colorOption}
-                        className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm transition-colors ${
-                          isSelected
-                            ? "border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300"
-                            : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 dark:border-dark-200 dark:bg-dark dark:text-gray-300 dark:hover:border-dark-300"
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => toggleColorOption(colorOption)}
-                          className="h-4 w-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
-                        />
-                        <span>{colorOption}</span>
-                      </label>
+                      <fieldset key={part} className="min-w-0 space-y-1">
+                        <legend className="text-xs font-semibold capitalize text-gray-700 dark:text-gray-300">{part} color *</legend>
+                        <input aria-label={`${part} color`} required maxLength={200} value={form[field]} onChange={(event) => setForm({ ...form, [field]: event.target.value })} placeholder={part === "base" ? "e.g., Black" : "e.g., White"} className="w-full rounded-xl border border-gray-200 bg-transparent px-3 py-2 text-sm text-gray-900 dark:border-dark-200 dark:text-white" />
+                      </fieldset>
                     );
                   })}
                 </div>
-
-                <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                  Customers can choose from the selected colors. Typical 3D printing colors like Gray, Orange, and Purple are included.
-                </p>
-                {!hasSelectedColorOptions && (
-                  <p className="text-[11px] text-amber-600 dark:text-amber-400">
-                    Select at least one color option.
-                  </p>
-                )}
-              </div>
-            )}
+              ) : form.colorMode === "FIXED" ? (
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Color *
+                  </label>
+                  <input
+                    type="text"
+                    value={form.color}
+                    onChange={(e) => setForm({ ...form, color: e.target.value })}
+                    required
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 dark:border-dark-200 dark:bg-dark dark:text-white"
+                    placeholder="e.g., Matte Black"
+                  />
+                </div>
+              ) : (
+                <AdminColorOptions
+                  label="Available Colors"
+                  selected={form.colorOptions}
+                  onToggle={toggleColorOption}
+                  emptyMessage="Select at least one color option."
+                  className="sm:col-span-2"
+                />
+              )}
+            </div>
           </div>
         </section>
 
