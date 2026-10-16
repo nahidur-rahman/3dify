@@ -36,7 +36,7 @@ export default function BrandLogo({
   size = "md",
   className,
   logoSrc,
-  logoAlt = "3DifyBd",
+  logoAlt = "3Dify",
 }: BrandLogoProps) {
   const [logoFailed, setLogoFailed] = useState(false);
   const envLogoSrc = process.env.NEXT_PUBLIC_LOGO_PATH?.trim();
