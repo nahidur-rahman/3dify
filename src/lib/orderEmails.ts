@@ -11,7 +11,7 @@ function getConfig(): OrderEmailConfig & { apiKey: string } {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   if (!apiKey) throw new Error("RESEND_API_KEY is missing");
 
-  const from = process.env.ORDER_EMAIL_FROM?.trim() || "3DifyBD Orders <orders@mail.3difybd.com>";
+  const from = process.env.ORDER_EMAIL_FROM?.trim() || "3Dify Orders <orders@mail.3difybd.com>";
   const adminEmail = process.env.ORDER_ADMIN_EMAIL?.trim() || "3difybd@gmail.com";
   const replyTo = process.env.ORDER_EMAIL_REPLY_TO?.trim() || adminEmail;
   const senderAddress = from.includes("<") ? from.match(/^[^<>\r\n]+<([^<>]+)>$/)?.[1] : from;
