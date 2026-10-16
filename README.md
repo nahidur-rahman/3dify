@@ -1,6 +1,6 @@
-# 3Dify BD
+# 3Dify
 
-3Dify BD is a 3D printed products storefront built with Next.js App Router.
+3Dify is a 3D printed products storefront built with Next.js App Router.
 
 ## Product summary
 
@@ -74,7 +74,7 @@ NEXT_PUBLIC_MESSENGER=
 NEXT_PUBLIC_FACEBOOK_URL=
 NEXT_PUBLIC_INSTAGRAM_URL=
 NEXT_PUBLIC_SITE_URL=
-NEXT_PUBLIC_APP_NAME=3Dify BD
+NEXT_PUBLIC_APP_NAME=3Dify
 
 PRODUCT_IMAGE_LIMIT=
 
@@ -117,7 +117,7 @@ Configure these server environment variables in `.env` and your hosting dashboar
 
 ```env
 RESEND_API_KEY=your-resend-api-key
-ORDER_EMAIL_FROM="3DifyBD Orders <orders@mail.3difybd.com>"
+ORDER_EMAIL_FROM="3Dify Orders <orders@mail.3difybd.com>"
 ORDER_ADMIN_EMAIL=3difybd@gmail.com
 ORDER_EMAIL_REPLY_TO=3difybd@gmail.com
 NEXT_PUBLIC_SITE_URL=https://3difybd.com
