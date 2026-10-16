@@ -39,14 +39,14 @@ export default function TextDesignEditor({ designs, onChange, disabled }: {
   }
 
   return (
-    <fieldset disabled={disabled} className="space-y-3">
+    <fieldset disabled={disabled} className="min-w-0 space-y-3">
       <legend className="text-sm font-semibold text-gray-900 dark:text-white">Text designs / fonts ({designs.length}/10)</legend>
       <p className="text-xs text-gray-500 dark:text-gray-400">Upload small sample images of each font or design. Recommended: 600 × 200 px, under 100 KB; maximum 1 MB each. Labels help customers identify their choice.</p>
       <input aria-label="Upload text design images" type="file" accept={TEXT_DESIGN_IMAGE_TYPES.join(",")} multiple onChange={selectFiles} disabled={disabled || designs.length >= TEXT_DESIGN_LIMIT} className="block w-full text-xs text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-primary-50 file:px-3 file:py-2 file:text-primary-700 dark:text-gray-300" />
       {error && <p role="alert" className="text-xs text-red-600">{error}</p>}
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,12rem),1fr))] gap-3">
         {designs.map((design) => (
-          <div key={design.id} className="space-y-2 rounded-xl border border-gray-200 p-2 dark:border-dark-200">
+          <div key={design.id} className="min-w-0 space-y-2 rounded-xl border border-gray-200 p-2 dark:border-dark-200">
             <div className="relative h-20 overflow-hidden rounded-lg bg-gray-100 dark:bg-dark-200">
               <Image src={design.image} alt={design.label} fill sizes="240px" unoptimized={!!design.file} className="object-contain" />
             </div>
