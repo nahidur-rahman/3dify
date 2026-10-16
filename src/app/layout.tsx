@@ -17,8 +17,8 @@ const metadataBase = (() => {
 export const metadata: Metadata = {
   metadataBase,
   title: {
-    default: "3Dify BD — Premium 3D Printed Products",
-    template: "%s | 3Dify BD",
+    default: "3Dify — Premium 3D Printed Products",
+    template: "%s | 3Dify",
   },
   icons: {
     icon: [
