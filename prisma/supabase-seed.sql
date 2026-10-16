@@ -1,4 +1,4 @@
--- 3Dify BD Supabase seed script
+-- 3Dify Supabase seed script
 -- Run this in the Supabase SQL editor after the schema migration.
 -- It is idempotent: it removes prior sample rows by name/category, then reinserts them.
 
