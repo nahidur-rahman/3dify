@@ -18,6 +18,7 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
   const router = useRouter();
   const { addToCart, openDrawer } = useCart();
   const nameKeychain = isNameKeychain(product);
+  const [showValidation, setShowValidation] = useState(false);
   const [customization, setCustomization] = useState<NameKeychainCustomization>({
     printedName: "",
     baseColor: product.colorMode === "OPTIONS" ? product.baseColorOptions?.[0] || "" : product.baseColor || "As shown",
@@ -62,7 +63,7 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
   }
 
   return (
-    <form className="flex flex-col gap-5" onSubmit={(event) => {
+    <form className="flex flex-col gap-5" onInvalidCapture={() => setShowValidation(true)} onSubmit={(event) => {
       event.preventDefault();
       const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
       handlePurchase(submitter?.value === "buy");
@@ -119,7 +120,7 @@ export default function AddToCartSection({ product }: AddToCartSectionProps) {
         </div>
       )}
 
-      {nameKeychain ? <NameKeychainOptions product={product} value={customization} onChange={setCustomization} /> : hasColorOptions ? (
+      {nameKeychain ? <NameKeychainOptions product={product} value={customization} onChange={setCustomization} showValidation={showValidation} /> : hasColorOptions ? (
         <div>
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
             Color
