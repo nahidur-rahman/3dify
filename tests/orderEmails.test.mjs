@@ -28,7 +28,7 @@ const keychain = loadTypeScript("../src/lib/nameKeychain.ts");
 const keychainCheckout = loadTypeScript("../src/lib/keychainCheckout.ts", { zod: require("zod"), "@/lib/nameKeychain": keychain });
 const templates = loadTypeScript("../src/lib/orderEmailTemplates.ts", { "@/lib/nameKeychain": keychain });
 const config = {
-  from: "3DifyBD Orders <orders@mail.3difybd.com>",
+  from: "3Dify Orders <orders@mail.3difybd.com>",
   adminEmail: "3difybd@gmail.com",
   replyTo: "support@example.com",
   siteUrl: "https://3difybd.com",
