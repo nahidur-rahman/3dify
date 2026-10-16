@@ -36,7 +36,7 @@ test("customer controls expose both color modes, required print name/design, bou
     "@/lib/nameKeychain": keychain,
     "@/lib/utils": { getWhatsAppLink: () => "https://wa.me/8801712345678", getMessengerLink: () => "https://m.me/shop", hasWhatsAppConfigured: () => true, hasMessengerConfigured: () => true },
   }).default;
-  const render = (saved) => renderToStaticMarkup(React.createElement(Options, { product: saved, value: customization, onChange: () => {} }));
+  const render = (saved, value = customization, showValidation = false) => renderToStaticMarkup(React.createElement(Options, { product: saved, value, showValidation, onChange: () => {} }));
   const options = render(product);
   assert.equal((options.match(/<select /g) || []).length, 2);
   assert.match(options, /aria-label="Base color"/);
@@ -47,6 +47,17 @@ test("customer controls expose both color modes, required print name/design, bou
   assert.match(options, /<textarea[^>]*maxLength="500"/);
   assert.match(options, /href="https:\/\/wa.me/);
   assert.match(options, /href="https:\/\/m.me/);
+  assert.ok(options.indexOf("Name to print") < options.indexOf("Base color"));
+  assert.ok(options.indexOf("Text color") < options.indexOf("Font / text design"));
+  const empty = { printedName: "   ", baseColor: "", textColor: "" };
+  assert.doesNotMatch(render(product, empty), /aria-invalid="true"/);
+  const invalid = render(product, empty, true);
+  for (const message of ["Enter a name to print.", "Choose a base color.", "Choose a text color.", "Choose a font / text design."]) {
+    assert.ok(invalid.includes(message), message);
+  }
+  assert.match(invalid, /aria-invalid="true"/);
+  assert.match(invalid, /border-red-500/);
+  assert.doesNotMatch(render(product, customization, true), /aria-invalid="true"|border-red-500/);
   const fixed = render({ ...product, colorMode: "FIXED", textDesigns: [] });
   assert.doesNotMatch(fixed, /<select|type="radio"/);
   assert.match(fixed, />Black<|>White</);
