@@ -46,7 +46,7 @@ export default async function AdminsPage() {
             Admins
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Review administrator accounts. Only SUPER admins can create or delete admin accounts.
+            Review administrator accounts.
           </p>
         </div>
         <div className="inline-flex flex-wrap items-center gap-2 break-all rounded-full border border-primary-500/20 bg-primary-500/5 px-4 py-2 text-sm text-primary-500">
