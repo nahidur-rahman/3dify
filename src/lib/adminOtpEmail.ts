@@ -14,9 +14,9 @@ export async function sendAdminOtpEmail(email: string, otp: string, challengeId:
   const body = JSON.stringify({
     from,
     to: [email],
-    subject: "Your 3DifyBD admin verification code",
-    text: `Your 3DifyBD admin login code is: ${otp}\n\nThis code expires in 5 minutes and can be used only once. Never share this code. If you did not request it, secure your admin password and ignore this email.`,
-    html: `<div style="font-family:Arial,sans-serif;color:#111827;max-width:480px;margin:auto;padding:24px"><h1 style="font-size:22px">Verify your admin login</h1><p>Your 3DifyBD verification code:</p><p style="font-size:32px;font-weight:bold;letter-spacing:6px">${otp}</p><p>This code expires in <strong>5 minutes</strong> and can be used only once.</p><p>Never share this code. If you did not request it, secure your admin password and ignore this email.</p></div>`,
+    subject: "Your 3Dify admin verification code",
+    text: `Your 3Dify admin login code is: ${otp}\n\nThis code expires in 5 minutes and can be used only once. Never share this code. If you did not request it, secure your admin password and ignore this email.`,
+    html: `<div style="font-family:Arial,sans-serif;color:#111827;max-width:480px;margin:auto;padding:24px"><h1 style="font-size:22px">Verify your admin login</h1><p>Your 3Dify verification code:</p><p style="font-size:32px;font-weight:bold;letter-spacing:6px">${otp}</p><p>This code expires in <strong>5 minutes</strong> and can be used only once.</p><p>Never share this code. If you did not request it, secure your admin password and ignore this email.</p></div>`,
   });
   for (let attempt = 0; attempt < 2; attempt++) {
     let retryDelay = 1_000;
