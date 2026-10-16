@@ -1,4 +1,4 @@
-# 3Dify BD Implementation Plan (MVP First)
+# 3Dify Implementation Plan (MVP First)
 
 This plan is the source of truth for implementation from Apr 25, 2026 onward.
 
@@ -6,7 +6,7 @@ This plan is the source of truth for implementation from Apr 25, 2026 onward.
 
 | Field | Detail |
 |---|---|
-| Brand | 3Dify BD |
+| Brand | 3Dify |
 | Tagline | Premium 3D Printed Products - Made to Order in Bangladesh |
 | Core flow | Browse -> Contact (WhatsApp/Messenger) -> We print -> Deliver |
 | Payments | Offline/manual via chat |
@@ -257,7 +257,7 @@ NEXT_PUBLIC_MESSENGER=
 NEXT_PUBLIC_SITE_URL=
 
 # App
-NEXT_PUBLIC_APP_NAME=3Dify BD
+NEXT_PUBLIC_APP_NAME=3Dify
 
 # Seed behavior (new)
 SEED_SAMPLE_PRODUCTS=true
