@@ -5,7 +5,7 @@ import { loadTypeScript } from "./helpers/loadTypeScript.mjs";
 
 const config = loadTypeScript("src/lib/adminOtpConfig.ts");
 const require = createRequire(import.meta.url);
-function service(fetch, apiKey = "test-api-key", from = "3DifyBD OTP <otp@mail.3difybd.com>") {
+function service(fetch, apiKey = "test-api-key", from = "3Dify OTP <otp@mail.3difybd.com>") {
   return loadTypeScript("src/lib/adminOtpEmail.ts", { "server-only": {}, zod: require("zod"), "@/lib/adminOtpConfig": config }, {
     process: { env: { RESEND_API_KEY: apiKey, ADMIN_OTP_FROM: from ?? undefined } }, fetch, setTimeout: (resolve) => { resolve(); },
   }).sendAdminOtpEmail;
@@ -18,7 +18,7 @@ test("the Resend message uses the exact OTP sender, private key, recipient and i
   const [url, options] = calls[0];
   assert.equal(url, "https://api.resend.com/emails");
   const body = JSON.parse(options.body);
-  assert.equal(body.from, "3DifyBD OTP <otp@mail.3difybd.com>");
+  assert.equal(body.from, "3Dify OTP <otp@mail.3difybd.com>");
   assert.deepEqual(body.to, ["admin@example.com"]);
   assert.match(body.text, /01234567/);
   assert.match(body.text, /5 minutes/);
