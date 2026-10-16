@@ -6,7 +6,7 @@ export const maxDuration = 30;
 
 export const metadata: Metadata = {
   title: "Checkout",
-  description: "Complete your order at 3Dify BD.",
+  description: "Complete your order at 3Dify.",
 };
 
 export default function CheckoutPage() {
