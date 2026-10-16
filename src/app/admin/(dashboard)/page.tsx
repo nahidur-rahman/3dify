@@ -71,7 +71,7 @@ export default async function AdminDashboardPage() {
             Dashboard
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Overview of your 3Dify BD store
+            Overview of your 3Dify store
           </p>
         </div>
         <div className="flex flex-wrap gap-2 sm:gap-3">
