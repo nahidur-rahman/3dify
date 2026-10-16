@@ -1,4 +1,4 @@
-# 3Dify BD Category Refactor TODO
+# 3Dify Category Refactor TODO
 
 Updated on September 27, 2026.
 
