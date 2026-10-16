@@ -102,13 +102,13 @@ export function buildOrderEmails(order: EmailOrder, config: OrderEmailConfig): O
       to: [recipient],
       reply_to: admin ? (order.customerEmail || config.replyTo) : config.replyTo,
       subject: admin
-        ? `New order ${order.orderNumber} | ${money(order.total)} | 3DifyBD`
-        : `Order received — ${order.orderNumber} | 3DifyBD`,
+        ? `New order ${order.orderNumber} | ${money(order.total)} | 3Dify`
+        : `Order received — ${order.orderNumber} | 3Dify`,
       html: `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
         <body style="margin:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#111827">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 12px">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:12px"><tr><td style="padding:28px 20px">
-        <p style="margin:0;color:#4f46e5;font-size:22px;font-weight:bold">3DifyBD</p>
+        <p style="margin:0;color:#4f46e5;font-size:22px;font-weight:bold">3Dify</p>
         <h1 style="font-size:24px;margin:20px 0 12px">${title}</h1>
         <p style="line-height:1.6">${escapeHtml(introduction)}</p>
         ${detail("Order number", order.orderNumber)}${detail("Placed", `${date} (Bangladesh time)`)}
@@ -118,7 +118,7 @@ export function buildOrderEmails(order: EmailOrder, config: OrderEmailConfig): O
         <p style="margin:24px 0"><a href="${escapeHtml(url.href)}" style="display:inline-block;background:#4f46e5;color:#ffffff;padding:12px 20px;border-radius:6px;text-decoration:none;font-weight:bold">${button}</a></p>
         <p style="font-size:13px;line-height:1.6;color:#6b7280">${escapeHtml(footer)}</p>
         </td></tr></table></td></tr></table></body></html>`,
-      text: ["3DifyBD", title, introduction, "", sharedText,
+      text: ["3Dify", title, introduction, "", sharedText,
         admin && order.customerEmail ? `Email: ${order.customerEmail}` : "",
         "", `${button}: ${url.href}`, "", footer,
       ].join("\n"),
