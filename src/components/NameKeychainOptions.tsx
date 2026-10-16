@@ -126,7 +126,7 @@ export default function NameKeychainOptions({ product, value, onChange, showVali
         />
       </label>
 
-      <div className="border-t border-gray-100 pt-2 text-[11px] leading-5 text-gray-500 dark:border-dark-200 dark:text-gray-400">
+      <div className="border-t border-gray-100 text-[11px] leading-5 text-gray-500 dark:border-dark-200 dark:text-gray-400">
         Need more customization? Or anything you have in mind? Contact us before ordering via WhatsApp or Messenger.
         {hasWhatsAppConfigured() && <a href={getWhatsAppLink(product.name)} target="_blank" rel="noopener noreferrer" className="ml-2 font-semibold text-green-600 underline dark:text-green-400">WhatsApp</a>}
         {hasMessengerConfigured() && <a href={getMessengerLink()} target="_blank" rel="noopener noreferrer" className="ml-2 font-semibold text-blue-600 underline dark:text-blue-400">Messenger</a>}
