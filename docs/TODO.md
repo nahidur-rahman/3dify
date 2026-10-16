@@ -1,4 +1,4 @@
-# 3Dify BD Implementation TODO (MVP First)
+# 3Dify Implementation TODO (MVP First)
 
 Updated on Apr 25, 2026 to match current codebase reality.
 
