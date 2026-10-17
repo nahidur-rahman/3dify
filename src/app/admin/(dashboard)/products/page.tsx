@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { productImageVariant } from "@/lib/imageVariants";
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
@@ -642,7 +643,7 @@ export default async function AdminProductsPage({
                         <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-gray-100 text-gray-400 dark:bg-dark-200">
                           {product.images[0] ? (
                             <Image
-                              src={product.images[0]}
+                              src={productImageVariant(product.images[0], "thumbnail")}
                               alt=""
                               fill
                               sizes="40px"
