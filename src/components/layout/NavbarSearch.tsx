@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { productImageVariant } from "@/lib/imageVariants";
 import Link from "next/link";
 import {
   usePathname,
@@ -257,7 +258,7 @@ export default function NavbarSearch({
                 <div className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-dark-200">
                   {suggestion.image ? (
                     <Image
-                      src={suggestion.image}
+                      src={productImageVariant(suggestion.image, "thumbnail")}
                       alt={suggestion.name}
                       fill
                       sizes="44px"
