@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import { productImageVariant, PRODUCT_IMAGE_TYPES, PRODUCT_IMAGE_MAX_BYTES } from "@/lib/imageVariants";
+import { uploadImageFiles } from "@/lib/uploadImageFiles";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import TextDesignEditor, { type EditableTextDesign } from "@/components/TextDesignEditor";
@@ -149,8 +151,8 @@ export default function ProductForm({
   const [existingImageHashes, setExistingImageHashes] = useState(
     existingImageSignatures
   );
-  const [uploadFolderKey, setUploadFolderKey] = useState(
-    product?.id || `draft-${crypto.randomUUID()}`
+  const [uploadFolderKey] = useState(
+    `draft-${crypto.randomUUID()}`
   );
 
   const cleanupUploadedImages = async (imageUrls: string[]) => {
@@ -327,6 +329,10 @@ export default function ProductForm({
 
       for (let index = 0; index < nextFiles.length; index += 1) {
         const file = nextFiles[index];
+        if (!PRODUCT_IMAGE_TYPES.includes(file.type) || file.size > PRODUCT_IMAGE_MAX_BYTES) {
+          setError("Choose JPEG, PNG, WebP or AVIF photos, up to 4 MB each.");
+          continue;
+        }
         const signature = await getFileSignature(file);
         if (seenSignatures.has(signature)) {
           continue;
@@ -386,31 +392,8 @@ export default function ProductForm({
     if (pendingImages.length === 0) return [];
 
     setImageUploading(true);
-    const formData = new FormData();
-    pendingImages.forEach((image) => formData.append("files", image.file));
-    formData.append("folderKey", uploadFolderKey);
-
     try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Upload failed");
-      }
-
-      if (typeof data.folderKey === "string" && data.folderKey.length > 0) {
-        setUploadFolderKey(data.folderKey);
-      }
-
-      const uploadedUrls = Array.isArray(data.urls)
-        ? (data.urls as unknown[]).filter(
-            (url): url is string => typeof url === "string" && url.length > 0
-          )
-        : [];
-
+      const uploadedUrls = await uploadImageFiles(pendingImages.map((image) => image.file), uploadFolderKey);
       return Array.from(new Set(uploadedUrls));
     } finally {
       setImageUploading(false);
@@ -443,14 +426,7 @@ export default function ProductForm({
       let savedTextDesigns = nameKeychain ? textDesigns.map(({ id, label, image }) => ({ id, label: label.trim(), image })) : [];
       const pendingDesigns = nameKeychain ? textDesigns.filter((design) => design.file) : [];
       if (pendingDesigns.length) {
-        const designData = new FormData();
-        pendingDesigns.forEach((design) => designData.append("files", design.file!));
-        designData.append("purpose", "text-design");
-        designData.append("folderKey", `draft-${crypto.randomUUID()}`);
-        const response = await fetch("/api/upload", { method: "POST", body: designData });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || "Design upload failed");
-        const urls: string[] = result.urls;
+        const urls = await uploadImageFiles(pendingDesigns.map((design) => design.file!), `draft-${crypto.randomUUID()}`, "text-design");
         uploadedImages.push(...urls);
         if (urls.length !== pendingDesigns.length) throw new Error("Design upload incomplete. Please retry.");
         const replacements = new Map(pendingDesigns.map((design, index) => [design.id, urls[index]]));
@@ -918,7 +894,7 @@ export default function ProductForm({
                 key={`existing-${i}`}
                 className="group relative aspect-square overflow-hidden rounded-xl bg-gray-100 dark:bg-dark-200"
               >
-                <Image src={url} alt="" fill sizes="80px" className="object-cover" />
+                <Image src={productImageVariant(url, "thumbnail")} alt="" fill sizes="80px" className="object-cover" />
                 <button
                   type="button"
                   onClick={() => removeImage(i)}
@@ -951,12 +927,13 @@ export default function ProductForm({
 
           <input
             type="file"
-            accept="image/*"
+            accept={PRODUCT_IMAGE_TYPES.join(",")}
             multiple
             onChange={handleImageUpload}
             disabled={imageUploading || loading}
             className="mt-3 block w-full text-xs text-gray-500 file:mr-3 file:rounded-full file:border-0 file:bg-primary-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-primary-600 hover:file:bg-primary-100 dark:file:bg-primary-500/10 dark:file:text-primary-400"
           />
+          <p className="mt-1 text-xs text-gray-500">JPEG, PNG, WebP or AVIF, up to 4 MB each. Photos are resized automatically.</p>
           {hasImageLimit && remainingImageSlots !== null && (
             <p
               className={`mt-1 text-xs ${
