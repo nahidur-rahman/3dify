@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { productImageVariant } from "@/lib/imageVariants";
 import { useState } from "react";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { cn } from "@/lib/utils";
@@ -65,7 +66,7 @@ export default function ProductImageGallery({
     <div className="flex flex-col gap-3">
       <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.98),_rgba(243,244,246,0.95)_48%,_rgba(229,231,235,0.9)_100%)] dark:bg-[radial-gradient(circle_at_top,_rgba(38,38,42,0.98),_rgba(24,24,28,0.96)_48%,_rgba(17,17,20,0.94)_100%)]">
         <Image
-          src={activeImage}
+          src={productImageVariant(activeImage, "main")}
           alt=""
           aria-hidden="true"
           fill
@@ -74,7 +75,7 @@ export default function ProductImageGallery({
           sizes="(max-width: 1024px) 100vw, 50vw"
         />
         <Image
-          src={activeImage}
+          src={productImageVariant(activeImage, "main")}
           alt={productName}
           fill
           className="object-contain transition-transform duration-500 transform-gpu"
@@ -134,7 +135,7 @@ export default function ProductImageGallery({
                 )}
               >
                 <Image
-                  src={image}
+                  src={productImageVariant(image, "thumbnail")}
                   alt={`${productName} thumbnail ${index + 1}`}
                   fill
                   className="object-cover"
