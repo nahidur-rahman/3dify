@@ -6,6 +6,7 @@ import CustomizationSummary from "@/components/CustomizationSummary";
 import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
+import { productImageVariant } from "@/lib/imageVariants";
 import Link from "next/link";
 import { useEffect } from "react";
 import { HiMinus, HiPlus, HiOutlineTrash, HiX, HiOutlineShoppingCart } from "react-icons/hi";
@@ -105,7 +106,7 @@ export default function CartDrawer() {
                     <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-dark-200">
                       {item.image ? (
                         <Image
-                          src={item.image}
+                          src={productImageVariant(item.image, "thumbnail")}
                           alt={item.name}
                           fill
                           className="object-cover"
