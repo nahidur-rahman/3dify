@@ -16,6 +16,7 @@ import { normalizeOrderPostalCode } from "@/lib/orderAddress";
 import { saveStoredOrder } from "@/lib/localOrderHistory";
 import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
+import { productImageVariant } from "@/lib/imageVariants";
 import {
   HiChevronDown,
   HiOutlineShoppingCart,
@@ -300,7 +301,7 @@ export default function CheckoutForm() {
                   <div className="relative h-14 w-14 flex-shrink-0 overflow-visible rounded-lg bg-gray-100 dark:bg-dark-200">
                     {item.image ? (
                       <Image
-                        src={item.image}
+                        src={productImageVariant(item.image, "thumbnail")}
                         alt={item.name}
                         fill
                         className="object-cover"
