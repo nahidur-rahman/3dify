@@ -18,6 +18,7 @@ import {
 } from "@/lib/pagination";
 import AdminOrdersTableSkeleton from "@/components/loading/AdminOrdersTableSkeleton";
 import Image from "next/image";
+import { productImageVariant } from "@/lib/imageVariants";
 import {
   HiOutlineCalendar,
   HiOutlineCheck,
@@ -465,7 +466,7 @@ export default function OrdersPageClient({
                               >
                                 {item.productImage ? (
                                   <Image
-                                    src={item.productImage}
+                                    src={productImageVariant(item.productImage, "thumbnail")}
                                     alt={item.productName}
                                     fill
                                     className="object-cover"
@@ -709,7 +710,7 @@ export default function OrdersPageClient({
                         <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-gray-200 dark:bg-dark-300 flex-shrink-0">
                           {item.productImage ? (
                             <Image
-                              src={item.productImage}
+                              src={productImageVariant(item.productImage, "thumbnail")}
                               alt={item.productName}
                               fill
                               className="object-cover"
