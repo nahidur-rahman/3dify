@@ -6,6 +6,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
+import { productImageVariant } from "@/lib/imageVariants";
 import Link from "next/link";
 import TrackOrderSkeleton from "@/components/loading/TrackOrderSkeleton";
 import {
@@ -320,7 +321,7 @@ function TrackOrderContent() {
                     <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-gray-100 dark:bg-dark-200 flex-shrink-0">
                       {item.productImage ? (
                         <Image
-                          src={item.productImage}
+                          src={productImageVariant(item.productImage, "thumbnail")}
                           alt={item.productName}
                           fill
                           className="object-cover"
