@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { productImageVariant } from "@/lib/imageVariants";
 import { useEffect, useRef, useState } from "react";
 import { TEXT_DESIGN_LIMIT, TEXT_DESIGN_MAX_BYTES, TEXT_DESIGN_IMAGE_TYPES } from "@/lib/nameKeychain";
 import type { TextDesign } from "@/lib/types";
@@ -48,7 +49,7 @@ export default function TextDesignEditor({ designs, onChange, disabled }: {
         {designs.map((design) => (
           <div key={design.id} className="min-w-0 space-y-2 rounded-xl border border-gray-200 p-2 dark:border-dark-200">
             <div className="relative h-20 overflow-hidden rounded-lg bg-gray-100 dark:bg-dark-200">
-              <Image src={design.image} alt={design.label} fill sizes="240px" unoptimized={!!design.file} className="object-contain" />
+              <Image src={productImageVariant(design.image, "card")} alt={design.label} fill sizes="240px" unoptimized={!!design.file} className="object-contain" />
             </div>
             <label className="block text-xs text-gray-600 dark:text-gray-300">
               Design label
