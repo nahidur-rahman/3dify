@@ -224,6 +224,28 @@ npx prisma migrate deploy
 - upload route works
 - contact links are configured
 
+## Image delivery and Vercel usage
+
+`next.config.mjs` sets `images.unoptimized: true`. Next.js Image components serve
+the source files directly, retaining their layout and lazy loading without
+requesting Vercel image transformations. Product images load from Supabase Storage;
+local assets load from the site. Automatic resizing and format conversion are disabled.
+
+- Deploy this configuration to production for it to take effect. It does not reset
+  existing usage; older deployments and already-open pages can still request optimization.
+- After deployment, open a fresh page and inspect the browser Network panel. Image
+  requests should use source URLs rather than `/_next/image?url=...`.
+- Compress product photos before uploading (prefer WebP, around 1200 px on the long
+  side and roughly 100–250 KB when practical). Large originals increase customer
+  download size and Supabase bandwidth consumption. Existing uploads are unchanged.
+- Check Vercel team usage and Supabase bandwidth after deployment. This change
+  addresses image transformations, not other hosting or storage quotas.
+
+Vercel Hobby is restricted to non-commercial personal use; a selling storefront
+needs a hosting plan/provider that permits commercial use. See the official
+[Hobby plan terms](https://vercel.com/docs/plans/hobby) and
+[image optimization limits](https://vercel.com/docs/image-optimization/limits-and-pricing).
+
 ## MVP checklist
 
 - Docs are aligned (PLAN.md, TODO.md, README.md)
