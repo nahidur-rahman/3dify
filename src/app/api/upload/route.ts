@@ -13,6 +13,7 @@ function getUploadErrorCode(message: string) {
   if (message === "No files provided") return "NO_FILES";
   if (message === "Invalid folder key") return "INVALID_FOLDER_KEY";
   if (message.startsWith("Invalid file type")) return "INVALID_FILE_TYPE";
+  if (message.startsWith("Invalid image")) return "INVALID_IMAGE";
   if (message.includes("Max size")) return "FILE_TOO_LARGE";
   if (message.startsWith("Upload failed:")) return "STORAGE_UPLOAD_FAILED";
   return "UPLOAD_FAILED";
