@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { productImageVariant } from "@/lib/imageVariants";
 import {
   calculateDiscountedPrice,
   formatPrice,
@@ -29,7 +30,7 @@ export default function ProductCard({
         <div className="relative aspect-square overflow-hidden bg-gray-50 dark:bg-dark/60">
           {imageSrc ? (
             <Image
-              src={imageSrc}
+              src={productImageVariant(imageSrc, "card")}
               alt={product.name}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
