@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { productImageVariant } from "@/lib/imageVariants";
 import { CUSTOMIZATION_NOTES_MAX_LENGTH, PRINTED_NAME_MAX_LENGTH } from "@/lib/nameKeychain";
 import { getWhatsAppLink, getMessengerLink, hasWhatsAppConfigured, hasMessengerConfigured } from "@/lib/utils";
 import type { NameKeychainCustomization, Product } from "@/lib/types";
@@ -101,7 +102,7 @@ export default function NameKeychainOptions({ product, value, onChange, showVali
                   className="absolute left-1.5 top-1.5 z-10 h-3 w-3 accent-primary-500"
                 />
                 <span className="relative mb-1 block h-10 overflow-hidden rounded bg-white">
-                  <Image src={design.image} alt={design.label} fill sizes="(max-width: 640px) 100px, 120px" className="object-contain px-1" />
+                  <Image src={productImageVariant(design.image, "card")} alt={design.label} fill sizes="(max-width: 640px) 100px, 120px" className="object-contain px-1" />
                 </span>
                 <span className="block truncate text-center text-[11px] font-medium text-gray-700 dark:text-gray-200">{design.label}</span>
               </label>
