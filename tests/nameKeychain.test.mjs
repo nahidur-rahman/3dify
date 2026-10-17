@@ -11,6 +11,7 @@ const require = createRequire(import.meta.url);
 const zod = require("zod");
 const nextServer = require("next/server");
 const keychain = loadTypeScript("src/lib/nameKeychain.ts");
+const imageVariants = loadTypeScript("src/lib/imageVariants.ts");
 const colors = loadTypeScript("src/lib/productColors.ts", { "@/lib/nameKeychain": keychain });
 const checkout = loadTypeScript("src/lib/keychainCheckout.ts", { zod, "@/lib/nameKeychain": keychain });
 const { getCartKey } = loadTypeScript("src/lib/cart.ts", { "@/lib/nameKeychain": keychain });
@@ -31,6 +32,7 @@ test("customer controls expose both color modes, required print name/design, bou
   const React = require("react");
   const { renderToStaticMarkup } = require("react-dom/server");
   const Options = loadTypeScript("src/components/NameKeychainOptions.tsx", {
+    "@/lib/imageVariants": imageVariants,
     "react/jsx-runtime": require("react/jsx-runtime"),
     "next/image": { default: ({ src, alt }) => React.createElement("img", { src, alt }) },
     "@/lib/nameKeychain": keychain,
@@ -206,6 +208,8 @@ function mediaService() {
   const files = new Set();
   const deleted = [];
   const helpers = loadTypeScript("src/lib/productImages.ts", {
+    "@/lib/imageVariants": imageVariants,
+    "@/lib/optimizeProductImage": {},
     crypto,
     "@/lib/nameKeychain": keychain,
     "@/lib/productColors": colors,
