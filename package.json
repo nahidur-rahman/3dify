@@ -1,6 +1,6 @@
 {
   "name": "3dify-bd",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,6 +8,9 @@
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "next lint",
+    "version:patch": "npm version patch --no-git-tag-version",
+    "version:minor": "npm version minor --no-git-tag-version",
+    "version:major": "npm version major --no-git-tag-version",
     "db:seed": "prisma db seed",
     "db:fresh-start": "prisma db seed -- --fresh-start"
   },
@@ -17,6 +20,9 @@
     "postinstall": "Generates Prisma Client from prisma/schema.prisma. Runs automatically after dependency installation; can also be run with npm run postinstall. Does not apply database migrations.",
     "start": "Starts the Next.js production server using an existing production build. Run npm run build first, then npm start.",
     "lint": "Runs the Next.js ESLint checks to report code quality and framework rule violations. Run with npm run lint.",
+    "version:patch": "Bumps the patch version in package.json and package-lock.json for small releases, without creating a Git commit or tag.",
+    "version:minor": "Bumps the minor version in package.json and package-lock.json for feature releases, without creating a Git commit or tag.",
+    "version:major": "Bumps the major version in package.json and package-lock.json for the stable 1.0.0 launch or later breaking releases, without creating a Git commit or tag.",
     "db:seed": "Creates or updates the SUPER admin using .env credentials; preserves existing records. Sample products are added only when SEED_SAMPLE_PRODUCTS=true.",
     "db:fresh-start": "Deletes admins, login challenges, auth rate limits, orders, order items, and products; creates one SUPER admin from .env. Preserves shipping rates, migration history, and storage images."
   },
@@ -31,6 +37,7 @@
     "react-dom": "^18",
     "react-icons": "^5.6.0",
     "server-only": "0.0.1",
+    "sharp": "0.34.5",
     "zod": "^4.3.6"
   },
   "devDependencies": {
