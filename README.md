@@ -224,22 +224,127 @@ npx prisma migrate deploy
 - upload route works
 - contact links are configured
 
+## Versions and how users receive updates
+
+The initial application version is `0.1.0` in `package.json` and `package-lock.json`.
+This is a release label: changing it does not deploy the website, invalidate browser
+caches, or refresh users' tabs. Each deployment also has its own Vercel deployment
+ID and source Git commit, so deployments remain distinguishable even if they share
+the same application version.
+
+Once a successful deployment is promoted to production, the production domain
+serves it on fresh page loads and normal browser refreshes. Preview deployments
+do not update the production domain. Users do not install or download an update
+manually. Next.js gives generated JavaScript/CSS bundles content-hashed filenames,
+so changed bundles have new URLs and unchanged assets can stay cached.
+
+An already-open tab can keep running the previous JavaScript and cached routes;
+deploying does not immediately replace the page on screen. In-app navigation can
+reuse the client router cache, so it is not a guaranteed update point. A normal
+browser refresh loads the current production version. This repository has no
+service worker or PWA update cycle.
+
+Product data has separate caching: catalog/detail reads use a 60-second
+revalidation interval, and admin product writes invalidate the relevant paths and
+cache tags. Time-based revalidation happens on requests and can serve stale data
+while refreshing; it is not a promise that every open tab updates after 60 seconds.
+The long image cache lifetime also does not delay code updates: changed product
+image bytes get new content-hashed URLs.
+
+For frequent early releases, use this convention:
+
+| Release | Command | Example |
+| --- | --- | --- |
+| Small fix or adjustment, including a one-line change | `npm run version:patch` | `0.1.0` → `0.1.1` |
+| Feature or substantial change during initial development | `npm run version:minor` | `0.1.7` → `0.2.0` |
+| First stable public release | `npm run version:major` | `0.4.8` → `1.0.0` |
+
+Bump once per intended production release, rather than once per file edit or preview
+deployment. There is no need to wait between patch releases; several per day are
+fine. After `1.0.0`, use patches for compatible fixes, minors for compatible
+features, and majors for breaking changes. A slower release schedule uses the same
+commands.
+
+For example, before releasing a small fix:
+
+```bash
+npm run version:patch
+npm run lint
+npm run build
+```
+
+The version commands update both package files without creating a Git commit or
+tag. Commit both files with the release changes, then deploy using the normal
+production workflow. Run relevant regression tests as well; if the release changes
+the database schema, apply compatible production migrations before deploying code
+that needs them. Keep APIs and migrations compatible with older tabs during rollout.
+
+For now, let users receive updates on their next full page load. If long-running
+sessions later need an update notification, add a dismissible “New version
+available” prompt with a user-triggered reload, taking care of unsaved checkout or
+admin form input.
+
+References: [Next.js 14 deployment and asset caching](https://nextjs.org/docs/14/app/building-your-application/deploying),
+[Next.js router and data caches](https://nextjs.org/docs/14/app/building-your-application/caching),
+[Vercel deployment skew protection](https://vercel.com/docs/skew-protection), and
+[npm version commands](https://docs.npmjs.com/cli/commands/npm-version/).
+
 ## Image delivery and Vercel usage
 
-`next.config.mjs` sets `images.unoptimized: true`. Next.js Image components serve
-the source files directly, retaining their layout and lazy loading without
-requesting Vercel image transformations. Product images load from Supabase Storage;
-local assets load from the site. Automatic resizing and format conversion are disabled.
+`next.config.mjs` sets `images.unoptimized: true`. New product uploads are encoded
+once using Sharp into three WebPs: main (750 px longest side), card (480 px), and
+thumbnail (128 px, suitable for a 64 px thumbnail on a 2x screen). All use quality 80.
+Aspect ratio, transparency and phone-photo orientation are preserved; small images
+are not enlarged. EXIF metadata is removed. Detailed photos may exceed 10% of their
+source size: the encoder preserves useful detail instead of enforcing a byte target.
+
+The database stores the main file's reference. Components select the appropriate
+versioned sibling URL; copy/delete/rollback operations include all three files.
+Original source hashes keep upload deduplication working. Legacy filenames fall
+back to their original URLs until converted. Uploads support still JPEG, PNG,
+WebP and AVIF up to 4 MiB each; the browser sends one photo per request to stay
+under Vercel's request-body limit. Text designs retain their existing 1 MiB limit.
+
+Generated files have a 90-day (`7776000` seconds, approximately three months) storage cache lifetime.
+Content-hashed, versioned filenames change when source bytes change. If encoding
+settings change, bump `IMAGE_VARIANT_VERSION` and the matching filename pattern in
+`src/lib/imageVariants.ts`; do not overwrite cached files. Browser caches download
+only viewed images and can evict them; the TTL does not reserve space or preload
+the entire library. Three generated files consume Supabase storage and bandwidth.
 
 - Deploy this configuration to production for it to take effect. It does not reset
   existing usage; older deployments and already-open pages can still request optimization.
 - After deployment, open a fresh page and inspect the browser Network panel. Image
   requests should use source URLs rather than `/_next/image?url=...`.
-- Compress product photos before uploading (prefer WebP, around 1200 px on the long
-  side and roughly 100–250 KB when practical). Large originals increase customer
-  download size and Supabase bandwidth consumption. Existing uploads are unchanged.
 - Check Vercel team usage and Supabase bandwidth after deployment. This change
   addresses image transformations, not other hosting or storage quotas.
+
+The Next.js optimizer configuration also sets a 90-day minimum TTL, WebP only,
+quality 80, and widths 128/480/750, and allows only the configured Supabase bucket
+host/path. Those optimizer settings (including `remotePatterns`) are inactive while
+global optimization is disabled; actual delivery uses the stored variants and their
+storage cache headers. Per-component `unoptimized` flags are unnecessary for stored
+images. Local files such as logos and homepage assets are not processed by upload.
+
+To measure existing product photos without writing to storage or the database:
+
+```bash
+node scripts/optimize-product-images.cjs --limit=5
+```
+
+Omit `--limit` to inspect the whole product library. Reports contain byte sizes for
+each variant and the actual main-image reduction. To convert the existing library:
+
+```bash
+node scripts/optimize-product-images.cjs --apply
+```
+
+This creates variants before updating each product, skips already converted images,
+and leaves originals for historical orders and older deployments. It checks for
+concurrent admin edits and cleans newly created variants if the product update fails.
+Deploy after conversion to refresh the cached catalog/search/product pages. Keep the
+original images in a separate backup if full-resolution editing is needed: new
+uploads retain only the three display versions, not a full-resolution master.
 
 Vercel Hobby is restricted to non-commercial personal use; a selling storefront
 needs a hosting plan/provider that permits commercial use. See the official
