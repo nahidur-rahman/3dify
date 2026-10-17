@@ -3,6 +3,8 @@ import { getSupabaseAdmin, productImageBucket } from "@/lib/supabaseAdmin";
 import { normalizeProductColorOptions } from "@/lib/productColors";
 import type { Product, ProductSizeOption, TextDesign } from "@/lib/types";
 import { parseTextDesigns } from "@/lib/nameKeychain";
+import { optimizeProductImage } from "@/lib/optimizeProductImage";
+import { IMAGE_CACHE_SECONDS, IMAGE_VARIANT_VERSION, PRODUCT_IMAGE_MAX_BYTES, PRODUCT_IMAGE_TYPES, productImageFiles, productImageSourceHash } from "@/lib/imageVariants";
 
 const PRODUCT_FOLDER_PREFIX = "products";
 const DRAFT_FOLDER_PREFIX = "draft";
@@ -11,12 +13,6 @@ function ensureFolderKey(folderKey: string) {
   if (!/^[a-zA-Z0-9_-]+$/.test(folderKey)) {
     throw new Error("Invalid folder key");
   }
-}
-
-function getExtension(fileName: string) {
-  const segments = fileName.split(".");
-  const ext = segments.length > 1 ? segments.pop() : "";
-  return ext ? ext.toLowerCase() : "jpg";
 }
 
 function buildPublicUrl(path: string) {
@@ -37,10 +33,6 @@ export function getProductImageLimit() {
 
 function hashBuffer(buffer: ArrayBuffer) {
   return createHash("sha256").update(new Uint8Array(buffer)).digest("hex");
-}
-
-async function getBlobHash(blob: Blob) {
-  return hashBuffer(await blob.arrayBuffer());
 }
 
 async function getRemoteImageHash(imageUrl: string) {
@@ -124,6 +116,10 @@ export async function getImageSignatures(imageUrls: string[]) {
   const signatures = await Promise.all(
     imageUrls.map(async (imageUrl) => {
       try {
+        // Filenames retain the source hash, so client-side duplicate detection
+        // still matches the original upload after the stored bytes are compressed.
+        const sourceHash = productImageSourceHash(imageUrl);
+        if (sourceHash) return sourceHash;
         return await getRemoteImageHash(imageUrl);
       } catch {
         return null;
@@ -194,37 +190,41 @@ function extractStoragePathFromUrl(url: string) {
 }
 
 export async function uploadProductImage(file: File, folderKey: string) {
-  if (!file.type.startsWith("image/")) {
+  if (!PRODUCT_IMAGE_TYPES.includes(file.type)) {
     throw new Error(`Invalid file type: ${file.type}`);
   }
 
-  if (file.size > 5 * 1024 * 1024) {
-    throw new Error("File too large. Max size is 5MB.");
+  if (file.size > PRODUCT_IMAGE_MAX_BYTES) {
+    throw new Error("File too large. Max size is 4MB.");
   }
 
   const folderPath = getProductFolderPath(folderKey);
-  const ext = getExtension(file.name);
-  const fileHash = await getBlobHash(file);
-  const imagePath = `${folderPath}/${fileHash}.${ext}`;
-  const contentType = file.type || `image/${ext}`;
-
-  const { error } = await getSupabaseAdmin()
-    .storage.from(productImageBucket)
-    .upload(imagePath, file, {
-      upsert: true,
-      contentType,
-      cacheControl: "3600",
-    });
-
-  if (error) {
-    throw new Error(`Upload failed: ${error.message}`);
+  const input = await file.arrayBuffer();
+  const fileHash = hashBuffer(input);
+  const variants = await optimizeProductImage(Buffer.from(input));
+  const uploaded: string[] = [];
+  const storage = getSupabaseAdmin().storage.from(productImageBucket);
+  try {
+    for (const { variant, data } of variants) {
+      const path = `${folderPath}/${fileHash}.${IMAGE_VARIANT_VERSION}-${variant}.webp`;
+      const { error } = await storage.upload(path, data, {
+        upsert: false, contentType: "image/webp", cacheControl: String(IMAGE_CACHE_SECONDS),
+      });
+      // An identical source has the same immutable variant URLs; reuse it.
+      if (error && !("status" in error && error.status === 409)) {
+        throw new Error(`Upload failed: ${error.message}`);
+      }
+      if (!error) uploaded.push(path);
+    }
+  } catch (error) {
+    if (uploaded.length) await storage.remove(uploaded);
+    throw error;
   }
-
-  return buildPublicUrl(imagePath);
+  return buildPublicUrl(`${folderPath}/${fileHash}.${IMAGE_VARIANT_VERSION}-main.webp`);
 }
 
 export async function deleteProductImages(imageUrls: string[]) {
-  const paths = uniqueStrings(imageUrls.map((url) => normalizeStoragePath(url)));
+  const paths = uniqueStrings(imageUrls.flatMap((url) => productImageFiles(normalizeStoragePath(url) || "")));
 
   if (paths.length === 0) return;
 
@@ -273,23 +273,25 @@ export async function moveDraftImagesToProductFolder(
         continue;
       }
 
-      const { error: copyError } = await supabase
-        .storage.from(productImageBucket)
-        .copy(sourcePath, destinationPath);
-
-      if (copyError) {
-        throw new Error(`Failed to move image: ${copyError.message}`);
+      const sourceFiles = productImageFiles(sourcePath);
+      const destinationFiles = productImageFiles(destinationPath);
+      for (let index = 0; index < sourceFiles.length; index += 1) {
+        const { error: copyError } = await supabase.storage.from(productImageBucket)
+          .copy(sourceFiles[index], destinationFiles[index]);
+        if (copyError) {
+          throw new Error(`Failed to move image: ${copyError.message}`);
+        }
+        copiedPaths.push(destinationFiles[index]);
       }
-
-      copiedPaths.push(destinationPath);
       nextPaths[i] = destinationPath;
     }
   } catch (error) {
-    const cleanupPaths = uniqueStrings([...draftSourcePaths, ...copiedPaths]);
+    const cleanupPaths = uniqueStrings([...draftSourcePaths.flatMap(productImageFiles), ...copiedPaths]);
 
     if (cleanupPaths.length > 0) {
       try {
-        await deleteProductImages(cleanupPaths);
+        const { error } = await supabase.storage.from(productImageBucket).remove(cleanupPaths);
+        if (error) throw error;
       } catch (cleanupError) {
         console.error(
           "Failed to clean up draft images after move failure:",
@@ -304,7 +306,7 @@ export async function moveDraftImagesToProductFolder(
   if (draftSourcePaths.length > 0) {
     const { error: removeError } = await supabase
       .storage.from(productImageBucket)
-      .remove(draftSourcePaths);
+      .remove(uniqueStrings(draftSourcePaths.flatMap(productImageFiles)));
 
     if (removeError) {
       throw new Error(`Failed to clean up old images: ${removeError.message}`);
