@@ -4,32 +4,55 @@ import { hash } from "bcryptjs";
 const prisma = new PrismaClient();
 
 function shouldSeedSampleProducts() {
-  return (process.env.SEED_SAMPLE_PRODUCTS || "true").toLowerCase() === "true";
+  return !process.argv.includes("--fresh-start")
+    && (process.env.SEED_SAMPLE_PRODUCTS || "false").toLowerCase() === "true";
 }
 
 async function main() {
   console.log("🌱 Seeding database...");
 
-  const adminPassword = await hash(process.env.ADMIN_PASSWORD || "admin123", 12);
-  const adminUsername = process.env.ADMIN_USERNAME || "admin";
-  const adminName = process.env.ADMIN_NAME || "Admin";
+  const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const password = process.env.ADMIN_PASSWORD;
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new Error("Set a valid ADMIN_EMAIL in .env before seeding.");
+  }
+  if (!password || password.length < 8 || Buffer.byteLength(password, "utf8") > 72) {
+    throw new Error("Set ADMIN_PASSWORD in .env (8+ characters, at most 72 UTF-8 bytes).");
+  }
+  const adminPassword = await hash(password, 12);
+  const adminUsername = process.env.ADMIN_USERNAME?.trim() || "admin";
+  const adminName = process.env.ADMIN_NAME?.trim() || "Super Admin";
+  const freshStart = process.argv.includes("--fresh-start");
   const admin = await prisma.$transaction(async (tx) => {
-    await tx.admin.deleteMany();
+    if (freshStart) {
+      const deleted = {
+        orderItems: (await tx.orderItem.deleteMany()).count,
+        orders: (await tx.order.deleteMany()).count,
+        products: (await tx.product.deleteMany()).count,
+        loginChallenges: (await tx.adminLoginChallenge.deleteMany()).count,
+        authRateLimits: (await tx.adminAuthRateLimit.deleteMany()).count,
+        admins: (await tx.admin.deleteMany()).count,
+      };
+      console.log("Fresh-start deletions (pending transaction commit):", deleted);
+    }
 
-    return tx.admin.create({
-      data: {
-        email: process.env.ADMIN_EMAIL || "admin@3difybd.com",
+    const data = {
+        email,
         password: adminPassword,
         username: adminUsername,
         name: adminName,
-        role: "SUPER",
-      },
+        role: "SUPER" as const,
+    };
+    return tx.admin.upsert({
+      where: { email },
+      create: data,
+      update: data,
     });
-  });
-  console.log(`✅ SUPER admin created: ${admin.email}`);
+  }, { timeout: 60_000, isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+  console.log(`✅ Transaction committed; SUPER admin ready (username: ${admin.username})`);
 
   if (!shouldSeedSampleProducts()) {
-    console.log("ℹ️ Skipping sample products (SEED_SAMPLE_PRODUCTS=false)");
+    console.log("ℹ️ Skipping sample products (fresh start or SEED_SAMPLE_PRODUCTS is not true)");
     console.log("🎉 Seeding complete!");
     return;
   }
@@ -174,8 +197,15 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error("❌ Seed error:", e);
-    process.exit(1);
+    // Prisma connection errors can contain database URLs; keep credentials out of logs.
+    console.error("❌ Seed failed:", e instanceof Prisma.PrismaClientKnownRequestError
+      ? `Database error ${e.code}; transaction rolled back.`
+      : e instanceof Prisma.PrismaClientInitializationError
+        ? "Database connection failed. Check connectivity and database configuration."
+        : e instanceof Error && e.message.startsWith("Set ")
+          ? e.message
+          : "Unable to seed database; any open transaction was rolled back.");
+    process.exitCode = 1;
   })
   .finally(async () => {
     await prisma.$disconnect();

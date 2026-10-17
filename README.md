@@ -170,10 +170,15 @@ Seed database:
 npx prisma db seed
 ```
 
-If Prisma cannot reach Supabase from your network, run the SQL seed instead:
+The seed requires `ADMIN_EMAIL` and `ADMIN_PASSWORD` from `.env`. Apply the complete migration history with `npx prisma migrate deploy` when setting up a hosted database. The legacy `prisma/supabase-seed.sql` is outdated and should not be used.
 
-1. Open `prisma/migrations/20260425000000_initial/migration.sql` in the Supabase SQL editor and run it once.
-2. Open `prisma/supabase-seed.sql` and run it to insert the admin record and sample products.
+For a fresh start, permanently delete all products, orders, order items, admins, login challenges, and authentication rate limits, then create one SUPER admin using the `.env` credentials:
+
+```bash
+npm run db:fresh-start
+```
+
+This command commits deletion and admin creation together in one transaction. Shipping rates, database structure, migration history, and files in Supabase Storage are preserved. Sample products are always skipped during a fresh start.
 
 Start dev server:
 
@@ -193,8 +198,10 @@ Open http://localhost:3000
 
 ## Seed behavior
 
-- Seed resets the admins table and recreates the initial SUPER admin using ADMIN_EMAIL and ADMIN_PASSWORD.
-- Sample products can be controlled by SEED_SAMPLE_PRODUCTS.
+- `npm run db:seed` creates or updates the SUPER admin matching `ADMIN_EMAIL`, using `ADMIN_PASSWORD`, without deleting other records. Passwords are hashed with bcrypt; missing credentials fail before database changes.
+- `ADMIN_USERNAME` and `ADMIN_NAME` optionally override the defaults `admin` and `Super Admin`. An existing conflicting username causes a rollback.
+- Sample products are opt-in with `SEED_SAMPLE_PRODUCTS=true`; the default is false.
+- `npm run db:fresh-start` explicitly clears the six tables listed above and seeds only the SUPER admin.
 
 ## Deployment (Vercel)
 

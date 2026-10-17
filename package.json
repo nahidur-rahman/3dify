@@ -7,7 +7,18 @@
     "build": "next build",
     "postinstall": "prisma generate",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:seed": "prisma db seed",
+    "db:fresh-start": "prisma db seed -- --fresh-start"
+  },
+  "_scriptComments": {
+    "dev": "Starts the Next.js development server with automatic reloads. Run with npm run dev.",
+    "build": "Creates an optimized production build of the Next.js application. Run with npm run build before starting the production server.",
+    "postinstall": "Generates Prisma Client from prisma/schema.prisma. Runs automatically after dependency installation; can also be run with npm run postinstall. Does not apply database migrations.",
+    "start": "Starts the Next.js production server using an existing production build. Run npm run build first, then npm start.",
+    "lint": "Runs the Next.js ESLint checks to report code quality and framework rule violations. Run with npm run lint.",
+    "db:seed": "Creates or updates the SUPER admin using .env credentials; preserves existing records. Sample products are added only when SEED_SAMPLE_PRODUCTS=true.",
+    "db:fresh-start": "Deletes admins, login challenges, auth rate limits, orders, order items, and products; creates one SUPER admin from .env. Preserves shipping rates, migration history, and storage images."
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -35,6 +46,6 @@
     "typescript": "^5"
   },
   "prisma": {
-    "seed": "npx ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+    "seed": "node prisma/run-seed.cjs"
   }
 }
